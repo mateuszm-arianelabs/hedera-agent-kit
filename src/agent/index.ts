@@ -19,7 +19,7 @@ import { associate_token } from "../tools/hts/transactions/associate_token";
 import { reject_token } from "../tools/hts/transactions/reject_token";
 import { claim_airdrop } from "../tools/hts/transactions/claim_airdrop";
 import { get_pending_airdrops } from "../tools/hts/queries/pending_airdrops";
-import { create_topic } from "../tools/hcs";
+import { create_topic, delete_topic } from "../tools/hcs";
 
 
 export default class HederaAgentKit {
@@ -154,5 +154,11 @@ export default class HederaAgentKit {
       topicMemo: string,
   ): Promise<TopicId> {
     return create_topic(topicMemo, this.client)
+  }
+
+  async deleteTopic(
+      topicId: TopicId
+  ): Promise<void> {
+    return delete_topic(topicId, this.client)
   }
 }
