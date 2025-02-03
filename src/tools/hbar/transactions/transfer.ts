@@ -1,10 +1,11 @@
-import { Client, Hbar, TransferTransaction, AccountId, TransactionId } from "@hashgraph/sdk"
+import { Client, Hbar, TransferTransaction, AccountId } from "@hashgraph/sdk"
+import { TransferHBARResult } from "../../../types";
 
 export const transfer_hbar = async (
     client: Client,
     toAccountId: string | AccountId,
     amount: string,
-): Promise<TransactionId> => {
+): Promise<TransferHBARResult> => {
     const operatorAccountId = client.operatorAccountId?.toString();
 
     if(!operatorAccountId) {
@@ -15,11 +16,15 @@ export const transfer_hbar = async (
         .addHbarTransfer(operatorAccountId, new Hbar(-amount))
         .addHbarTransfer(toAccountId, new Hbar(amount))
 
-    const executeTx = await tx.execute(client)
-    const rx = await executeTx.getReceipt(client)
+    const txResponse = await tx.execute(client)
+    const receipt = await txResponse.getReceipt(client)
+    const txStatus = receipt.status;
 
-    if (!rx.status.toString().includes('SUCCESS'))
-        throw new Error("Token Transfer Transaction failed")
+    if (!txStatus.toString().includes('SUCCESS'))
+        throw new Error("HBAR Transfer Transaction failed")
 
-    return executeTx.transactionId
+    return {
+        status: txStatus.toString(),
+        txHash: txResponse.transactionId.toString(),
+    }
 }

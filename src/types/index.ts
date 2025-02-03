@@ -130,6 +130,11 @@ export type TransferTokenResult = {
     txHash: string,
 }
 
+export type TransferHBARResult = {
+    status: string,
+    txHash: string,
+}
+
 export type PendingAirdropsApiResponse = {
     airdrops: Airdrop[];
     links: {

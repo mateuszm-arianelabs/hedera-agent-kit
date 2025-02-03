@@ -1,4 +1,4 @@
-import {Client, TokenId, AccountId, TransactionId, PendingAirdropId} from "@hashgraph/sdk"
+import {Client, TokenId, AccountId, PendingAirdropId} from "@hashgraph/sdk"
 import { create_token, transfer_token, airdrop_token } from "../tools"
 import { get_hbar_balance } from "../tools/hts/queries"
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop"
@@ -8,7 +8,7 @@ import {
   HederaNetworkType,
   HtsTokenDetails,
   RejectTokenResult,
-  TokenBalance, TransferTokenResult
+  TokenBalance, TransferHBARResult, TransferTokenResult
 } from "../types";
 import { get_hts_balance } from "../tools/hts/queries";
 import { get_hts_token_details } from "../tools/hts/queries";
@@ -128,7 +128,7 @@ export default class HederaAgentKit {
   async transferHbar(
       toAccountId: string | AccountId,
       amount: string
-  ): Promise<TransactionId> {
+  ): Promise<TransferHBARResult> {
     return transfer_hbar(
         this.client,
         toAccountId,
