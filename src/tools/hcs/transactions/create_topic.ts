@@ -1,7 +1,9 @@
 import {Client, TopicCreateTransaction, TopicId} from "@hashgraph/sdk";
 
 export const create_topic = async (memo: string, client: Client): Promise<TopicId> => {
-    const tx = new TopicCreateTransaction().setTopicMemo(memo);
+    const tx = new TopicCreateTransaction()
+        .setTopicMemo(memo)
+        .setAdminKey(client.operatorPublicKey!);
 
     const txResponse = await tx.execute(client);
 
