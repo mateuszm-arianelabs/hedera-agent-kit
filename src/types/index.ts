@@ -1,3 +1,6 @@
+import BigNumber from "bignumber.js";
+import {TokenId} from "@hashgraph/sdk";
+
 export type HederaNetworkType = "mainnet" | "testnet" | "previewnet";
 
 export type TokenBalance = {
@@ -20,7 +23,7 @@ export type DetailedTokenBalance= {
     tokenName: string;
     tokenDecimals: string;
     balance: number;
-    balanceInDisplayUnit: number;
+    balanceInDisplayUnit: BigNumber;
 }
 
 export type HtsTokenBalanceApiReponse = {
@@ -104,6 +107,32 @@ export type Airdrop = {
     receiver_id: string;
     sender_id: string;
     token_id: string;
+}
+
+export type AirdropResult = {
+    status: string,
+    txHash: string,
+}
+
+export type ClaimAirdropResult = {
+    status: string,
+    txHash: string,
+}
+
+export type CreateTokenResult = {
+    status: string,
+    txHash: string,
+    tokenId: TokenId,
+}
+
+export type TransferTokenResult = {
+    status: string,
+    txHash: string,
+}
+
+export type TransferHBARResult = {
+    status: string,
+    txHash: string,
 }
 
 export type PendingAirdropsApiResponse = {

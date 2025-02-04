@@ -1,4 +1,5 @@
-import { Client, TokenCreateTransaction, TokenId } from "@hashgraph/sdk"
+import { Client, TokenCreateTransaction } from "@hashgraph/sdk"
+import { CreateTokenResult } from "../../../types";
 
 // to do: make more generic so can handle nft as well
 // atm just does ft
@@ -8,7 +9,7 @@ export const create_token = async (
   decimals: number,
   initialSupply: number,
   client: Client
-): Promise<TokenId> => {
+): Promise<CreateTokenResult> => {
   const tx = new TokenCreateTransaction()
     .setTokenName(name)
     .setTokenSymbol(symbol)
@@ -16,11 +17,16 @@ export const create_token = async (
     .setInitialSupply(initialSupply)
     .setTreasuryAccountId(client.operatorAccountId!)
 
-  const executeTx = await tx.execute(client)
-  const rx = await executeTx.getReceipt(client)
+  const txResponse = await tx.execute(client)
+  const receipt = await txResponse.getReceipt(client)
+  const txStatus = receipt.status;
 
-  if (!rx.tokenId)
+  if (!receipt.tokenId)
     throw new Error("Token Create Transaction failed")
 
-  return rx.tokenId
+  return {
+    status: txStatus.toString(),
+    txHash: txResponse.transactionId.toString(),
+    tokenId: receipt.tokenId
+  }
 }

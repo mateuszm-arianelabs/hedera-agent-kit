@@ -1,11 +1,12 @@
-import {Client, AccountBalanceQuery, AccountId} from "@hashgraph/sdk"
+import { Client, AccountBalanceQuery, AccountId } from "@hashgraph/sdk"
 import {
   AllTokensBalancesApiResponse,
   DetailedTokenBalance,
   HederaNetworkType,
   HtsTokenBalanceApiReponse, HtsTokenDetails,
 } from "../../../types";
-import {get_hts_token_details} from "./details";
+import { get_hts_token_details } from "./details";
+import { toDisplayUnit } from "../../../utils/hts-format-utils";
 
 export const get_hbar_balance = async (
     client: Client,
@@ -36,10 +37,9 @@ export const get_hts_balance = async (
 
     const data: HtsTokenBalanceApiReponse = await response.json();
     const balance = data.balances[0]?.balance;
-    const decimals = data.balances[0]?.decimals;
-    if (balance === undefined || decimals === undefined) return 0;
+    if (balance === undefined) return 0;
 
-    return balance / Math.pow(10, decimals); // converting to display unit
+    return balance; // returns balance in base unit
   } catch (error) {
     console.error("Failed to fetch HTS balance:", error);
     throw error;
@@ -72,7 +72,7 @@ export const get_all_tokens_balances = async (
           tokenId: token.token_id,
           tokenName: tokenDetails.name,
           tokenSymbol: tokenDetails.symbol,
-          balanceInDisplayUnit: token.balance / Math.pow(10, Number(tokenDetails.decimals))
+          balanceInDisplayUnit: (await toDisplayUnit(token.token_id, token.balance, networkType))
         };
         array.push(detailedTokenBalance);
       }

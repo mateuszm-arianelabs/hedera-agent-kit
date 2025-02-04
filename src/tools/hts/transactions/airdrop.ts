@@ -1,4 +1,5 @@
 import { Client, TokenId, AccountId, TokenAirdropTransaction } from "@hashgraph/sdk"
+import { AirdropResult } from "../../../types";
 
 export interface AirdropRecipient {
   accountId: string | AccountId;
@@ -9,7 +10,7 @@ export const airdrop_token = async (
   tokenId: TokenId,
   recipients: AirdropRecipient[],
   client: Client
-): Promise<void> => {
+): Promise<AirdropResult> => {
   const tx = new TokenAirdropTransaction();
   
   // Add token transfers for each recipient
@@ -20,9 +21,15 @@ export const airdrop_token = async (
     tx.addTokenTransfer(tokenId, recipient.accountId, recipient.amount);
   }
 
-  const executeTx = await tx.freezeWith(client).execute(client);
-  const rx = await executeTx.getReceipt(client);
+  const txResponse = await tx.freezeWith(client).execute(client);
+  const receipt = await txResponse.getReceipt(client);
+  const txStatus = receipt.status;
 
-  if (!rx.status.toString().includes('SUCCESS'))
+  if (!txStatus.toString().includes('SUCCESS'))
     throw new Error("Token Airdrop Transaction failed");
+
+  return {
+    status: txStatus.toString(),
+    txHash: txResponse.transactionId.toString(),
+  }
 } 

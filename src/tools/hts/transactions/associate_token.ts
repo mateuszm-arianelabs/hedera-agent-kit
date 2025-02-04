@@ -1,26 +1,24 @@
 import { AssociateTokenResult } from "../../../types";
 import {Client, TokenAssociateTransaction, TokenId} from "@hashgraph/sdk";
-import { mapUint8ArrayToHexString } from "../../../utils/tx-utils";
-
 
 export const associate_token = async (
     tokenId: TokenId,
     client: Client
 ): Promise<AssociateTokenResult> => {
 
-    const transaction = await new TokenAssociateTransaction()
+    const tx = await new TokenAssociateTransaction()
         .setAccountId(client.operatorAccountId!.toString())
         .setTokenIds([tokenId])
 
-    const txResponse = await transaction.execute(client);
+    const txResponse = await tx.execute(client);
     const receipt = await txResponse.getReceipt(client);
-    const transactionStatus = receipt.status;
+    const txStatus = receipt.status;
 
-    if (!receipt.status.toString().includes('SUCCESS'))
+    if (!txStatus.toString().includes('SUCCESS'))
         throw new Error("Token Association failed")
 
     return {
-        status: transactionStatus.toString(),
-        txHash: mapUint8ArrayToHexString(txResponse.transactionHash),
+        status: txStatus.toString(),
+        txHash: txResponse.transactionId.toString(),
     }
 }

@@ -10,17 +10,15 @@ export const reject_token = async (
         .addTokenId(tokenId)
         .freezeWith(client);
 
-    const executeTx = await tx.execute(client);
-    const receipt = await executeTx.getReceipt(client);
+    const txResponse = await tx.execute(client);
+    const receipt = await txResponse.getReceipt(client);
+    const txStatus = receipt.status;
 
-    const status = receipt.status;
-    const txId = executeTx.transactionId.toString();
-
-    if (!status.toString().includes('SUCCESS'))
+    if (!txStatus.toString().includes('SUCCESS'))
         throw new Error("Token Rejection Transaction failed");
 
     return {
-        status: status.toString(),
-        txHash: txId
+        status: txStatus.toString(),
+        txHash: txResponse.transactionId.toString()
     }
 }
