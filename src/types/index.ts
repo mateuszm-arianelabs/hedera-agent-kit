@@ -112,3 +112,26 @@ export type PendingAirdropsApiResponse = {
         next: string | null;
     };
 }
+
+type Key = {
+    _type: "ECDSA_SECP256K1" | "ED25519" | "ProtobufEncoded";
+    key: string;
+};
+
+type TimestampRange = {
+    from: string; // Unix timestamp in seconds.nanoseconds format
+    to?: string | null; // Nullable Unix timestamp
+};
+
+export type TopicInfoApiResponse = {
+    admin_key?: Key | null;
+    auto_renew_account?: string | null; // Format: shard.realm.num (e.g., "0.0.2")
+    auto_renew_period?: number | null; // 64-bit integer
+    created_timestamp?: string | null; // Unix timestamp (e.g., "1586567700.453054000")
+    deleted?: boolean | null;
+    memo?: string;
+    submit_key?: Key | null;
+    timestamp?: TimestampRange;
+    topic_id?: string | null; // Format: shard.realm.num (e.g., "0.0.2")
+};
+

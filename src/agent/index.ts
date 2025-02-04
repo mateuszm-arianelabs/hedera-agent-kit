@@ -1,4 +1,4 @@
-import { Client, TokenId, AccountId, TransactionId, PendingAirdropId, TopicId, TopicInfo } from "@hashgraph/sdk"
+import { Client, TokenId, AccountId, TransactionId, PendingAirdropId, TopicId } from "@hashgraph/sdk"
 import { create_token, transfer_token, airdrop_token } from "../tools"
 import { get_hbar_balance } from "../tools/hts/queries"
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop"
@@ -8,7 +8,8 @@ import {
   HederaNetworkType,
   HtsTokenDetails,
   RejectTokenResult,
-  TokenBalance
+  TokenBalance,
+  TopicInfoApiResponse
 } from "../types";
 import { get_hts_balance } from "../tools/hts/queries";
 import { get_hts_token_details } from "../tools/hts/queries";
@@ -20,7 +21,7 @@ import { reject_token } from "../tools/hts/transactions/reject_token";
 import { claim_airdrop } from "../tools/hts/transactions/claim_airdrop";
 import { get_pending_airdrops } from "../tools/hts/queries/pending_airdrops";
 import { create_topic, delete_topic } from "../tools/hcs";
-import { get_topic_info } from "../tools/hcs/transactions/get_topic_info";
+import { get_topic_info } from "../tools/hcs/queries";
 
 
 export default class HederaAgentKit {
@@ -165,7 +166,8 @@ export default class HederaAgentKit {
 
   async getTopicInfo(
       topicId: TopicId,
-  ): Promise<TopicInfo> {
-    return get_topic_info(topicId, this.client)
+      networkType: HederaNetworkType,
+  ): Promise<TopicInfoApiResponse> {
+    return get_topic_info(topicId, networkType)
   }
 }
