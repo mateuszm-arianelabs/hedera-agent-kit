@@ -1,4 +1,4 @@
-import {Client, TokenId, AccountId, PendingAirdropId} from "@hashgraph/sdk"
+import { Client, TokenId, AccountId, PendingAirdropId, TopicId } from "@hashgraph/sdk"
 import { create_token, transfer_token, airdrop_token } from "../tools"
 import { get_hbar_balance } from "../tools/hts/queries"
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop"
@@ -19,6 +19,7 @@ import { associate_token } from "../tools";
 import { reject_token } from "../tools";
 import { claim_airdrop } from "../tools";
 import { get_pending_airdrops } from "../tools/hts/queries";
+import { create_topic, delete_topic } from "../tools/hcs";
 
 
 export default class HederaAgentKit {
@@ -147,5 +148,17 @@ export default class HederaAgentKit {
       networkType: HederaNetworkType
   ): Promise<Airdrop[]> {
     return get_pending_airdrops(networkType, accountId)
+  }
+
+  async createTopic(
+      topicMemo: string,
+  ): Promise<TopicId> {
+    return create_topic(topicMemo, this.client)
+  }
+
+  async deleteTopic(
+      topicId: TopicId
+  ): Promise<void> {
+    return delete_topic(topicId, this.client)
   }
 }
