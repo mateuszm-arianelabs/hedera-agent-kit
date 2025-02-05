@@ -14,7 +14,9 @@ import {
   TokenBalance,
   TransferHBARResult,
   TransferTokenResult,
-  TopicInfoApiResponse, SubmitMessageResult
+  TopicInfoApiResponse,
+  SubmitMessageResult,
+  DissociateTokenResult
 } from "../types";
 import { get_hts_balance } from "../tools/hts/queries";
 import { get_hts_token_details } from "../tools/hts/queries";
@@ -28,7 +30,8 @@ import {
   create_topic,
   delete_topic,
   submit_topic_message,
-  claim_airdrop
+  claim_airdrop,
+  dissociate_token
 } from "../tools";
 import { get_topic_info } from "../tools/hcs/queries";
 
@@ -115,6 +118,12 @@ export default class HederaAgentKit {
       tokenId: TokenId
   ): Promise<AssociateTokenResult> {
     return associate_token(tokenId, this.client);
+  }
+
+  async dissociateToken(
+      tokenId: TokenId
+  ): Promise <DissociateTokenResult> {
+    return dissociate_token(tokenId, this.client);
   }
 
   async airdropToken(

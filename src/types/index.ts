@@ -102,6 +102,11 @@ export type AssociateTokenResult = {
     txHash: string,
 }
 
+export type DissociateTokenResult = {
+    status: string,
+    txHash: string,
+}
+
 export type Airdrop = {
     amount: number;
     receiver_id: string;
