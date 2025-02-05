@@ -140,6 +140,12 @@ export type TransferHBARResult = {
     txHash: string,
 }
 
+export type CreateTopicResult = {
+    status: string,
+    txHash: string,
+    topicId: string,
+}
+
 export type PendingAirdropsApiResponse = {
     airdrops: Airdrop[];
     links: {

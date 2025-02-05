@@ -1,21 +1,33 @@
-import {Client, TopicCreateTransaction, TopicId} from "@hashgraph/sdk";
+import { Client, TopicCreateTransaction } from "@hashgraph/sdk";
+import { CreateTopicResult } from "../../../types";
 
-export const create_topic = async (memo: string, client: Client): Promise<TopicId> => {
-    const tx = new TopicCreateTransaction()
+export const create_topic = async (
+    memo: string,
+    client: Client,
+    isSubmitKey: boolean
+): Promise<CreateTopicResult> => {
+    let tx = new TopicCreateTransaction()
         .setTopicMemo(memo)
         .setAdminKey(client.operatorPublicKey!);
 
+    if (isSubmitKey) {
+        tx.setSubmitKey(client.operatorPublicKey!);
+    }
+
     const txResponse = await tx.execute(client);
+    const receipt = await txResponse.getReceipt(client);
+    const txStatus = receipt.status;
 
-    const rx = await txResponse.getReceipt(client);
-
-    if (!rx.status.toString().includes('SUCCESS')) {
+    if (!txStatus.toString().includes('SUCCESS'))
         throw new Error("Topic creation transaction failed");
-    }
 
-    if(!rx.topicId) {
+    if (!receipt.topicId)
         throw new Error("Unknown error occurred during topic creation.");
-    }
 
-    return rx.topicId;
+
+    return {
+        txHash: txResponse.transactionId.toString(),
+        status: txStatus.toString(),
+        topicId: receipt.topicId.toString(),
+    };
 }

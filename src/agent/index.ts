@@ -15,7 +15,8 @@ import {
   TransferHBARResult,
   TransferTokenResult,
   TopicInfoApiResponse,
-  DissociateTokenResult
+  DissociateTokenResult,
+  CreateTopicResult
 } from "../types";
 import { get_hts_balance } from "../tools/hts/queries";
 import { get_hts_token_details } from "../tools/hts/queries";
@@ -167,8 +168,9 @@ export default class HederaAgentKit {
 
   async createTopic(
       topicMemo: string,
-  ): Promise<TopicId> {
-    return create_topic(topicMemo, this.client)
+      isSubmitKey: boolean,
+  ): Promise<CreateTopicResult> {
+    return create_topic(topicMemo, this.client, isSubmitKey)
   }
 
   async deleteTopic(
