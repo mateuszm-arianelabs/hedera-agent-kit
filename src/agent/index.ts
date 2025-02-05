@@ -14,7 +14,8 @@ import {
   TokenBalance,
   TransferHBARResult,
   TransferTokenResult,
-  TopicInfoApiResponse, DissociateTokenResult
+  TopicInfoApiResponse,
+  DissociateTokenResult
 } from "../types";
 import { get_hts_balance } from "../tools/hts/queries";
 import { get_hts_token_details } from "../tools/hts/queries";
