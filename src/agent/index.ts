@@ -17,7 +17,8 @@ import {
   TopicInfoApiResponse,
   SubmitMessageResult,
   DissociateTokenResult,
-  CreateTopicResult
+  CreateTopicResult,
+  MintTokenResult
 } from "../types";
 import { get_hts_balance } from "../tools/hts/queries";
 import { get_hts_token_details } from "../tools/hts/queries";
@@ -35,6 +36,7 @@ import {
   dissociate_token
 } from "../tools";
 import { get_topic_info } from "../tools/hcs/queries";
+import { mint_token } from "../tools";
 
 
 export default class HederaAgentKit {
@@ -143,6 +145,17 @@ export default class HederaAgentKit {
   ): Promise<RejectTokenResult> {
     return reject_token(
         tokenId,
+        this.client
+    );
+  }
+
+  async mintToken(
+      tokenId: TokenId,
+      amount: number
+  ): Promise<MintTokenResult> {
+    return mint_token(
+        tokenId,
+        amount,
         this.client
     );
   }
