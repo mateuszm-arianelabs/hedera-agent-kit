@@ -54,13 +54,15 @@ export default class HederaAgentKit {
     name: string,
     symbol: string,
     decimals: number,
-    initialSupply: number
+    initialSupply: number,
+    isSupplyKey?: boolean,
   ): Promise<CreateTokenResult> {
     return create_token(
       name,
       symbol,
       decimals,
       initialSupply,
+      isSupplyKey || false,
       this.client
     )
   }

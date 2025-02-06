@@ -8,6 +8,7 @@ export const create_token = async (
   symbol: string,
   decimals: number,
   initialSupply: number,
+  isSupplyKey: boolean,
   client: Client
 ): Promise<CreateTokenResult> => {
   const tx = new TokenCreateTransaction()
@@ -16,6 +17,9 @@ export const create_token = async (
     .setDecimals(decimals)
     .setInitialSupply(initialSupply)
     .setTreasuryAccountId(client.operatorAccountId!)
+
+  if(isSupplyKey)
+      tx.setSupplyKey(client.operatorPublicKey!);
 
   const txResponse = await tx.execute(client)
   const receipt = await txResponse.getReceipt(client)

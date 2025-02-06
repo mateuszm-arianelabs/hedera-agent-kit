@@ -25,7 +25,8 @@ initialSupply: number, the initial supply of the token e.g. 100000
           parsedInput.name,
           parsedInput.symbol,
           parsedInput.decimals,
-          parsedInput.initialSupply
+          parsedInput.initialSupply,
+          parsedInput.isSupplyKey
       )).tokenId;
 
       return JSON.stringify({
