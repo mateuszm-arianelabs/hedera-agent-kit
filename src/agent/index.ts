@@ -18,7 +18,8 @@ import {
   SubmitMessageResult,
   DissociateTokenResult,
   CreateTopicResult,
-  MintTokenResult
+  MintTokenResult,
+  HCSMessage
 } from "../types";
 import { get_hts_balance } from "../tools/hts/queries";
 import { get_hts_token_details } from "../tools/hts/queries";
@@ -35,7 +36,7 @@ import {
   claim_airdrop,
   dissociate_token
 } from "../tools";
-import { get_topic_info } from "../tools/hcs/queries";
+import {get_topic_info, get_topic_messages} from "../tools/hcs/queries";
 import { mint_token } from "../tools";
 
 
@@ -211,5 +212,14 @@ export default class HederaAgentKit {
       message: string,
   ): Promise<SubmitMessageResult> {
     return submit_topic_message(topicId, message, this.client)
+  }
+
+  async getTopicMessages(
+      topicId: TopicId,
+      networkType: HederaNetworkType,
+      lowerTimestamp?: number,
+      upperTimestamp?: number,
+  ): Promise<Array<HCSMessage>> {
+    return get_topic_messages(topicId, networkType, lowerTimestamp, upperTimestamp);
   }
 }
