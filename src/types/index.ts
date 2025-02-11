@@ -151,6 +151,11 @@ export type CreateTopicResult = {
     topicId: string,
 }
 
+export type DeleteTopicResult = {
+    status: string,
+    txHash: string,
+}
+
 export type MintTokenResult = {
     status: string,
     txHash: string,

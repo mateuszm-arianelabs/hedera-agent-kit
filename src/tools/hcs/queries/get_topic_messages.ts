@@ -25,9 +25,6 @@ export const get_topic_messages = async (
 
     try {
         while (url) {   // Results are paginated
-
-            console.log(`About to fetch topic ${topicId.toString()}: ${url}`);
-
             const response = await fetch(url);
 
             if (!response.ok) {
