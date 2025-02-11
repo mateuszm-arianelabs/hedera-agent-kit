@@ -19,7 +19,8 @@ import {
   DissociateTokenResult,
   CreateTopicResult,
   MintTokenResult,
-  HCSMessage
+  HCSMessage,
+  DeleteTopicResult
 } from "../types";
 import { get_hts_balance } from "../tools/hts/queries";
 import { get_hts_token_details } from "../tools/hts/queries";
@@ -196,7 +197,7 @@ export default class HederaAgentKit {
 
   async deleteTopic(
       topicId: TopicId
-  ): Promise<void> {
+  ): Promise<DeleteTopicResult> {
     return delete_topic(topicId, this.client)
   }
 
