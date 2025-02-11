@@ -44,8 +44,11 @@ Welcome to the **Hedera Agent Kit**! This project aims to provide a LangChain-co
     - Create NFTs.
     - Simple token swapping on DEXs.
 
-Note:
+### Note
 The methods in the HederaAgentKit class are fully implemented and functional for interacting with the Hedera network (e.g., creating tokens, transferring assets, managing airdrops). However, Langchain tools for most of these methods and operations are not implemented by default.
+
+### Details
+For further details check [HederaAgentKit Readme](./src/agent/README.md).
 
 ## Getting Started
 
