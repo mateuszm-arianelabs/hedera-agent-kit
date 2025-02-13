@@ -11,26 +11,19 @@ export const approve_asset_allowance = async (
     amount: number,
     client: Client,
 ): Promise<AssetAllowanceResult> => {
-    let tx;
-    if(tokenId) {
-        tx = await new AccountAllowanceApproveTransaction()
-            .approveTokenAllowance(tokenId, client.operatorAccountId!, spenderAccount, amount)
-            .freezeWith(client)
-            .execute(client);
+    const tx = await new AccountAllowanceApproveTransaction()
+    if (tokenId) {
+        tx.approveTokenAllowance(tokenId, client.operatorAccountId!, spenderAccount, amount)
     } else {
-        tx = await new AccountAllowanceApproveTransaction()
-            .approveHbarAllowance(client.operatorAccountId!, spenderAccount, amount)
-            .freezeWith(client)
-            .execute(client);
+        tx.approveHbarAllowance(client.operatorAccountId!, spenderAccount, amount)
     }
+    const txResponse = await tx.freezeWith(client).execute(client);
 
-    const receiptQuery = tx.getReceiptQuery();
-    const txResponse = await receiptQuery.execute(client);
-    const receipt = txResponse.status;
-    const hash = receiptQuery.transactionId?.toString();
+    const receipt = await txResponse.getReceipt(client);
+    const hash = txResponse.transactionId.toString();
 
     return {
-        status: receipt.toString(),
+        status: receipt.status.toString(),
         txHash: hash || 'error',
     }
 }
