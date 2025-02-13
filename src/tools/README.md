@@ -47,6 +47,7 @@ This asynchronous function facilitates the transfer of HBAR from the operator ac
 
 ---
 
+
 ## HCS - Hedera Consensus Service
 
 ### `submit_topic_message(topicId, message, client)`
@@ -836,3 +837,58 @@ This asynchronous function retrieves a list of pending airdrops for a specified 
 2. **Response Handling**:
     - Throws an error if the HTTP response is not successful.
     - Parses the response and returns the list of pending airdrops.  
+
+
+## Account - Account management
+
+### `approve_asset_allowance(spenderAccount, tokenId, amount, client)`
+
+This asynchronous function approves a specified allowance for an account (spender) to either spend HBAR or a specific token, depending on whether a `tokenId` is provided. The function uses the provided Hedera `client` to execute the approval transaction.
+
+---
+
+#### Parameters
+
+- **spenderAccount**: `AccountId`  
+  The account ID of the spender, which will be granted the allowance to transfer the specified amount.
+
+- **tokenId**: `TokenId | undefined`  
+  The ID of the token for which the allowance is being granted. If this parameter is `undefined`, the allowance is for HBAR.
+
+- **amount**: `number`  
+  The amount of the asset (either HBAR or the specified token) to be approved for spending by the `spenderAccount`.
+
+- **client**: `Client`  
+  An instance of the Hedera SDK client that holds the operator account used to authorize the allowance.
+
+---
+
+#### Returns
+
+- **Promise<AssetAllowanceResult>**  
+  A promise that resolves to an object containing:
+    - **status**: `string` — The status of the transaction receipt (e.g., `"SUCCESS"`).
+    - **txHash**: `string` — The transaction hash (transaction ID) of the approval transaction.
+
+---
+
+#### Behavior & Error Handling
+
+1. **Allowance Type Determination**:  
+   The function first checks whether a `tokenId` is provided:
+    - If `tokenId` is defined, it creates a token allowance approval for the specified token.
+    - If `tokenId` is `undefined`, it defaults to approving an HBAR allowance.
+
+2. **Transaction Creation & Execution**:  
+   The appropriate `AccountAllowanceApproveTransaction` is constructed:
+    - For token allowance, the transaction approves the specified amount of the token to be spent by the spender.
+    - For HBAR allowance, the transaction approves the specified amount of HBAR to be spent by the spender.  
+      The transaction is then frozen and executed.
+
+3. **Receipt Retrieval & Status Check**:  
+   After executing the transaction, the function retrieves the transaction receipt and verifies its status to determine if the approval was successful.
+
+4. **Error Handling**:  
+   If the transaction receipt's status does not include `"SUCCESS"`, the function will throw an error, indicating that the approval has failed.
+
+---
