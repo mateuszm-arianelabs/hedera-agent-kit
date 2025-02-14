@@ -25,10 +25,41 @@ const kit = new HederaAgentKit(accountId, privateKey, network);
 ### Token Operations
 
 #### Create a Fungible Token (FT)
+
 ```ts
-const createFTResult = await kit.createFT("MyToken", "MTK", 2, 1000, true);
-console.log(JSON.stringify(createFTResult, null, 2))
+const options = {
+    name: "MyToken",       // Token name
+    symbol: "MTK",         // Token symbol
+    decimals: 2,           // Number of decimal places (optional), defaults to 0
+    initialSupply: 1000,   // Initial supply of tokens (optional), defaults to 0
+    isSupplyKey: true,     // Supply key flag (optional), defaults to false
+    maxSupply: 10000,      // Maximum token supply (optional), if not set there is no maxSupply 
+    isMetadataKey: true,   // Metadata key flag (optional), defaults to false
+    isAdminKey: true,      // Admin key flag (optional), defaults to false
+    tokenMetadata: new TextEncoder().encode("Metadata Info"), // Token metadata (optional)
+    memo: "Initial Token Creation" // Optional memo
+};
+
+const createFTResult = await kit.createFT(options);
+console.log(JSON.stringify(createFTResult, null, 2));
 ```
+
+#### Create a Non-Fungible Token (NFT)
+```ts
+const options = {
+    name: "MyNFT",                    // Token name
+    symbol: "NFT",                    // Token symbol
+    maxSupply: 1,                     // Maximum token supply (optional)
+    isMetadataKey: true,              // Metadata key flag (optional), defaults to false
+    isAdminKey: true,                 // Admin key flag (optional), defaults to false
+    tokenMetadata: new TextEncoder().encode("Unique NFT Metadata"), // Token metadata (optional)
+    memo: "Initial NFT Creation"      // Memo (optional)
+};
+
+const createNFTResult = await kit.createNFT(options);
+console.log(JSON.stringify(createNFTResult, null, 2));
+```
+**Note: ** `options` object accepts more parameters but `decimals`, `initialSupply`, `isSupplyKey`, `tokenType` will be overwritten for correct token creation.
 
 #### Transfer a Token
 ```ts
