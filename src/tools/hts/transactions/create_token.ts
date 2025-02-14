@@ -26,13 +26,13 @@ export const create_token = async (options: CreateTokenOptions): Promise<CreateT
       .setTreasuryAccountId(options.client.operatorAccountId!);
 
   // Optional and conditional parameters
-  if (options.maxSupply !== undefined) {
+  if (options.maxSupply) {
     tx.setMaxSupply(options.maxSupply).setSupplyType(TokenSupplyType.Finite);
   }
-  if (options.tokenMetadata !== undefined) {
+  if (options.tokenMetadata) {
     tx.setMetadata(options.tokenMetadata);
   }
-  if (options.memo !== undefined) {
+  if (options.memo) {
     tx.setTokenMemo(options.memo);
   }
   if (options.isMetadataKey) {
