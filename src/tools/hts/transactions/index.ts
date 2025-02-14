@@ -6,3 +6,4 @@ export { reject_token } from "./reject_token";
 export { claim_airdrop } from "./claim_airdrop";
 export { dissociate_token } from "./dissociate_token";
 export { mint_token } from "./mint_token";
+export { mint_nft } from "./mint_nft";

@@ -550,6 +550,50 @@ This asynchronous function mints new tokens for a given token, increasing its to
 
 ---
 
+### `mint_nft(tokenId, tokenMetadata, client)`
+
+This asynchronous function mints a new NFT token.
+
+---
+
+#### Parameters
+
+- **tokenId**: `TokenId`  
+  The unique identifier of the NFT to be minted.
+
+- **tokenMetadata**: `Uint8Array<ArrayBufferLike>`  
+  A `Uint8Array` representing the metadata for the NFT (limited to **100 bytes**).
+
+- **client**: `Client`  
+  An instance of the Hedera SDK client used to execute the transaction.
+
+---
+
+#### Returns
+
+- **Promise<MintNFTResult>**  
+  A promise that resolves to an object containing:
+    - **status**: `string` — The status of the transaction receipt.
+    - **txHash**: `string` — The transaction hash (transaction ID) of the minting operation.
+
+---
+
+#### Behavior & Error Handling
+
+1. **Transaction Construction**:
+    - Initializes a new `TokenMintTransaction` and sets the `tokenId`.
+    - Adds the `tokenMetadata` to the transaction.
+    - Freezes the transaction with the client.
+
+2. **Transaction Execution & Receipt**:
+    - Executes the transaction and retrieves the receipt.
+    - Validates that the receipt status indicates success.
+
+3. **Error Handling**:
+    - If the transaction status does not include `"SUCCESS"`, an error with the message `"NFT token Minting Transaction failed"` is thrown.
+
+---
+
 ### `reject_token(tokenId, client)`
 
 This asynchronous function rejects an incoming token transfer for the operator's account, effectively declining the token.

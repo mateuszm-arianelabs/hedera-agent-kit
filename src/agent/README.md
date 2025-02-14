@@ -85,9 +85,15 @@ const rejectResult = await kit.rejectToken(TokenId.fromString("0.0.606"));
 console.log(JSON.stringify(rejectResult, null, 2));
 ```
 
-#### Mint Additional Tokens
+#### Mint Additional Fungible Tokens
 ```ts
-const mintResult = await kit.mintToken(TokenId.fromString("0.0.707"), 1000);
+const mintNFTResult = await kit.mintToken(TokenId.fromString("0.0.707"), new TextEncoder().encode("Metadata For Minted Token"));
+console.log(JSON.stringify(mintNFTResult, null, 2));
+```
+
+#### Mint Non-Fungible Tokens (NFT)
+```ts
+const mintResult = await kit.mintNFTToken(TokenId.fromString("0.0.123353"), );
 console.log(JSON.stringify(mintResult, null, 2));
 ```
 

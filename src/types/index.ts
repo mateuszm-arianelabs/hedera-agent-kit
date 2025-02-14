@@ -162,6 +162,11 @@ export type MintTokenResult = {
     txHash: string,
 }
 
+export type MintNFTResult = {
+    status: string,
+    txHash: string,
+}
+
 export type AssetAllowanceResult = {
     status: string,
     txHash: string,
