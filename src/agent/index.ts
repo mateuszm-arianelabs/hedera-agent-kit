@@ -41,10 +41,9 @@ import {
   MintTokenResult,
   HCSMessage,
   DeleteTopicResult,
-  AssetAllowanceResult
+  AssetAllowanceResult, CreateNFTOptions, CreateFTOptions
 } from "../types";
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
-import {CreateTokenOptions} from "../tools/hts/transactions/create_token";
 
 
 export default class HederaAgentKit {
@@ -60,7 +59,7 @@ export default class HederaAgentKit {
     this.client = Client.forNetwork(network).setOperator(accountId, privateKey)
   }
 
-  async createFT(options: Omit<CreateTokenOptions, "tokenType" | "client">): Promise<CreateTokenResult> {
+  async createFT(options: CreateFTOptions): Promise<CreateTokenResult> {
     return create_token({
       ...options,
       tokenType: TokenType.FungibleCommon,
@@ -68,7 +67,7 @@ export default class HederaAgentKit {
     });
   }
 
-  async createNFT(options: Omit<CreateTokenOptions, "tokenType" | "client" | "decimals" | "initialSupply">): Promise<CreateTokenResult> {
+  async createNFT(options: CreateNFTOptions): Promise<CreateTokenResult> {
     return create_token({
       ...options,
       decimals: 0,
