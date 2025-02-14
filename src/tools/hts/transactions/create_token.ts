@@ -54,6 +54,6 @@ export const create_token = async (options: CreateTokenOptions): Promise<CreateT
   return {
     status: txStatus.toString(),
     txHash: txResponse.transactionId.toString(),
-    tokenId: receipt.tokenId.toString(),
+    tokenId: receipt.tokenId,
   };
 };

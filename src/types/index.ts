@@ -127,7 +127,7 @@ export type ClaimAirdropResult = {
 export type CreateTokenResult = {
     status: string,
     txHash: string,
-    tokenId: string,
+    tokenId: TokenId,
 }
 
 export type TransferTokenResult = {

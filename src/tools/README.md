@@ -448,7 +448,7 @@ This asynchronous function creates a new token on the Hedera network with the sp
   A promise that resolves to an object containing:
     - **status**: `string` — The status of the transaction receipt.
     - **txHash**: `string` — The transaction hash (transaction ID) of the token creation.
-    - **tokenId**: `string` — The identifier of the newly created token.
+    - **tokenId**: `TokenId` — The identifier of the newly created token.
 
 ---
 
