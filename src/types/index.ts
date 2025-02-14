@@ -161,6 +161,11 @@ export type MintTokenResult = {
     txHash: string,
 }
 
+export type AssetAllowanceResult = {
+    status: string,
+    txHash: string,
+}
+
 export type PendingAirdropsApiResponse = {
     airdrops: Airdrop[];
     links: {

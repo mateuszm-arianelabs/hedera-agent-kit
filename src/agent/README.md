@@ -148,6 +148,22 @@ const topicMessages = await kit.getTopicMessages(TopicId.fromString("0.0.1414"),
 console.log(JSON.stringify(topicMessages, null, 2));
 ```
 
+### Account Management
+
+#### Approve Allowance for an asset
+##### For HBAR
+If no Token Id is passed function defaults to approving allowance for HBAR.
+```ts
+const approveAllowanceResult = await kit.approveAssetAllowance(AccountId.fromString('0.0.5393196'), 10);
+console.log(JSON.stringify(approveAllowanceResult, null, 2));
+```
+
+##### For Fungible Token
+```ts
+const approveAllowanceResult = await kit.approveAssetAllowance(AccountId.fromString('0.0.5393196'), 10, TokenId.fromString('0.0.5445171'));
+console.log(JSON.stringify(approveAllowanceResult, null, 2));
+```
+
 ## Underlying implementation
 For underlying implementation of provided functions check [tools documentation](../tools/README.md).
 

@@ -1,7 +1,27 @@
-import { Client, TokenId, AccountId, PendingAirdropId, TopicId } from "@hashgraph/sdk"
-import { create_token, transfer_token, airdrop_token } from "../tools"
-import { get_hbar_balance } from "../tools/hts/queries"
-import { AirdropRecipient } from "../tools/hts/transactions/airdrop"
+import { Client, TokenId, AccountId, PendingAirdropId, TopicId } from "@hashgraph/sdk";
+import {
+  create_token,
+  transfer_token,
+  airdrop_token,
+  get_hbar_balance,
+  get_hts_balance,
+  get_hts_token_details,
+  get_all_tokens_balances,
+  get_token_holders,
+  get_pending_airdrops,
+  associate_token,
+  reject_token,
+  create_topic,
+  delete_topic,
+  submit_topic_message,
+  claim_airdrop,
+  dissociate_token,
+  mint_token,
+  approve_asset_allowance,
+  transfer_hbar,
+  get_topic_info,
+  get_topic_messages
+} from "../tools";
 import {
   Airdrop,
   AirdropResult,
@@ -20,25 +40,10 @@ import {
   CreateTopicResult,
   MintTokenResult,
   HCSMessage,
-  DeleteTopicResult
+  DeleteTopicResult,
+  AssetAllowanceResult
 } from "../types";
-import { get_hts_balance } from "../tools/hts/queries";
-import { get_hts_token_details } from "../tools/hts/queries";
-import { transfer_hbar } from "../tools/hbar/transactions";
-import { get_all_tokens_balances } from "../tools/hts/queries/balance";
-import { get_token_holders } from "../tools/hts/queries";
-import { get_pending_airdrops } from "../tools/hts/queries";
-import {
-  associate_token,
-  reject_token,
-  create_topic,
-  delete_topic,
-  submit_topic_message,
-  claim_airdrop,
-  dissociate_token
-} from "../tools";
-import {get_topic_info, get_topic_messages} from "../tools/hcs/queries";
-import { mint_token } from "../tools";
+import {AirdropRecipient} from "../tools/hts/transactions/airdrop";
 
 
 export default class HederaAgentKit {
@@ -222,5 +227,13 @@ export default class HederaAgentKit {
       upperTimestamp?: number,
   ): Promise<Array<HCSMessage>> {
     return get_topic_messages(topicId, networkType, lowerTimestamp, upperTimestamp);
+  }
+
+  async approveAssetAllowance(
+      spenderAccount: AccountId,
+      amount: number,
+      tokenId?: TokenId,
+  ): Promise<AssetAllowanceResult> {
+    return approve_asset_allowance(spenderAccount, tokenId, amount, this.client);
   }
 }
