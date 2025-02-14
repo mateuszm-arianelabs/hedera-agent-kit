@@ -1,5 +1,6 @@
 import { Tool } from "@langchain/core/tools";
 import HederaAgentKit from "../agent";
+import {TokenType} from "@hashgraph/sdk";
 
 
 export class HederaCreateFungibleTokenTool extends Tool {
@@ -21,13 +22,13 @@ initialSupply: number, the initial supply of the token e.g. 100000
     try {
       const parsedInput = JSON.parse(input);
 
-      const tokenId = (await this.hederaKit.createFT(
-          parsedInput.name,
-          parsedInput.symbol,
-          parsedInput.decimals,
-          parsedInput.initialSupply,
-          parsedInput.isSupplyKey
-      )).tokenId;
+      const tokenId = (await this.hederaKit.createFT({
+        name: parsedInput.name,
+        symbol: parsedInput.symbol,
+        decimals: parsedInput.decimals,
+        initialSupply: parsedInput.initialSupply,
+        isSupplyKey: parsedInput.isSupplyKey,
+      })).tokenId;
 
       return JSON.stringify({
         status: "success",
