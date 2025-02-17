@@ -1,5 +1,6 @@
 import BigNumber from "bignumber.js";
 import { TokenId } from "@hashgraph/sdk";
+import { CreateTokenOptions } from "../tools/hts/transactions/create_token";
 
 export type HederaNetworkType = "mainnet" | "testnet" | "previewnet";
 
@@ -213,4 +214,10 @@ export type HCSMessageApiResponse = {
     };
 };
 
+export interface CreateNFTOptions extends Omit<CreateTokenOptions, "tokenType" | "client" | "decimals" | "initialSupply">{
+
+}
+
+export interface CreateFTOptions extends Omit<CreateTokenOptions, "tokenType" | "client"> {
+}
 

@@ -1,4 +1,4 @@
-import { Client, TokenId, AccountId, PendingAirdropId, TopicId } from "@hashgraph/sdk";
+import { Client, TokenId, AccountId, PendingAirdropId, TopicId, TokenType } from "@hashgraph/sdk";
 import {
   create_token,
   transfer_token,
@@ -41,7 +41,9 @@ import {
   MintTokenResult,
   HCSMessage,
   DeleteTopicResult,
-  AssetAllowanceResult
+  AssetAllowanceResult,
+  CreateNFTOptions,
+  CreateFTOptions
 } from "../types";
 import {AirdropRecipient} from "../tools/hts/transactions/airdrop";
 
@@ -59,21 +61,23 @@ export default class HederaAgentKit {
     this.client = Client.forNetwork(network).setOperator(accountId, privateKey)
   }
 
-  async createFT(
-    name: string,
-    symbol: string,
-    decimals: number,
-    initialSupply: number,
-    isSupplyKey?: boolean,
-  ): Promise<CreateTokenResult> {
-    return create_token(
-      name,
-      symbol,
-      decimals,
-      initialSupply,
-      isSupplyKey || false,
-      this.client
-    )
+  async createFT(options: CreateFTOptions): Promise<CreateTokenResult> {
+    return create_token({
+      ...options,
+      tokenType: TokenType.FungibleCommon,
+      client: this.client,
+    });
+  }
+
+  async createNFT(options: CreateNFTOptions): Promise<CreateTokenResult> {
+    return create_token({
+      ...options,
+      decimals: 0,
+      initialSupply: 0,
+      isSupplyKey: true,
+      tokenType: TokenType.NonFungibleUnique,
+      client: this.client,
+    });
   }
 
   async transferToken(

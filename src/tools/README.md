@@ -391,31 +391,54 @@ This asynchronous function claims a pending token airdrop for the operator's acc
 
 ---
 
-### `create_token(name, symbol, decimals, initialSupply, isSupplyKey, client)`
+### `create_token(options: CreateTokenOptions)`
 
-This asynchronous function creates a new fungible token on the Hedera network with the specified attributes.
+This asynchronous function creates a new token on the Hedera network with the specified attributes, supporting both fungible and non-fungible tokens.
 
 ---
 
 #### Parameters
+- **options**: `CreateTokenOptions`  
+  The options for creating the token. This object should include:
 
-- **name**: `string`  
-  The name of the token.
+    - **name**: `string`  
+      The name of the token.
 
-- **symbol**: `string`  
-  The symbol representing the token.
+    - **symbol**: `string`  
+      The symbol representing the token.
 
-- **decimals**: `number`  
-  The number of decimal places for the token.
+    - **decimals**: `number` (optional)  
+      The number of decimal places for the token. Default is `0`.
 
-- **initialSupply**: `number`  
-  The initial supply of tokens given in the smallest unit (meaning: display_unit * 10^token_decimals)
+    - **initialSupply**: `number` (optional)  
+      The initial supply of tokens in the smallest unit (meaning: display_unit * 10^token_decimals). Default is `0`.
 
-- **isSupplyKey**: `boolean`  
-  A flag indicating whether to set the supply key. If `true`, the operator's public key is set as the supply key.
+    - **isSupplyKey**: `boolean` (optional)  
+      A flag indicating whether to set the supply key. If `true`, the operator's public key is set as the supply key. Default is `false`.
+  
+    - **tokenType**: `TokenType`  
+      Specifies the type of token to create. Available values are:
+        - `TokenType.FungibleCommon`: For Fungible Tokens (FT).
+        - `TokenType.NonFungibleUnique`: For Non-Fungible Tokens (NFT).
 
-- **client**: `Client`  
-  An instance of the Hedera SDK client used to execute the transaction. The client's operator account is used as the treasury account.
+    - **maxSupply**: `number` (optional)  
+      The maximum supply of tokens for finite supply tokens. Setting this to true also sets the `TokenSupplyType` to  `Finite`.
+
+    - **isMetadataKey**: `boolean` (optional)  
+      A flag indicating whether to set the metadata key. If `true`, the operator's public key is used as the metadata key. Default is `false`.
+
+    - **isAdminKey**: `boolean` (optional)  
+      A flag indicating whether to set the admin key. If `true`, the operator's public key is used as the admin key. Default is `false`.
+
+    - **tokenMetadata**: `Uint8Array` (optional)  
+      A byte array containing metadata for the token.
+
+    - **memo**: `string` (optional)  
+      A memo associated with the token.
+
+    - **client**: `Client`  
+      An instance of the Hedera SDK client used to execute the transaction. The client's operator account is used as the treasury account.
+
 
 ---
 
@@ -432,8 +455,8 @@ This asynchronous function creates a new fungible token on the Hedera network wi
 #### Behavior & Error Handling
 
 1. **Transaction Construction**:
-    - Creates a new `TokenCreateTransaction` with the token's name, symbol, decimals, initial supply, and treasury account ID.
-    - Optionally sets the supply key if `isSupplyKey` is `true`.
+    - Constructs a `TokenCreateTransaction` with the token's name, symbol, decimals, initial supply, and treasury account ID.
+    - Optionally sets the supply key, admin key, metadata key, and token metadata based on the provided options.
 
 2. **Transaction Execution & Receipt**:
     - Executes the transaction and retrieves the receipt.
