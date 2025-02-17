@@ -20,7 +20,8 @@ import {
   approve_asset_allowance,
   transfer_hbar,
   get_topic_info,
-  get_topic_messages
+  get_topic_messages,
+  mint_nft
 } from "../tools";
 import {
   Airdrop,
@@ -47,7 +48,6 @@ import {
   MintNFTResult
 } from "../types";
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
-import { mint_nft } from "../tools";
 
 
 export default class HederaAgentKit {
