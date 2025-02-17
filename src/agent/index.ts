@@ -41,9 +41,11 @@ import {
   MintTokenResult,
   HCSMessage,
   DeleteTopicResult,
-  AssetAllowanceResult, CreateNFTOptions, CreateFTOptions
+  AssetAllowanceResult,
+  CreateNFTOptions,
+  CreateFTOptions
 } from "../types";
-import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
+import {AirdropRecipient} from "../tools/hts/transactions/airdrop";
 
 
 export default class HederaAgentKit {
