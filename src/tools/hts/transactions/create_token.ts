@@ -12,8 +12,8 @@ export interface CreateTokenOptions {
   maxSupply?: number;
   isMetadataKey?: boolean;
   isAdminKey?: boolean;
-  tokenMetadata?: Uint8Array<ArrayBufferLike>;
-  memo?: string;
+  tokenMetadata?: Uint8Array<ArrayBufferLike> | null;
+  memo?: string | null;
 }
 
 export const create_token = async (options: CreateTokenOptions): Promise<CreateTokenResult> => {
