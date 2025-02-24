@@ -149,17 +149,31 @@ amount: number, the amount of tokens to transfer e.g. 100
 export class HederaGetBalanceTool extends Tool {
   name = 'hedera_get_hbar_balance'
 
-  description = `Get the HBAR balance of the connected account
-This tool takes no inputs, just pass an empty string or '{}'
+  description = `Retrieves the HBAR balance of a specified Hedera account.  
+If an account ID is provided, it returns the balance of that account.  
+If no input is given (empty JSON '{}'), it returns the balance of the connected account.  
+
+### **Inputs** (optional, input is a JSON string):  
+- **accountId** (*string*, optional): The Hedera account ID to check the balance for (e.g., "0.0.789012").  
+  - If omitted, the tool will return the balance of the connected account.  
+
+### **Example Usage:**  
+1. **Get balance of a specific account:**  
+   '{ "accountId": "0.0.123456" }'  
+2. **Get balance of the connected account:**  
+   '{}'
 `
 
-  constructor(private hederaKit: HederaAgentKit) {
+
+constructor(private hederaKit: HederaAgentKit) {
     super()
   }
 
   protected async _call(input: string): Promise<string> {
     try {
-      const balance = await this.hederaKit.getHbarBalance();
+      const parsedInput = JSON.parse(input);
+
+      const balance = await this.hederaKit.getHbarBalance(parsedInput?.accountId);
 
       return JSON.stringify({
         status: "success",
