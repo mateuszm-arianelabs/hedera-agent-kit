@@ -1,6 +1,5 @@
 import { Tool } from "@langchain/core/tools";
 import HederaAgentKit from "../agent";
-import {TokenType} from "@hashgraph/sdk";
 
 
 export class HederaCreateFungibleTokenTool extends Tool {
@@ -10,8 +9,13 @@ export class HederaCreateFungibleTokenTool extends Tool {
 Inputs ( input is a JSON string ):
 name: string, the name of the token e.g. My Token,
 symbol: string, the symbol of the token e.g. MT,
-decimals: number, the amount of decimals of the token
-initialSupply: number, the initial supply of the token e.g. 100000
+decimals: number, the amount of decimals of the token,
+initialSupply: number, the initial supply of the token e.g. 100000,
+isSupplyKey: boolean, decides whether supply key should be set, false if not passed
+isMetadataKey: boolean, decides whether metadata key should be set, false if not passed
+isAdminKey: boolean, decides whether admin key should be set, false if not passed
+memo: string, containing memo associated with this token, empty string if not passed
+tokenMetadata: string, containing metadata associated with this token, empty string if not passed
 `
 
   constructor(private hederaKit: HederaAgentKit) {
@@ -28,11 +32,65 @@ initialSupply: number, the initial supply of the token e.g. 100000
         decimals: parsedInput.decimals,
         initialSupply: parsedInput.initialSupply,
         isSupplyKey: parsedInput.isSupplyKey,
+        isAdminKey: parsedInput.isAdminKey,
+        isMetadataKey: parsedInput.isMetadataKey,
+        memo: parsedInput.memo,
+        tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata),
       })).tokenId;
 
       return JSON.stringify({
         status: "success",
         message: "Token creation successful",
+        initialSupply: parsedInput.initialSupply,
+        tokenId: tokenId.toString(),
+        solidityAddress: tokenId.toSolidityAddress(),
+      });
+    } catch (error: any) {
+      return JSON.stringify({
+        status: "error",
+        message: error.message,
+        code: error.code || "UNKNOWN_ERROR",
+      });
+    }
+  }
+}
+
+// FIXME: works well in isolation but normally usually createFT is called instead of createNFT
+export class HederaCreateNonFungibleTokenTool extends Tool {
+  name = 'hedera_create_fungible_token'
+
+  description = `Create a non fungible (NFT) token on Hedera
+Inputs ( input is a JSON string ):
+name: string, the name of the token e.g. My Token,
+symbol: string, the symbol of the token e.g. MT,
+maxSupply: number, the max supply of the token e.g. 100000,
+isMetadataKey: boolean, decides whether metadata key should be set, false if not passed
+isAdminKey: boolean, decides whether admin key should be set, false if not passed
+memo: string, containing memo associated with this token, empty string if not passed
+tokenMetadata: string, containing metadata associated with this token, empty string if not passed
+`
+
+  constructor(private hederaKit: HederaAgentKit) {
+    super()
+  }
+
+  protected async _call(input: string): Promise<string> {
+    try {
+      const parsedInput = JSON.parse(input);
+
+      const tokenId = (await this.hederaKit.createNFT({
+        name: parsedInput.name,
+        symbol: parsedInput.symbol,
+        maxSupply: parsedInput.maxSupply,
+        isAdminKey: parsedInput.isAdminKey,
+        isMetadataKey: parsedInput.isMetadataKey,
+        memo: parsedInput.memo,
+        tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata),
+      })).tokenId;
+
+      return JSON.stringify({
+        status: "success",
+        message: "NFT Token creation successful",
         initialSupply: parsedInput.initialSupply,
         tokenId: tokenId.toString(),
         solidityAddress: tokenId.toSolidityAddress(),
@@ -171,6 +229,7 @@ export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
     new HederaCreateFungibleTokenTool(hederaKit),
     new HederaTransferTokenTool(hederaKit),
     new HederaGetBalanceTool(hederaKit),
-    new HederaAirdropTokenTool(hederaKit)
+    new HederaAirdropTokenTool(hederaKit),
+    new HederaCreateNonFungibleTokenTool(hederaKit)
   ]
 }
