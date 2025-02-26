@@ -3,8 +3,6 @@ import HederaAgentKit from "../agent";
 import * as dotenv from "dotenv";
 import {HederaNetworkType} from "../types";
 import { AccountId, PendingAirdropId, TokenId, TopicId } from "@hashgraph/sdk";
-import { OpenAIChat } from "@langchain/openai";
-
 
 dotenv.config();
 export class HederaCreateFungibleTokenTool extends Tool {
@@ -127,7 +125,7 @@ amount: number, the amount of tokens to transfer e.g. 100
   protected async _call(input: string): Promise<string> {
     try {
       const parsedInput = JSON.parse(input);
-
+      
       await this.hederaKit.transferToken(
         parsedInput.tokenId,
         parsedInput.toAccountId,
@@ -171,7 +169,6 @@ If no input is given (empty JSON '{}'), it returns the balance of the connected 
 
 
 constructor(private hederaKit: HederaAgentKit) {
-
     super()
   }
 
@@ -226,8 +223,7 @@ If no account ID is given, it returns the balance for the connected account.
       if (!parsedInput.tokenId) {
         throw new Error("tokenId is required");
       }
-
-      if (!process.env.HEDERA_NETWORK) {
+      if(!process.env.HEDERA_NETWORK) {
         throw new Error("HEDERA_NETWORK environment variable is required");
       }
 
@@ -284,7 +280,7 @@ Example usage:
   protected async _call(input: string): Promise<string> {
     try {
       const parsedInput = JSON.parse(input);
-
+      
       await this.hederaKit.airdropToken(
         parsedInput.tokenId,
         parsedInput.recipients
@@ -546,7 +542,7 @@ Example usage:
         status: "success",
         message: "NFT minting successful",
         tokenId: parsedInput.tokenId,
-        tokenMetadata: parsedInput.tokenMetadata
+        tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata)
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -715,6 +711,7 @@ Example usage:
 
       const holders = await this.hederaKit.getTokenHolders(
         parsedInput.tokenId,
+        process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet",
         parsedInput.threshold
       );
 
@@ -732,7 +729,6 @@ Example usage:
     }
   }
 }
-
 export class HederaCreateTopicTool extends Tool {
   name = 'hedera_create_topic'
 
@@ -874,7 +870,7 @@ Example usage:
       const parsedInput = JSON.parse(input);
       const topicInfo = await this.hederaKit.getTopicInfo(
         TopicId.fromString(parsedInput.topicId),
-        this.hederaKit.client.network.type as HederaNetworkType
+        process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet"
       );
       return JSON.stringify({
         status: "success",
@@ -929,6 +925,7 @@ Example usage:
       const parsedInput = JSON.parse(input);
       const messages = await this.hederaKit.getTopicMessages(
         TopicId.fromString(parsedInput.topicId),
+        process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet",
         parsedInput.lowerThreshold,
         parsedInput.upperThreshold
       );
@@ -946,7 +943,6 @@ Example usage:
     }
   }
 }
-
 
 export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
   return [
