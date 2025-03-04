@@ -31,7 +31,7 @@ function validateEnvironment(): void {
 
 validateEnvironment();
 
-export async function initializeAgent() {
+async function initializeAgent() {
   try {
     const llm = new ChatOpenAI({
       modelName: "gpt-4",
@@ -88,17 +88,15 @@ async function runAutonomousMode(agent: any, config: any, interval = 10) {
       // The agent's "thought" is just a prompt you provide
       const thought =
         "Perform an interesting on-chain action on Hedera that showcases your capabilities.";
-        // throw new Error('eee')
-        // You can stream or await the entire call
-        const stream = await agent.stream({ messages: [new HumanMessage(thought)] }, config);
-        
-        for await (const chunk of stream) {
-        console.log(chunk);
+
+      // You can stream or await the entire call
+      const stream = await agent.stream({ messages: [new HumanMessage(thought)] }, config);
+
+      for await (const chunk of stream) {
         if ("agent" in chunk) {
-          console.log(chunk.agent.messages);
-          // console.log(chunk.agent.messages[0].content);
+          console.log(chunk.agent.messages[0].content);
         } else if ("tools" in chunk) {
-          // console.log(chunk.tools.messages[0].content);
+          console.log(chunk.tools.messages[0].content);
         }
         console.log("-------------------");
       }
