@@ -3,6 +3,8 @@ import HederaAgentKit from "../agent";
 import * as dotenv from "dotenv";
 import {HederaNetworkType} from "../types";
 import { AccountId, PendingAirdropId, TokenId, TopicId } from "@hashgraph/sdk";
+import { fromDisplayToBaseUnit } from "../utils/format-units";
+import { fromBaseToDisplayUnit } from "../tests/utils/utils";
 
 dotenv.config();
 export class HederaCreateFungibleTokenTool extends Tool {
@@ -33,7 +35,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
         name: parsedInput.name,
         symbol: parsedInput.symbol,
         decimals: parsedInput.decimals,
-        initialSupply: parsedInput.initialSupply,
+        initialSupply: fromDisplayToBaseUnit(parsedInput.initialSupply, parsedInput.decimals),
         isSupplyKey: parsedInput.isSupplyKey,
         isAdminKey: parsedInput.isAdminKey,
         isMetadataKey: parsedInput.isMetadataKey,
@@ -44,7 +46,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
       return JSON.stringify({
         status: "success",
         message: "Token creation successful",
-        initialSupply: parsedInput.initialSupply,
+        initialSupply: fromDisplayToBaseUnit(parsedInput.initialSupply, parsedInput.decimals),
         tokenId: tokenId.toString(),
         solidityAddress: tokenId.toSolidityAddress(),
       });
@@ -240,7 +242,7 @@ If no account ID is given, it returns the balance for the connected account.
 
       return JSON.stringify({
         status: "success",
-        balance: balance,
+        balance: fromBaseToDisplayUnit(balance, Number(details.decimals)),
         unit: details.symbol
       });
     } catch (error: any) {
@@ -467,7 +469,7 @@ Example usage:
   }
 }
 export class HederaTransferHbarTool extends Tool {
-  name = 'hedera_transfer_hbar'
+  name = 'hedera_transfer_native_hbar_token'
 
   description = `Transfer HBAR to an account on Hedera
 Inputs ( input is a JSON string ):
@@ -490,7 +492,7 @@ Example usage:
       console.log(input);
       const parsedInput = JSON.parse(input);
 
-      await this.hederaKit.transferHbar(
+      const successResponse = await this.hederaKit.transferHbar(
         parsedInput.toAccountId,
         parsedInput.amount
       );
@@ -498,7 +500,8 @@ Example usage:
         status: "success",
         message: "HBAR transfer successful",
         toAccountId: parsedInput.toAccountId,
-        amount: parsedInput.amount
+        amount: parsedInput.amount,
+        txHash: successResponse.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
