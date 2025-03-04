@@ -2,6 +2,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { HumanMessage } from "@langchain/core/messages";
 import { initializeAgent } from "./utils";
+import { StateType } from "@langchain/langgraph";
 
 export class LangchainAgent {
   private constructor(
@@ -14,10 +15,14 @@ export class LangchainAgent {
     return new LangchainAgent(agent, config);
   }
 
-  async sendPrompt(prompt: string): Promise<any> {
-    const test = await this.agent.invoke({
-      messages: [new HumanMessage(prompt)],
-    });
-    return test;
+  async sendPrompt(prompt: { text: string }): Promise<StateType<any>> {
+    const response = await this.agent.invoke(
+      {
+        messages: [new HumanMessage(prompt.text)],
+      },
+      this.config
+    );
+
+    return response;
   }
 }

@@ -1,21 +1,20 @@
-import { describe, it, beforeEach } from "vitest";
-import { LangchainAgent } from "./utils/elizaApiClient";
-import { ElizaOSPrompt } from "./types";
-import * as dotenv from "dotenv";
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { describe, it } from "vitest";
+import { LangchainAgent } from "./utils/langchainAgent";
 
 describe("Test connection with Langchain", () => {
-    beforeEach(async () => {
-        dotenv.config();
-        await wait(1000);
-    });
-    
-    it("Test connection with Langchain", async () => {
-        const agent = await LangchainAgent.create();
-        const response = await agent.sendPrompt('Hello world!');
-        console.log(response);
+  it("Test connection with Langchain", async () => {
+    try {
+      const agent = await LangchainAgent.create();
+      const conversation = await agent.sendPrompt({
+        text: "Hello world!",
+      });
+      const response =
+        conversation.messages[conversation.messages.length - 1].content;
 
-        expect(response).toBeDefined();
-    });
+      expect(response).toBeTruthy();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  });
 });
