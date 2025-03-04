@@ -39,7 +39,7 @@ async function initializeAgent() {
     });
 
     // Initialize HederaAgentKit
-    const hederaKit = new HederaAgentKit(
+    const hederaKit = await HederaAgentKit.createInstance(
       process.env.HEDERA_ACCOUNT_ID!,
       process.env.HEDERA_PRIVATE_KEY!,
       // Pass your network of choice. Default is "mainnet".

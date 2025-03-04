@@ -226,3 +226,29 @@ export interface CreateNFTOptions extends Omit<CreateTokenOptions, "tokenType" |
 export interface CreateFTOptions extends Omit<CreateTokenOptions, "tokenType" | "client"> {
 }
 
+export type AccountBalance = {
+    balance: number;
+    timestamp: string;
+    tokens: TokenBalance[];
+  };
+
+export type Account = {
+    account: string;
+    alias: string;
+    auto_renew_period: number;
+    balance: AccountBalance;
+    created_timestamp: string;
+    decline_reward: boolean;
+    deleted: boolean;
+    ethereum_nonce: number;
+    evm_address: string;
+    expiry_timestamp: string;
+    key: Key;
+    max_automatic_token_associations: number;
+    memo: string;
+    pending_reward: number;
+    receiver_sig_required: boolean;
+    staked_account_id: string | null;
+    staked_node_id: string | null;
+    stake_period_start: string | null;
+  };  

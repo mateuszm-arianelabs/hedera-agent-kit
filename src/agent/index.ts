@@ -48,19 +48,29 @@ import {
   MintNFTResult
 } from "../types";
 import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
+import { createPrivateKey } from "../utils/private-key-utils";
 
 
 export default class HederaAgentKit {
 
   public client: Client
 
-  constructor(
+  private constructor(
     accountId: string,
     privateKey: string,
     network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet'
   ) {
     // @ts-ignore
     this.client = Client.forNetwork(network).setOperator(accountId, privateKey)
+  }
+
+  static async createInstance(
+    accountId: string,
+    privateKey: string,
+    network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet'
+  ) {
+    const validPrivateKey = await createPrivateKey(privateKey, accountId);
+    return new HederaAgentKit(accountId, validPrivateKey, network);
   }
 
   async createFT(options: CreateFTOptions): Promise<CreateTokenResult> {
