@@ -88,26 +88,26 @@ describe("get_hts_balance", () => {
           token2,
           `How many tokens with id ${token2} account ${acc2.accountId} has`,
         ],
-        // [
-        //   acc3.accountId,
-        //   token2,
-        //   `Check balance of token ${token2} for wallet ${acc3.accountId}`,
-        // ],
-        // [
-        //   acc1.accountId,
-        //   token2,
-        //   `What's balance of ${token2} for ${acc1.accountId}`,
-        // ],
-        // [
-        //   acc3.accountId,
-        //   token1,
-        //   `What is the token balance of ${token1} account ${acc3.accountId} has`,
-        // ],
-        // [
-        //   acc3.accountId,
-        //   token2,
-        //   `Check balance of token ${token2} for wallet ${acc3.accountId}`,
-        // ],
+        [
+          acc3.accountId,
+          token2,
+          `Check balance of token ${token2} for wallet ${acc3.accountId}`,
+        ],
+        [
+          acc1.accountId,
+          token2,
+          `What's balance of ${token2} for ${acc1.accountId}`,
+        ],
+        [
+          acc3.accountId,
+          token1,
+          `What is the token balance of ${token1} account ${acc3.accountId} has`,
+        ],
+        [
+          acc3.accountId,
+          token2,
+          `Check balance of token ${token2} for wallet ${acc3.accountId}`,
+        ],
       ];
     } catch (error) {
       console.error("Error in setup:", error);
