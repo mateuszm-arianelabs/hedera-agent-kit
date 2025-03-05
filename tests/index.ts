@@ -34,7 +34,7 @@ validateEnvironment();
 async function initializeAgent() {
   try {
     const llm = new ChatOpenAI({
-      modelName: "gpt-4o-mini",
+      modelName: "gpt-4",
       temperature: 0.7,
     });
 
