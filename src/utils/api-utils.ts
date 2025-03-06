@@ -1,4 +1,4 @@
-import {HederaNetworkType} from "../types";
+import { HederaNetworkType } from "../types";
 
 export const createBaseMirrorNodeApiUrl = (networkType: HederaNetworkType) => {
     const networkBase = networkType === 'mainnet' ? `${networkType}-public` : networkType;
