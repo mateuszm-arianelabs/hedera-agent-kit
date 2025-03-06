@@ -3,8 +3,8 @@ import HederaAgentKit from "../agent";
 import * as dotenv from "dotenv";
 import {HederaNetworkType} from "../types";
 import { AccountId, PendingAirdropId, TokenId, TopicId } from "@hashgraph/sdk";
-import { fromDisplayToBaseUnit } from "../utils/format-units";
-import { fromBaseToDisplayUnit } from "../tests/utils/utils";
+import { fromDisplayToBaseUnit, fromBaseToDisplayUnit } from "../utils/format-units";
+import { toBaseUnit } from "../utils/hts-format-utils";
 
 dotenv.config();
 export class HederaCreateFungibleTokenTool extends Tool {
@@ -127,11 +127,16 @@ amount: number, the amount of tokens to transfer e.g. 100
   protected async _call(input: string): Promise<string> {
     try {
       const parsedInput = JSON.parse(input);
-      
-      await this.hederaKit.transferToken(
+      const amount = await toBaseUnit( 
+        parsedInput.tokenId,
+        parsedInput.amount, 
+        this.hederaKit.network
+      );
+
+      const successResponse = await this.hederaKit.transferToken(
         parsedInput.tokenId,
         parsedInput.toAccountId,
-        parsedInput.amount
+        Number(amount.toString())
       );
 
       return JSON.stringify({
@@ -139,7 +144,8 @@ amount: number, the amount of tokens to transfer e.g. 100
         message: "Token transfer successful",
         tokenId: parsedInput.tokenId,
         toAccountId: parsedInput.toAccountId,
-        amount: parsedInput.amount
+        amount: parsedInput.amount,
+        txHash: successResponse.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -667,7 +673,7 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
-      const parsedInput = JSON.parse(input);
+      const parsedInput = input ? JSON.parse(input) : {};
 
       const balances = await this.hederaKit.getAllTokensBalances(
         process.env.HEDERA_NETWORK as HederaNetworkType,
@@ -711,17 +717,29 @@ Example usage:
   protected async _call(input: string): Promise<string> {
     try {
       const parsedInput = JSON.parse(input);
+      const threshold = parsedInput.threshold ? 
+        Number((await toBaseUnit(
+          parsedInput.tokenId as string, 
+          parsedInput.threshold, 
+          this.hederaKit.network
+        )).toString()) : undefined;
 
       const holders = await this.hederaKit.getTokenHolders(
         parsedInput.tokenId,
         process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet",
-        parsedInput.threshold
+        threshold
       );
+
+      const formattedHolders = holders.map((holder) => ({
+        account: holder.account,
+        balance: fromBaseToDisplayUnit(holder.balance, holder.decimals).toString(),
+        decimals: holder.decimals
+      }));
 
       return JSON.stringify({
         status: "success",
         message: "Token holders retrieved",
-        holders: holders
+        holders: formattedHolders
       });
     } catch (error: any) {
       return JSON.stringify({
