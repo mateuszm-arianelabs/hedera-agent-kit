@@ -139,7 +139,7 @@ amount: number, the amount of tokens to transfer e.g. 100 in base unit
       const successResponse = await this.hederaKit.transferToken(
         parsedInput.tokenId,
         parsedInput.toAccountId,
-        Number(amount.toString())
+        Number(amount.toString()) // given in base unit
       );
 
       const decimals = getHTSDecimals(parsedInput.tokenId, process.env.HEDERA_NETWORK as HederaNetworkType);
@@ -742,8 +742,8 @@ Example usage:
       // returns balances in base unit
       const holders = await this.hederaKit.getTokenHolders(
         parsedInput.tokenId,
-        process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet",
-        threshold
+        this.hederaKit.network,
+        threshold // given in base unit, optionals
       );
 
       const formattedHolders = holders.map((holder) => ({
