@@ -1,10 +1,9 @@
 import { Tool } from "@langchain/core/tools";
 import HederaAgentKit from "../agent";
 import * as dotenv from "dotenv";
-import {HederaNetworkType} from "../types";
+import { HederaNetworkType } from "../types";
 import { AccountId, PendingAirdropId, TokenId, TopicId } from "@hashgraph/sdk";
-import { fromDisplayToBaseUnit } from "../utils/format-units";
-import { fromBaseToDisplayUnit } from "../tests/utils/utils";
+import {getHTSDecimals} from "../utils/hts-format-utils";
 
 dotenv.config();
 export class HederaCreateFungibleTokenTool extends Tool {
@@ -15,7 +14,7 @@ Inputs ( input is a JSON string ):
 name: string, the name of the token e.g. My Token,
 symbol: string, the symbol of the token e.g. MT,
 decimals: number, the amount of decimals of the token,
-initialSupply: number, the initial supply of the token e.g. 100000,
+initialSupply: number, the initial supply of the token e.g. 100000, given in base unit
 isSupplyKey: boolean, decides whether supply key should be set, false if not passed
 isMetadataKey: boolean, decides whether metadata key should be set, false if not passed
 isAdminKey: boolean, decides whether admin key should be set, false if not passed
@@ -31,24 +30,26 @@ tokenMetadata: string, containing metadata associated with this token, empty str
     try {
       const parsedInput = JSON.parse(input);
 
-      const tokenId = (await this.hederaKit.createFT({
+      const result = (await this.hederaKit.createFT({
         name: parsedInput.name,
         symbol: parsedInput.symbol,
         decimals: parsedInput.decimals,
-        initialSupply: fromDisplayToBaseUnit(parsedInput.initialSupply, parsedInput.decimals),
+        initialSupply: parsedInput.initialSupply, // given in base unit
         isSupplyKey: parsedInput.isSupplyKey,
         isAdminKey: parsedInput.isAdminKey,
         isMetadataKey: parsedInput.isMetadataKey,
         memo: parsedInput.memo,
-        tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata),
-      })).tokenId;
+        tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata), // encoding to Uint8Array
+      }));
 
       return JSON.stringify({
         status: "success",
         message: "Token creation successful",
-        initialSupply: fromDisplayToBaseUnit(parsedInput.initialSupply, parsedInput.decimals),
-        tokenId: tokenId.toString(),
-        solidityAddress: tokenId.toSolidityAddress(),
+        initialSupply: parsedInput.initialSupply,
+        tokenId: result.tokenId.toString(),
+        decimals: parsedInput.decimals,
+        solidityAddress: result.tokenId.toSolidityAddress(),
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -60,9 +61,8 @@ tokenMetadata: string, containing metadata associated with this token, empty str
   }
 }
 
-// FIXME: works well in isolation but normally usually createFT is called instead of createNFT
 export class HederaCreateNonFungibleTokenTool extends Tool {
-  name = 'hedera_create_fungible_token'
+  name = 'hedera_create_non_fungible_token'
 
   description = `Create a non fungible (NFT) token on Hedera
 Inputs ( input is a JSON string ):
@@ -83,22 +83,23 @@ tokenMetadata: string, containing metadata associated with this token, empty str
     try {
       const parsedInput = JSON.parse(input);
 
-      const tokenId = (await this.hederaKit.createNFT({
+      const result = (await this.hederaKit.createNFT({
         name: parsedInput.name,
         symbol: parsedInput.symbol,
-        maxSupply: parsedInput.maxSupply,
+        maxSupply: parsedInput.maxSupply, // given in base unit, NFTs have decimals equal zero so display and base units are the same
         isAdminKey: parsedInput.isAdminKey,
         isMetadataKey: parsedInput.isMetadataKey,
         memo: parsedInput.memo,
-        tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata),
-      })).tokenId;
+        tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata), // encoding to Uint8Array
+      }));
 
       return JSON.stringify({
         status: "success",
         message: "NFT Token creation successful",
         initialSupply: parsedInput.initialSupply,
-        tokenId: tokenId.toString(),
-        solidityAddress: tokenId.toSolidityAddress(),
+        tokenId: result.tokenId.toString(),
+        solidityAddress: result.tokenId.toSolidityAddress(),
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -117,7 +118,7 @@ export class HederaTransferTokenTool extends Tool {
 Inputs ( input is a JSON string ):
 tokenId: string, the ID of the token to transfer e.g. 0.0.123456,
 toAccountId: string, the account ID to transfer to e.g. 0.0.789012,
-amount: number, the amount of tokens to transfer e.g. 100
+amount: number, the amount of tokens to transfer e.g. 100 in base unit
 `
 
   constructor(private hederaKit: HederaAgentKit) {
@@ -131,15 +132,18 @@ amount: number, the amount of tokens to transfer e.g. 100
       await this.hederaKit.transferToken(
         parsedInput.tokenId,
         parsedInput.toAccountId,
-        parsedInput.amount
+        parsedInput.amount // given in base unit
       );
+
+      const decimals = getHTSDecimals(parsedInput.tokenId, process.env.HEDERA_NETWORK as HederaNetworkType);
 
       return JSON.stringify({
         status: "success",
         message: "Token transfer successful",
         tokenId: parsedInput.tokenId,
         toAccountId: parsedInput.toAccountId,
-        amount: parsedInput.amount
+        amount: parsedInput.amount,
+        decimals: decimals,
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -198,7 +202,7 @@ constructor(private hederaKit: HederaAgentKit) {
 export class HederaGetHtsBalanceTool extends Tool {
   name = 'hedera_get_hts_balance'
 
-  description = `Retrieves the balance of a specified Hedera Token Service (HTS) token for a given account.  
+  description = `Retrieves the balance of a specified Hedera Token Service (HTS) token for a given account in base unit.  
 If an account ID is provided, it returns the balance of that account.  
 If no account ID is given, it returns the balance for the connected account.
 
@@ -242,8 +246,9 @@ If no account ID is given, it returns the balance for the connected account.
 
       return JSON.stringify({
         status: "success",
-        balance: fromBaseToDisplayUnit(balance, Number(details.decimals)),
-        unit: details.symbol
+        balance: balance, // in base unit
+        unit: details.symbol,
+        decimals: details.decimals
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -283,9 +288,9 @@ Example usage:
     try {
       const parsedInput = JSON.parse(input);
       
-      await this.hederaKit.airdropToken(
+      const result = await this.hederaKit.airdropToken(
         parsedInput.tokenId,
-        parsedInput.recipients
+        parsedInput.recipients // token amounts given in base unit
       );
 
       return JSON.stringify({
@@ -293,7 +298,8 @@ Example usage:
         message: "Token airdrop successful",
         tokenId: parsedInput.tokenId,
         recipientCount: parsedInput.recipients.length,
-        totalAmount: parsedInput.recipients.reduce((sum: number, r: any) => sum + r.amount, 0)
+        totalAmount: parsedInput.recipients.reduce((sum: number, r: any) => sum + r.amount, 0), // in base unit
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -326,14 +332,15 @@ Example usage:
     try {
       const parsedInput = JSON.parse(input);
 
-      await this.hederaKit.associateToken(
+      const result = await this.hederaKit.associateToken(
         parsedInput.tokenId
       );
 
       return JSON.stringify({
         status: "success",
         message: "Token association successful",
-        tokenId: parsedInput.tokenId
+        tokenId: parsedInput.tokenId,
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -366,14 +373,15 @@ Example usage:
     try {
       const parsedInput = JSON.parse(input);
 
-      await this.hederaKit.dissociateToken(
+      const result = await this.hederaKit.dissociateToken(
         parsedInput.tokenId
       );
 
       return JSON.stringify({
         status: "success",
         message: "Token dissociation successful",
-        tokenId: parsedInput.tokenId
+        tokenId: parsedInput.tokenId,
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -406,14 +414,15 @@ Example usage:
     try {
       const parsedInput = JSON.parse(input);
 
-      await this.hederaKit.rejectToken(
+      const result = await this.hederaKit.rejectToken(
         TokenId.fromString(parsedInput.tokenId)
       );
 
       return JSON.stringify({
         status: "success",
         message: "Token rejection successful",
-        tokenId: parsedInput.tokenId
+        tokenId: parsedInput.tokenId,
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -448,16 +457,17 @@ Example usage:
     try {
       const parsedInput = JSON.parse(input);
 
-      await this.hederaKit.mintToken(
+      const result = await this.hederaKit.mintToken(
         parsedInput.tokenId,
-        parsedInput.amount
+        parsedInput.amount // given in base unit
       );
 
       return JSON.stringify({
         status: "success",
         message: "Token minting successful",
         tokenId: parsedInput.tokenId,
-        amount: parsedInput.amount
+        amount: parsedInput.amount, // in base unit
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -492,7 +502,7 @@ Example usage:
       console.log(input);
       const parsedInput = JSON.parse(input);
 
-      const successResponse = await this.hederaKit.transferHbar(
+      const result = await this.hederaKit.transferHbar(
         parsedInput.toAccountId,
         parsedInput.amount
       );
@@ -501,7 +511,7 @@ Example usage:
         message: "HBAR transfer successful",
         toAccountId: parsedInput.toAccountId,
         amount: parsedInput.amount,
-        txHash: successResponse.txHash
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -536,7 +546,7 @@ Example usage:
     try {
       const parsedInput = JSON.parse(input);
 
-      await this.hederaKit.mintNFTToken(
+      const result = await this.hederaKit.mintNFTToken(
         parsedInput.tokenId,
         parsedInput.tokenMetadata
       );
@@ -545,7 +555,8 @@ Example usage:
         status: "success",
         message: "NFT minting successful",
         tokenId: parsedInput.tokenId,
-        tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata)
+        tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata), // encoding to Uint8Array
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -583,7 +594,7 @@ Example usage:
         senderId: AccountId.fromString(parsedInput.senderAccountId),
         receiverId: this.hederaKit.client.operatorAccountId!
       });
-      await this.hederaKit.claimAirdrop(
+      const result = await this.hederaKit.claimAirdrop(
         airdropId
       );
 
@@ -592,7 +603,8 @@ Example usage:
         message: "Airdrop claim successful",
         tokenId: parsedInput.tokenId,
         senderAccountId: parsedInput.senderAccountId,
-        receiverAccountId: AccountId.fromString(process.env.HEDERA_ACCOUNT_ID!)
+        receiverAccountId: AccountId.fromString(process.env.HEDERA_ACCOUNT_ID!),
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -669,6 +681,7 @@ Example usage:
     try {
       const parsedInput = JSON.parse(input);
 
+      // returns both display and base unit balances
       const balances = await this.hederaKit.getAllTokensBalances(
         process.env.HEDERA_NETWORK as HederaNetworkType,
         parsedInput.accountId
@@ -712,10 +725,11 @@ Example usage:
     try {
       const parsedInput = JSON.parse(input);
 
+      // returns balances in base unit
       const holders = await this.hederaKit.getTokenHolders(
         parsedInput.tokenId,
         process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet",
-        parsedInput.threshold
+        parsedInput.threshold // given in base unit, optional
       );
 
       return JSON.stringify({
@@ -754,14 +768,15 @@ Example usage:
   protected async _call(input: string): Promise<string> {
     try {
       const parsedInput = JSON.parse(input);
-      const topic = await this.hederaKit.createTopic(
+      const result = await this.hederaKit.createTopic(
         parsedInput.name,
         parsedInput.isSubmitKey
       );
       return JSON.stringify({
         status: "success",
         message: "Topic created",
-        topic: topic
+        topicId: result.topicId,
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -792,13 +807,14 @@ Example usage:
   protected async _call(input: string): Promise<string> {
     try {
       const parsedInput = JSON.parse(input);
-      await this.hederaKit.deleteTopic(
+      const result = await this.hederaKit.deleteTopic(
         TopicId.fromString(parsedInput.topicId)
       );
       return JSON.stringify({
         status: "success",
         message: "Topic deleted",
-        topicId: parsedInput.topicId
+        topicId: parsedInput.topicId,
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
@@ -831,7 +847,7 @@ Example usage:
   protected async _call(input: string): Promise<string> {
     try {
       const parsedInput = JSON.parse(input);
-      await this.hederaKit.submitTopicMessage(
+      const result = await this.hederaKit.submitTopicMessage(
         TopicId.fromString(parsedInput.topicId),
         parsedInput.message
       );
@@ -839,7 +855,8 @@ Example usage:
         status: "success",
         message: "Message submitted",
         topicId: parsedInput.topicId,
-        topicMessage: parsedInput.message
+        topicMessage: parsedInput.message,
+        txHash: result.txHash
       });
     } catch (error: any) {
       return JSON.stringify({
