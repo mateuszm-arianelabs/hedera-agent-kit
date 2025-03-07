@@ -1,0 +1,220 @@
+import { describe, expect, it, beforeEach, beforeAll } from "vitest";
+import { NetworkType } from "./types";
+import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
+import * as dotenv from "dotenv";
+import { LangchainAgent } from "./utils/langchainAgent";
+import { NetworkClientWrapper } from "./utils/testnetClient";
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function extractTokenId(messages) {
+    const toolMessages = messages.filter((msg) =>
+        (msg.id && msg.id[2] === "ToolMessage") ||
+        msg.name === "hedera_create_non_fungible_token"
+    );
+
+    for (const message of toolMessages) {
+        try {
+            const toolResponse = JSON.parse(message.content);
+
+            if (toolResponse.status !== "success" || !toolResponse.tokenId) {
+                continue;
+            }
+
+            return toolResponse.tokenId;
+
+        } catch (error) {
+            console.error("Error parsing tool message:", error);
+        }
+    }
+
+    return null;
+}
+
+describe("create_nft_token", () => {
+    let langchainAgent: LangchainAgent;
+    let hederaApiClient: HederaMirrorNodeClient;
+    let wrapper;
+
+    beforeAll(async () => {
+        wrapper = new NetworkClientWrapper(
+            process.env.HEDERA_ACCOUNT_ID!,
+            process.env.HEDERA_PRIVATE_KEY!,
+            process.env.HEDERA_KEY_TYPE!,
+            "testnet"
+        );
+        hederaApiClient = new HederaMirrorNodeClient("testnet" as NetworkType);
+
+        }
+    );
+
+    beforeEach(async () => {
+        dotenv.config();
+        await wait(3000);
+    });
+
+    it("Create NFT token with all possible parameters", async () => {
+
+        const prompt = {
+            user: "user",
+            text: "Create non-fungible token with name TestToken, symbol TT, and max supply of 100. Set memo to 'This is an example memo' and token metadata to 'And that's an example metadata'. Add admin key. Set metadata key.",
+        };
+
+        langchainAgent = await LangchainAgent.create();
+        const response = await langchainAgent.sendPrompt(prompt);
+
+        const tokenId = extractTokenId(response.messages);
+
+        await wait(5000);
+
+        const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+
+        expect(tokenDetails.symbol).toEqual("TT");
+        expect(tokenDetails.name).toEqual("TestToken");
+        expect(tokenDetails.decimals).toEqual("0"); // all NFTs have decimals 0 by default
+        expect(Number(tokenDetails.max_supply)).toEqual(100);
+        expect(tokenDetails.memo).toEqual("This is an example memo");
+        expect(atob(tokenDetails.metadata!)).toEqual(
+            "And that's an example metadata"
+        );
+        expect(tokenDetails?.supply_key?.key).not.toBeFalsy(); // all NFTs have supply key set by default
+        expect(tokenDetails?.admin_key?.key).not.toBeFalsy();
+        expect(tokenDetails?.metadata_key?.key).not.toBeFalsy();
+    });
+
+    it("Create without optional keys", async () => {
+        const prompt = {
+            user: "user",
+            text: "Create non-fungible token with name TestToken, symbol TT, and max supply of 100. Set memo to 'This is an example memo' and token metadata to 'And that's an example metadata'. Do not set the metadata and admin keys",
+        };
+
+        langchainAgent = await LangchainAgent.create();
+        const response = await langchainAgent.sendPrompt(prompt);
+
+        const tokenId = extractTokenId(response.messages);
+
+        await wait(5000);
+
+        const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+
+        expect(tokenDetails.symbol).toEqual("TT");
+        expect(tokenDetails.name).toEqual("TestToken");
+        expect(tokenDetails.decimals).toEqual("0"); // all NFTs have decimals 0 by default
+        expect(Number(tokenDetails.max_supply)).toEqual(100);
+        expect(tokenDetails.memo).toEqual("This is an example memo");
+        expect(atob(tokenDetails.metadata!)).toEqual(
+            "And that's an example metadata"
+        );
+        expect(tokenDetails?.supply_key?.key).not.toBeFalsy(); // all NFTs have supply key set by default
+        expect(tokenDetails?.admin_key?.key).toBeFalsy();
+        expect(tokenDetails?.metadata_key?.key).toBeFalsy();
+    });
+
+    it("Create token with minimal parameters", async () => {
+        const prompt = {
+            user: "user",
+            text: "Create non-fungible token with name TestToken, symbol TT.",
+        };
+
+        langchainAgent = await LangchainAgent.create();
+        const response = await langchainAgent.sendPrompt(prompt);
+        console.log(JSON.stringify(response, null, 2));
+
+        const tokenId = extractTokenId(response.messages);
+
+        await wait(5000);
+
+        const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+
+        expect(tokenDetails.symbol).toEqual("TT");
+        expect(tokenDetails.name).toEqual("TestToken");
+        expect(tokenDetails.decimals).toEqual("0"); // all NFTs have decimals 0 by default
+        expect(Number(tokenDetails.max_supply)).toEqual(0);
+        expect(tokenDetails.memo).toEqual("");
+        expect(tokenDetails.metadata).toEqual("");
+        expect(tokenDetails?.supply_key?.key).not.toBeFalsy(); // all NFTs have supply key set by default
+        expect(tokenDetails?.admin_key?.key).toBeFalsy();
+        expect(tokenDetails?.metadata_key?.key).toBeFalsy();
+    });
+
+    it("Create token with minimal parameters plus memo", async () => {
+        const prompt = {
+            user: "user",
+            text: "Create non-fungible token with name TestToken, symbol TT. Set memo to 'This is memo'.",
+        };
+
+        langchainAgent = await LangchainAgent.create();
+        const response = await langchainAgent.sendPrompt(prompt);
+        console.log(JSON.stringify(response, null, 2));
+
+        const tokenId = extractTokenId(response.messages);
+
+        await wait(5000);
+
+        const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+
+        expect(tokenDetails.symbol).toEqual("TT");
+        expect(tokenDetails.name).toEqual("TestToken");
+        expect(tokenDetails.decimals).toEqual("0"); // all NFTs have decimals 0 by default
+        expect(Number(tokenDetails.max_supply)).toEqual(0);
+        expect(tokenDetails.memo).toEqual("This is memo");
+        expect(tokenDetails.metadata).toEqual("");
+        expect(tokenDetails?.supply_key?.key).not.toBeFalsy(); // all NFTs have supply key set by default
+        expect(tokenDetails?.admin_key?.key).toBeFalsy();
+        expect(tokenDetails?.metadata_key?.key).toBeFalsy();
+    });
+
+    it("Create token with minimal parameters plus metadata key", async () => {
+        const prompt = {
+            user: "user",
+            text: "Create non-fungible token with name TestToken, symbol TT. Set metadata key.",
+        };
+
+        langchainAgent = await LangchainAgent.create();
+        const response = await langchainAgent.sendPrompt(prompt);
+        console.log(JSON.stringify(response, null, 2));
+
+        const tokenId = extractTokenId(response.messages);
+
+        await wait(5000);
+
+        const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+
+        expect(tokenDetails.symbol).toEqual("TT");
+        expect(tokenDetails.name).toEqual("TestToken");
+        expect(tokenDetails.decimals).toEqual("0"); // all NFTs have decimals 0 by default
+        expect(Number(tokenDetails.max_supply)).toEqual(0);
+        expect(tokenDetails.memo).toEqual("");
+        expect(tokenDetails.metadata).toEqual("");
+        expect(tokenDetails?.supply_key?.key).not.toBeFalsy(); // all NFTs have supply key set by default
+        expect(tokenDetails?.admin_key?.key).toBeFalsy();
+        expect(tokenDetails?.metadata_key?.key).not.toBeFalsy();
+    });
+
+    it("Create token with minimal parameters plus admin key and metadata key and memo and metadata", async () => {
+        const prompt = {
+            user: "user",
+            text: "Create non-fungible token with name TestToken, symbol TT. Set metadata key and admin key. Add memo 'thats memo' and metadata 'thats metadata'.",
+        };
+
+        langchainAgent = await LangchainAgent.create();
+        const response = await langchainAgent.sendPrompt(prompt);
+        console.log(JSON.stringify(response, null, 2));
+
+        const tokenId = extractTokenId(response.messages);
+
+        await wait(5000);
+
+        const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+
+        expect(tokenDetails.symbol).toEqual("TT");
+        expect(tokenDetails.name).toEqual("TestToken");
+        expect(tokenDetails.decimals).toEqual("0"); // all NFTs have decimals 0 by default
+        expect(Number(tokenDetails.max_supply)).toEqual(0);
+        expect(tokenDetails.memo).toEqual("thats memo");
+        expect(atob(tokenDetails.metadata!)).toEqual("thats metadata");
+        expect(tokenDetails?.supply_key?.key).not.toBeFalsy(); // all NFTs have supply key set by default
+        expect(tokenDetails?.admin_key?.key).not.toBeFalsy();
+        expect(tokenDetails?.metadata_key?.key).not.toBeFalsy();
+    });
+}, 240_000);
