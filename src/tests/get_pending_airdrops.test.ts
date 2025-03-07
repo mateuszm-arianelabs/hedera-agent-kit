@@ -1,0 +1,162 @@
+import { describe, beforeAll, expect, it } from "vitest";
+import { AccountData } from "./utils/testnetUtils";
+import { LangchainAgent } from "./utils/langchainAgent";
+import { NetworkClientWrapper } from "./utils/testnetClient";
+import * as dotenv from "dotenv";
+import { Airdrop } from "../types";
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function findRelevantAirdrop(messages, accountId, tokenId) {
+    const toolMessages = messages.filter((msg) =>
+        (msg.id && msg.id[2] === "ToolMessage") ||
+        msg.name === "hedera_get_pending_airdrop"
+    );
+
+    for (const message of toolMessages) {
+        try {
+            const toolResponse = JSON.parse(message.content);
+
+            if (toolResponse.status !== "success" || !toolResponse.airdrop) {
+                continue;
+            }
+
+            const matchingAirdrop = toolResponse.airdrop.find(
+                (airdrop) =>
+                    airdrop.token_id === tokenId &&
+                    airdrop.receiver_id === accountId
+            );
+
+            if (matchingAirdrop) {
+                return matchingAirdrop;
+            }
+        } catch (error) {
+            console.error("Error parsing tool message:", error);
+        }
+    }
+
+    return null;
+}
+
+describe("get_pending_airdrops", () => {
+    let acc1: AccountData;
+    let acc2: AccountData;
+    let acc3: AccountData;
+    let token1: string;
+    let langchainAgent: LangchainAgent;
+    let testCases: [string, string, string, number][];
+    let networkClientWrapper;
+
+    beforeAll(async () => {
+        dotenv.config()
+        try {
+            langchainAgent = await LangchainAgent.create();
+            networkClientWrapper = new NetworkClientWrapper(
+                process.env.HEDERA_ACCOUNT_ID!,
+                process.env.HEDERA_PRIVATE_KEY!,
+                process.env.HEDERA_KEY_TYPE!,
+                "testnet"
+            );
+
+            // create accounts
+            await Promise.all([
+                networkClientWrapper.createAccount(0, 0),
+                networkClientWrapper.createAccount(0, 0),
+                networkClientWrapper.createAccount(0, 0),
+            ]).then(([_acc1, _acc2, _acc3]) => {
+                acc1 = _acc1;
+                acc2 = _acc2;
+                acc3 = _acc3;
+            });
+
+            // create tokens
+            token1 = await networkClientWrapper.createFT({
+                name: "AirDrop1",
+                symbol: "AD1",
+                initialSupply: 1000,
+                decimals: 2,
+            });
+
+            await networkClientWrapper.airdropToken(token1, [
+                {
+                    accountId: acc1.accountId,
+                    amount: 10,
+                },
+                {
+                    accountId: acc2.accountId,
+                    amount: 10,
+                },
+                {
+                    accountId: acc3.accountId,
+                    amount: 7,
+                },
+            ]);
+
+            await wait(5000);
+
+
+            testCases = [
+                [
+                    acc1.accountId,
+                    token1,
+                    `Show me pending airdrops for account ${acc1.accountId}`,
+                    10,
+                ],
+                [
+                    acc2.accountId,
+                    token1,
+                    `Get pending airdrops for account ${acc2.accountId}`,
+                    10,
+                ],
+                [
+                    acc3.accountId,
+                    token1,
+                    `Display pending airdrops for account ${acc3.accountId}`,
+                    7,
+                ],
+            ];
+
+        } catch (error) {
+            console.error("Error in setup:", error);
+            throw error;
+        }
+    });
+
+    describe("pending airdrops checks", () => {
+        it("should test dynamic token airdrops", async () => {
+            for (const [
+                accountId,
+                tokenId,
+                promptText,
+                expectedAmount,
+            ] of testCases) {
+                const prompt = {
+                    user: "user",
+                    text: promptText,
+                };
+
+                const response = await langchainAgent.sendPrompt(prompt);
+
+                const relevantAirdrop = findRelevantAirdrop(response.messages, accountId, tokenId);
+
+                if (!relevantAirdrop) {
+                    throw new Error(`No matching airdrop found for account ${accountId} and token ${tokenId}`);
+                }
+
+                const expectedResult: Airdrop = {
+                    amount: expectedAmount,
+                    receiver_id: accountId,
+                    sender_id: networkClientWrapper.getAccountId(),
+                    token_id: tokenId,
+                }
+
+                expect(relevantAirdrop.amount).toEqual(expectedResult.amount);
+                expect(relevantAirdrop.receiver_id).toEqual(expectedResult.receiver_id);
+                expect(relevantAirdrop.sender_id).toEqual(expectedResult.sender_id);
+                expect(relevantAirdrop.token_id).toEqual(expectedResult.token_id);
+
+                await wait(5000);
+            }
+        }, 240_000);
+    })
+})
