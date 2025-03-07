@@ -114,4 +114,13 @@ export class NetworkClientWrapper {
   ): Promise<CreateTopicResult> {
     return this.agentKit.createTopic(topicMemo, submitKey);
   }
+
+  getAccountTokenBalance(
+      tokenId: string,
+      networkType: string,
+      accountId: string
+  ): Promise<number> {
+    return this.agentKit.getHtsBalance(tokenId, networkType as HederaNetworkType, accountId);
+  }
+
 }
