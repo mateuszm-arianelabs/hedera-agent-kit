@@ -791,10 +791,20 @@ Inputs ( input is a JSON string ):
 name: string, the name of the topic e.g. My Topic,
 isSubmitKey: boolean, decides whether submit key should be set, false if not passed
 Example usage:
-1. Create a topic with name "My Topic" and submit key:
+1. Create a topic with memo "My Topic":
+  '{
+    "name": "My Topic",
+    "isSubmitKey": false
+  }'
+2. Create a topic with memo "My Topic". Restrict posting with a key:
   '{
     "name": "My Topic",
     "isSubmitKey": true
+  }'
+3. Create a topic with memo "My Topic". Do not set a submit key:
+  '{
+    "name": "My Topic",
+    "isSubmitKey": false
   }'
 `
 
