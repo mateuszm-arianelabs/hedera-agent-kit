@@ -1,19 +1,19 @@
-import * as dotenv from "dotenv";
-import { NetworkClientWrapper } from "./utils/testnetClient";
+import { describe, beforeAll, expect, it, afterAll } from "vitest";
 import { AccountData } from "./utils/testnetUtils";
-import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { LangchainAgent } from "./utils/langchainAgent";
+import { NetworkClientWrapper } from "./utils/testnetClient";
+import * as dotenv from "dotenv";
+import {HederaMirrorNodeClient} from "./utils/hederaMirrorNodeClient";
+import {NetworkType} from "./types";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-dotenv.config();
-describe("claim_airdrop", () => {
+describe("claim_pending_airdrops", () => {
     let airdropCreatorAccount: AccountData;
     let token1: string;
     let token2: string;
-    let networkClientWrapper: NetworkClientWrapper;
-    let claimerInitialMaxAutoAssociation: number;
     let langchainAgent: LangchainAgent;
+    let claimerInitialMaxAutoAssociation: number;
     let testCases: {
         receiverAccountId: string;
         senderAccountId: string;
@@ -21,28 +21,32 @@ describe("claim_airdrop", () => {
         promptText: string;
         expectedClaimedAmount: number;
     }[];
+    let networkClientWrapper: NetworkClientWrapper;
     let hederaMirrorNodeClient: HederaMirrorNodeClient;
 
     beforeAll(async () => {
+        dotenv.config()
         try {
-            hederaMirrorNodeClient = new HederaMirrorNodeClient(
-                process.env.HEDERA_NETWORK as
-                    | "testnet"
-                    | "mainnet"
-                    | "previewnet"
-            );
+            langchainAgent = await LangchainAgent.create();
+
+            hederaMirrorNodeClient = new HederaMirrorNodeClient("testnet" as NetworkType);
 
             networkClientWrapper = new NetworkClientWrapper(
                 process.env.HEDERA_ACCOUNT_ID!,
                 process.env.HEDERA_PRIVATE_KEY!,
                 process.env.HEDERA_KEY_TYPE!,
-                "testnet"
+                "testnet" as NetworkType
             );
 
+
+            // Create test account
+            const startingHbars = 10;
+            const autoAssociation = 0; // no auto association
             airdropCreatorAccount = await networkClientWrapper.createAccount(
-                15,
-                0
+                startingHbars,
+                autoAssociation
             );
+
 
             claimerInitialMaxAutoAssociation = (
                 await hederaMirrorNodeClient.getAccountInfo(
@@ -67,6 +71,7 @@ describe("claim_airdrop", () => {
                     "testnet"
                 );
 
+            // create tokens
             await Promise.all([
                 airdropCreatorAccountNetworkClientWrapper.createFT({
                     name: "ClaimAirdrop1",
@@ -85,6 +90,7 @@ describe("claim_airdrop", () => {
                 token2 = _token2;
             });
 
+            // airdrop tokens
             await Promise.all([
                 airdropCreatorAccountNetworkClientWrapper.airdropToken(token1, [
                     {
@@ -99,6 +105,9 @@ describe("claim_airdrop", () => {
                     },
                 ]),
             ]);
+
+            await wait(5000);
+
 
             testCases = [
                 {
@@ -117,15 +126,20 @@ describe("claim_airdrop", () => {
                 },
             ];
 
-            langchainAgent = await LangchainAgent.create()
         } catch (error) {
             console.error("Error in setup:", error);
             throw error;
         }
     });
 
-    describe("claim airdrop checks", () => {
-        it("should claim airdrop", async () => {
+    afterAll(async () => {
+        await networkClientWrapper.setMaxAutoAssociation(
+            claimerInitialMaxAutoAssociation
+        );
+    });
+
+    describe("pending airdrops checks", () => {
+        it("should test dynamic token airdrops", async () => {
             for (const {
                 receiverAccountId,
                 tokenId,
@@ -137,22 +151,16 @@ describe("claim_airdrop", () => {
                     text: promptText,
                 };
 
-                await langchainAgent.sendPrompt(prompt);
-                await wait(5000);
+                const response = await langchainAgent.sendPrompt(prompt);
 
-                const tokenInfo = await hederaMirrorNodeClient.getAccountToken(
+                const tokenBalance = await networkClientWrapper.getAccountTokenBalance(
+                    tokenId,
+                    'testnet',
                     receiverAccountId,
-                    tokenId
                 );
 
-                expect(tokenInfo?.balance ?? 0).toBe(expectedClaimedAmount);
+                expect(tokenBalance ?? 0).toBe(expectedClaimedAmount);
             }
-        });
-    });
-
-    afterAll(async () => {
-        await networkClientWrapper.setMaxAutoAssociation(
-            claimerInitialMaxAutoAssociation
-        );
-    });
-});
+        }, 240_000);
+    })
+})
