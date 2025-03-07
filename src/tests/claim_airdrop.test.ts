@@ -38,10 +38,15 @@ describe("claim_pending_airdrops", () => {
                 "testnet" as NetworkType
             );
 
+
+            // Create test account
+            const startingHbars = 10;
+            const autoAssociation = 0; // no auto association
             airdropCreatorAccount = await networkClientWrapper.createAccount(
-                15,
-                0
+                startingHbars,
+                autoAssociation
             );
+
 
             claimerInitialMaxAutoAssociation = (
                 await hederaMirrorNodeClient.getAccountInfo(
@@ -85,6 +90,7 @@ describe("claim_pending_airdrops", () => {
                 token2 = _token2;
             });
 
+            // airdrop tokens
             await Promise.all([
                 airdropCreatorAccountNetworkClientWrapper.airdropToken(token1, [
                     {

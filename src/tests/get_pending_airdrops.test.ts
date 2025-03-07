@@ -58,18 +58,20 @@ describe("get_pending_airdrops", () => {
                 "testnet"
             );
 
-            // create accounts
+            // create test accounts
+            const startingHbars = 0;
+            const autoAssociation = 0; // no auto association
             await Promise.all([
-                networkClientWrapper.createAccount(0, 0),
-                networkClientWrapper.createAccount(0, 0),
-                networkClientWrapper.createAccount(0, 0),
+                networkClientWrapper.createAccount(startingHbars, autoAssociation),
+                networkClientWrapper.createAccount(startingHbars, autoAssociation),
+                networkClientWrapper.createAccount(startingHbars, autoAssociation),
             ]).then(([_acc1, _acc2, _acc3]) => {
                 acc1 = _acc1;
                 acc2 = _acc2;
                 acc3 = _acc3;
             });
 
-            // create tokens
+            // create token
             token1 = await networkClientWrapper.createFT({
                 name: "AirDrop1",
                 symbol: "AD1",
@@ -77,6 +79,7 @@ describe("get_pending_airdrops", () => {
                 decimals: 2,
             });
 
+            // airdrop token
             await networkClientWrapper.airdropToken(token1, [
                 {
                     accountId: acc1.accountId,

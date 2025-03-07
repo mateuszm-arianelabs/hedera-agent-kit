@@ -57,8 +57,10 @@ describe("reject_token", async () => {
                 );
             }
 
-            // Create test accounts
-            acc1 = await networkClientWrapper.createAccount(10, -1);
+            // Create test account
+            const startingHbars = 10;
+            const autoAssociation = -1; // unlimited
+            acc1 = await networkClientWrapper.createAccount(startingHbars, autoAssociation);
 
             airdropCreatorNetworkClientWrapper = new NetworkClientWrapper(
                 acc1.accountId,

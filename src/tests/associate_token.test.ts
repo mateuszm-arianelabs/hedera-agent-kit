@@ -34,9 +34,12 @@ describe("associate_token", () => {
                 "testnet"
             );
 
+            // Create test account
+            const startingHbars = 10;
+            const autoAssociation = 0; // no auto association
             tokenCreatorAccount = await networkClientWrapper.createAccount(
-                15,
-                0
+                startingHbars,
+                autoAssociation
             );
 
             claimerInitialMaxAutoAssociation = (
@@ -62,6 +65,7 @@ describe("associate_token", () => {
                     "testnet"
                 );
 
+            // create tokens
             await Promise.all([
                 tokenCreatorAccountNetworkClientWrapper.createFT({
                     name: "TokenToAssociate1",
