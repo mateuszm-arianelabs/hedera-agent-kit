@@ -27,6 +27,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
   }
 
   protected async _call(input: string): Promise<string> {
+    console.log('hedera_create_fungible_token tool has been called')
     try {
       const parsedInput = JSON.parse(input);
 
@@ -81,6 +82,8 @@ tokenMetadata: string, containing metadata associated with this token, empty str
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_create_non_fungible_token tool has been called')
+
       const parsedInput = JSON.parse(input);
 
       const result = (await this.hederaKit.createNFT({
@@ -127,6 +130,8 @@ amount: number, the amount of tokens to transfer e.g. 100 in base unit
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_transfer_token tool has been called')
+
       const parsedInput = JSON.parse(input);
       
       await this.hederaKit.transferToken(
@@ -180,6 +185,8 @@ constructor(private hederaKit: HederaAgentKit) {
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_get_hbar_balance tool has been called')
+
       const parsedInput = JSON.parse(input);
 
       const balance = await this.hederaKit.getHbarBalance(parsedInput?.accountId);
@@ -225,6 +232,8 @@ If no account ID is given, it returns the balance for the connected account.
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_get_hts_balance tool has been called')
+
       const parsedInput = JSON.parse(input);
       if (!parsedInput.tokenId) {
         throw new Error("tokenId is required");
@@ -286,6 +295,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_airdrop_token token tool has been called')
+
       const parsedInput = JSON.parse(input);
       
       const result = await this.hederaKit.airdropToken(
@@ -330,6 +341,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_associate_token token tool has been called')
+
       const parsedInput = JSON.parse(input);
 
       const result = await this.hederaKit.associateToken(
@@ -371,6 +384,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_dissociate_token token tool has been called')
+
       const parsedInput = JSON.parse(input);
 
       const result = await this.hederaKit.dissociateToken(
@@ -412,6 +427,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_reject_token tool has been called')
+
       const parsedInput = JSON.parse(input);
 
       const result = await this.hederaKit.rejectToken(
@@ -455,6 +472,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_mint_fungible_token tool has been called')
+
       const parsedInput = JSON.parse(input);
 
       const result = await this.hederaKit.mintToken(
@@ -478,6 +497,7 @@ Example usage:
     }
   }
 }
+
 export class HederaTransferHbarTool extends Tool {
   name = 'hedera_transfer_native_hbar_token'
 
@@ -499,6 +519,7 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_transfer_native_hbar_token tool has been called');
       console.log(input);
       const parsedInput = JSON.parse(input);
 
@@ -522,6 +543,7 @@ Example usage:
     }
   }
 }
+
 export class HederaMintNFTTool extends Tool {
   name = 'hedera_mint_nft'
 
@@ -544,6 +566,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_mint_nft tool has been called');
+
       const parsedInput = JSON.parse(input);
 
       const result = await this.hederaKit.mintNFTToken(
@@ -567,6 +591,7 @@ Example usage:
     }
   }
 }
+
 export class HederaClaimAirdropTool extends Tool {
   name = 'hedera_claim_airdrop'
 
@@ -588,6 +613,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_claim_airdrop tool has been called');
+
       const parsedInput = JSON.parse(input);
       const airdropId = new PendingAirdropId({
         tokenId: TokenId.fromString(parsedInput.tokenId),
@@ -615,14 +642,15 @@ Example usage:
     }
   }
 }
+
 export class HederaGetPendingAirdropTool extends Tool {
   name = 'hedera_get_pending_airdrop'
 
-  description = `Get the pending airdrop for a token on Hedera
+  description = `Get the pending airdrops for the given account on Hedera
 Inputs ( input is a JSON string ):
 - accountId: string, the account ID to get the pending airdrop for e.g. 0.0.789012,
 Example usage:
-1. Get the pending airdrop for account 0.0.789012:
+1. Get the pending airdrops for account 0.0.789012:
   '{
     "accountId": "0.0.789012"
   }'
@@ -634,6 +662,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_get_pending_airdrop tool has been called');
+
       const parsedInput = JSON.parse(input);
 
       const airdrop = await this.hederaKit.getPendingAirdrops(
@@ -655,6 +685,7 @@ Example usage:
     }
   }
 }
+
 export class HederaGetAllTokenBalancesTool extends Tool {
   name = 'hedera_get_all_token_balances'
 
@@ -679,6 +710,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_get_all_token_balances tool has been called');
+
       const parsedInput = JSON.parse(input);
 
       // returns both display and base unit balances
@@ -701,6 +734,7 @@ Example usage:
     }
   }
 }
+
 export class HederaGetTokenHoldersTool extends Tool {
   name = 'hedera_get_token_holders'
 
@@ -723,6 +757,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_get_token_holders tool has been called');
+
       const parsedInput = JSON.parse(input);
 
       // returns balances in base unit
@@ -746,6 +782,7 @@ Example usage:
     }
   }
 }
+
 export class HederaCreateTopicTool extends Tool {
   name = 'hedera_create_topic'
 
@@ -767,6 +804,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_create_topic tool has been called');
+
       const parsedInput = JSON.parse(input);
       const result = await this.hederaKit.createTopic(
         parsedInput.name,
@@ -787,6 +826,7 @@ Example usage:
     }
   }
 }
+
 export class HederaDeleteTopicTool extends Tool {
   name = 'hedera_delete_topic'
 
@@ -806,6 +846,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_delete_topic tool has been called');
+
       const parsedInput = JSON.parse(input);
       const result = await this.hederaKit.deleteTopic(
         TopicId.fromString(parsedInput.topicId)
@@ -825,6 +867,7 @@ Example usage:
     }
   }
 }
+
 export class HederaSubmitTopicMessageTool extends Tool {
   name = 'hedera_submit_topic_message'
 
@@ -846,6 +889,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_submit_topic_message tool has been called');
+
       const parsedInput = JSON.parse(input);
       const result = await this.hederaKit.submitTopicMessage(
         TopicId.fromString(parsedInput.topicId),
@@ -887,6 +932,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_get_topic_info tool has been called');
+
       const parsedInput = JSON.parse(input);
       const topicInfo = await this.hederaKit.getTopicInfo(
         TopicId.fromString(parsedInput.topicId),
@@ -906,6 +953,7 @@ Example usage:
     }
   }
 }
+
 export class HederaGetTopicMessagesTool extends Tool {
   name = 'hedera_get_topic_messages'
 
@@ -942,6 +990,8 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
+      console.log('hedera_get_topic_messages tool has been called');
+
       const parsedInput = JSON.parse(input);
       const messages = await this.hederaKit.getTopicMessages(
         TopicId.fromString(parsedInput.topicId),
