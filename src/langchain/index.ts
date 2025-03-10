@@ -3,6 +3,8 @@ import HederaAgentKit from "../agent";
 import * as dotenv from "dotenv";
 import { HederaNetworkType } from "../types";
 import { AccountId, PendingAirdropId, TokenId, TopicId } from "@hashgraph/sdk";
+import { fromBaseToDisplayUnit } from "../utils/format-units";
+import { toBaseUnit } from "../utils/hts-format-utils";
 import {getHTSDecimals} from "../utils/hts-format-utils";
 
 dotenv.config();
@@ -133,11 +135,16 @@ amount: number, the amount of tokens to transfer e.g. 100 in base unit
       console.log('hedera_transfer_token tool has been called')
 
       const parsedInput = JSON.parse(input);
-      
-      await this.hederaKit.transferToken(
+      const amount = await toBaseUnit( 
+        parsedInput.tokenId,
+        parsedInput.amount, 
+        this.hederaKit.network
+      );
+
+      const successResponse = await this.hederaKit.transferToken(
         parsedInput.tokenId,
         parsedInput.toAccountId,
-        parsedInput.amount // given in base unit
+        Number(amount.toString()) // given in base unit
       );
 
       const decimals = getHTSDecimals(parsedInput.tokenId, process.env.HEDERA_NETWORK as HederaNetworkType);
@@ -148,6 +155,7 @@ amount: number, the amount of tokens to transfer e.g. 100 in base unit
         tokenId: parsedInput.tokenId,
         toAccountId: parsedInput.toAccountId,
         amount: parsedInput.amount,
+        txHash: successResponse.txHash,
         decimals: decimals,
       });
     } catch (error: any) {
@@ -710,9 +718,7 @@ Example usage:
 
   protected async _call(input: string): Promise<string> {
     try {
-      console.log('hedera_get_all_token_balances tool has been called');
-
-      const parsedInput = JSON.parse(input);
+      const parsedInput = input ? JSON.parse(input) : {};
 
       // returns both display and base unit balances
       const balances = await this.hederaKit.getAllTokensBalances(
@@ -760,18 +766,30 @@ Example usage:
       console.log('hedera_get_token_holders tool has been called');
 
       const parsedInput = JSON.parse(input);
+      const threshold = parsedInput.threshold ? 
+        Number((await toBaseUnit(
+          parsedInput.tokenId as string, 
+          parsedInput.threshold, 
+          this.hederaKit.network
+        )).toString()) : undefined;
 
       // returns balances in base unit
       const holders = await this.hederaKit.getTokenHolders(
         parsedInput.tokenId,
-        process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet",
-        parsedInput.threshold // given in base unit, optional
+        this.hederaKit.network,
+        threshold // given in base unit, optionals
       );
+
+      const formattedHolders = holders.map((holder) => ({
+        account: holder.account,
+        balance: fromBaseToDisplayUnit(holder.balance, holder.decimals).toString(),
+        decimals: holder.decimals
+      }));
 
       return JSON.stringify({
         status: "success",
         message: "Token holders retrieved",
-        holders: holders
+        holders: formattedHolders
       });
     } catch (error: any) {
       return JSON.stringify({

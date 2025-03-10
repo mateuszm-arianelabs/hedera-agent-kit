@@ -53,7 +53,8 @@ import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
 export default class HederaAgentKit {
 
   public client: Client
-
+  readonly network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet'
+  
   constructor(
     accountId: string,
     privateKey: string,
@@ -61,6 +62,7 @@ export default class HederaAgentKit {
   ) {
     // @ts-ignore
     this.client = Client.forNetwork(network).setOperator(accountId, privateKey)
+    this.network = network;
   }
 
   async createFT(options: CreateFTOptions): Promise<CreateTokenResult> {
