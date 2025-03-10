@@ -1,12 +1,4 @@
-import {
-  Client,
-  TokenId,
-  AccountId,
-  PendingAirdropId,
-  TopicId,
-  TokenType,
-  PrivateKey,
-} from "@hashgraph/sdk";
+import { Client, TokenId, AccountId, PendingAirdropId, TopicId, TokenType } from "@hashgraph/sdk";
 import {
   create_token,
   transfer_token,
@@ -61,31 +53,16 @@ import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
 export default class HederaAgentKit {
 
   public client: Client
-
+  readonly network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet'
+  
   constructor(
-    existingClient: Client,
-  )
-  constructor(
-    accountId: AccountId | string,
-    privateKey: PrivateKey | string,
-    network: 'mainnet' | 'testnet' | 'previewnet' | 'localnode',
-  )
-  constructor(
-    clientOrAccountId: Client | AccountId | string,
-    privateKey?: PrivateKey | string,
-    network?: 'mainnet' | 'testnet' | 'previewnet' | 'localnode'
+    accountId: string,
+    privateKey: string,
+    network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet'
   ) {
-    if (this.isClient(clientOrAccountId)) {
-      this.client = clientOrAccountId;
-    } else {
-      network = network || 'mainnet';
-      // @ts-ignore
-      this.client = Client.forNetwork(network).setOperator(clientOrAccountId, privateKey);
-    }
-  }
-
-  private isClient(x: any): x is Client {
-    return typeof x.setOperator === 'function';
+    // @ts-ignore
+    this.client = Client.forNetwork(network).setOperator(accountId, privateKey)
+    this.network = network;
   }
 
   async createFT(options: CreateFTOptions): Promise<CreateTokenResult> {
