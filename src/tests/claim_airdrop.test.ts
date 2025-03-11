@@ -3,8 +3,8 @@ import { AccountData } from "./utils/testnetUtils";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { NetworkClientWrapper } from "./utils/testnetClient";
 import * as dotenv from "dotenv";
-import {HederaMirrorNodeClient} from "./utils/hederaMirrorNodeClient";
-import {NetworkType} from "./types";
+import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
+import { NetworkType } from "./types";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
