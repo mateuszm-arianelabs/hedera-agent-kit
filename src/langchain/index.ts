@@ -6,6 +6,7 @@ import { AccountId, PendingAirdropId, TokenId, TopicId } from "@hashgraph/sdk";
 import { fromBaseToDisplayUnit } from "../utils/format-units";
 import { toBaseUnit } from "../utils/hts-format-utils";
 import {getHTSDecimals} from "../utils/hts-format-utils";
+import { convertStringToTimestamp } from "../utils/date-format-utils";
 
 dotenv.config();
 export class HederaCreateFungibleTokenTool extends Tool {
@@ -1021,11 +1022,12 @@ Example usage:
       console.log('hedera_get_topic_messages tool has been called');
 
       const parsedInput = JSON.parse(input);
+      console.log(`parsed input: ${JSON.stringify(parsedInput)}`);
       const messages = await this.hederaKit.getTopicMessages(
         TopicId.fromString(parsedInput.topicId),
         process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet",
-        parsedInput.lowerThreshold,
-        parsedInput.upperThreshold
+          parsedInput.lowerThreshold != null ? convertStringToTimestamp(parsedInput.lowerThreshold) : undefined,
+          parsedInput.upperThreshold != null ? convertStringToTimestamp(parsedInput.upperThreshold) : undefined
       );
       return JSON.stringify({
         status: "success",
