@@ -4,6 +4,7 @@ import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import * as dotenv from "dotenv";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { NetworkClientWrapper } from "./utils/testnetClient";
+import {TokenType} from "@hashgraph/sdk";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -71,15 +72,15 @@ describe("create_nft_token", () => {
 
         expect(tokenDetails.symbol).toEqual("TT");
         expect(tokenDetails.name).toEqual("TestToken");
-        expect(tokenDetails.decimals).toEqual("0"); // all NFTs have decimals 0 by default
+        expect(tokenDetails.type).toEqual(TokenType.NonFungibleUnique.toString());
         expect(Number(tokenDetails.max_supply)).toEqual(100);
         expect(tokenDetails.memo).toEqual("This is an example memo");
         expect(atob(tokenDetails.metadata!)).toEqual(
             "And that's an example metadata"
         );
-        expect(tokenDetails?.supply_key?.key).not.toBeFalsy(); // all NFTs have supply key set by default
-        expect(tokenDetails?.admin_key?.key).not.toBeFalsy();
-        expect(tokenDetails?.metadata_key?.key).not.toBeFalsy();
+        expect(tokenDetails?.supply_key?.key).toBeTruthy(); // all NFTs have supply key set by default
+        expect(tokenDetails?.admin_key?.key).toBeTruthy();
+        expect(tokenDetails?.metadata_key?.key).toBeTruthy();
     });
 
     it("Create without optional keys", async () => {
@@ -99,13 +100,13 @@ describe("create_nft_token", () => {
 
         expect(tokenDetails.symbol).toEqual("TT");
         expect(tokenDetails.name).toEqual("TestToken");
-        expect(tokenDetails.decimals).toEqual("0"); // all NFTs have decimals 0 by default
+        expect(tokenDetails.type).toEqual(TokenType.NonFungibleUnique.toString());
         expect(Number(tokenDetails.max_supply)).toEqual(100);
         expect(tokenDetails.memo).toEqual("This is an example memo");
         expect(atob(tokenDetails.metadata!)).toEqual(
             "And that's an example metadata"
         );
-        expect(tokenDetails?.supply_key?.key).not.toBeFalsy(); // all NFTs have supply key set by default
+        expect(tokenDetails?.supply_key?.key).toBeTruthy(); // all NFTs have supply key set by default
         expect(tokenDetails?.admin_key?.key).toBeFalsy();
         expect(tokenDetails?.metadata_key?.key).toBeFalsy();
     });
@@ -128,11 +129,11 @@ describe("create_nft_token", () => {
 
         expect(tokenDetails.symbol).toEqual("TT");
         expect(tokenDetails.name).toEqual("TestToken");
-        expect(tokenDetails.decimals).toEqual("0"); // all NFTs have decimals 0 by default
+        expect(tokenDetails.type).toEqual(TokenType.NonFungibleUnique.toString());
         expect(Number(tokenDetails.max_supply)).toEqual(0);
         expect(tokenDetails.memo).toEqual("");
         expect(tokenDetails.metadata).toEqual("");
-        expect(tokenDetails?.supply_key?.key).not.toBeFalsy(); // all NFTs have supply key set by default
+        expect(tokenDetails?.supply_key?.key).toBeTruthy(); // all NFTs have supply key set by default
         expect(tokenDetails?.admin_key?.key).toBeFalsy();
         expect(tokenDetails?.metadata_key?.key).toBeFalsy();
     });
@@ -155,11 +156,11 @@ describe("create_nft_token", () => {
 
         expect(tokenDetails.symbol).toEqual("TT");
         expect(tokenDetails.name).toEqual("TestToken");
-        expect(tokenDetails.decimals).toEqual("0"); // all NFTs have decimals 0 by default
+        expect(tokenDetails.type).toEqual(TokenType.NonFungibleUnique.toString());
         expect(Number(tokenDetails.max_supply)).toEqual(0);
         expect(tokenDetails.memo).toEqual("This is memo");
         expect(tokenDetails.metadata).toEqual("");
-        expect(tokenDetails?.supply_key?.key).not.toBeFalsy(); // all NFTs have supply key set by default
+        expect(tokenDetails?.supply_key?.key).toBeTruthy(); // all NFTs have supply key set by default
         expect(tokenDetails?.admin_key?.key).toBeFalsy();
         expect(tokenDetails?.metadata_key?.key).toBeFalsy();
     });
@@ -182,13 +183,13 @@ describe("create_nft_token", () => {
 
         expect(tokenDetails.symbol).toEqual("TT");
         expect(tokenDetails.name).toEqual("TestToken");
-        expect(tokenDetails.decimals).toEqual("0"); // all NFTs have decimals 0 by default
+        expect(tokenDetails.type).toEqual(TokenType.NonFungibleUnique.toString());
         expect(Number(tokenDetails.max_supply)).toEqual(0);
         expect(tokenDetails.memo).toEqual("");
         expect(tokenDetails.metadata).toEqual("");
-        expect(tokenDetails?.supply_key?.key).not.toBeFalsy(); // all NFTs have supply key set by default
+        expect(tokenDetails?.supply_key?.key).toBeTruthy(); // all NFTs have supply key set by default
         expect(tokenDetails?.admin_key?.key).toBeFalsy();
-        expect(tokenDetails?.metadata_key?.key).not.toBeFalsy();
+        expect(tokenDetails?.metadata_key?.key).toBeTruthy();
     });
 
     it("Create token with minimal parameters plus admin key and metadata key and memo and metadata", async () => {
@@ -209,12 +210,12 @@ describe("create_nft_token", () => {
 
         expect(tokenDetails.symbol).toEqual("TT");
         expect(tokenDetails.name).toEqual("TestToken");
-        expect(tokenDetails.decimals).toEqual("0"); // all NFTs have decimals 0 by default
+        expect(tokenDetails.type).toEqual(TokenType.NonFungibleUnique.toString());
         expect(Number(tokenDetails.max_supply)).toEqual(0);
         expect(tokenDetails.memo).toEqual("thats memo");
         expect(atob(tokenDetails.metadata!)).toEqual("thats metadata");
-        expect(tokenDetails?.supply_key?.key).not.toBeFalsy(); // all NFTs have supply key set by default
-        expect(tokenDetails?.admin_key?.key).not.toBeFalsy();
-        expect(tokenDetails?.metadata_key?.key).not.toBeFalsy();
+        expect(tokenDetails?.supply_key?.key).toBeTruthy(); // all NFTs have supply key set by default
+        expect(tokenDetails?.admin_key?.key).toBeTruthy();
+        expect(tokenDetails?.metadata_key?.key).toBeTruthy();
     });
 }, 240_000);
