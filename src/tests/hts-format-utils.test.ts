@@ -4,8 +4,8 @@ import * as dotenv from "dotenv";
 import BigNumber from "bignumber.js";
 import { HederaNetworkType } from "../types";
 import {getHTSDecimals, toBaseUnit, toDisplayUnit} from "../utils/hts-format-utils";
+import { wait } from "./utils/utils";
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("Token Unit Conversion Functions", () => {
     let networkClientWrapper: NetworkClientWrapper;

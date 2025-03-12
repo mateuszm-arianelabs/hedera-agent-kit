@@ -4,8 +4,8 @@ import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "./utils/testnetClient";
 import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { LangchainAgent } from "./utils/langchainAgent";
+import { wait } from "./utils/utils";
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function extractTopicMessages(messages) {
     const toolMessages = messages.filter((msg) =>

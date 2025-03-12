@@ -1,10 +1,8 @@
 import { describe, expect, it, beforeEach, beforeAll } from "vitest";
 import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import * as dotenv from "dotenv";
-import { fromDisplayToBaseUnit } from "./utils/utils";
+import { fromDisplayToBaseUnit, wait } from "./utils/utils";
 import { LangchainAgent } from "./utils/langchainAgent";
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const extractTokenId = (messages: any[]) => {
   return messages.reduce((acc, { content }) => {

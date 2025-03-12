@@ -5,8 +5,8 @@ import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { NetworkType } from "./types";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { TopicInfoApiResponse } from "../types";
+import { wait } from "./utils/utils";
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function extractTopicInfo(messages: any[]): TopicInfoApiResponse {
   const result = messages.reduce((acc, message) => {

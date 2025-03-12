@@ -4,8 +4,8 @@ import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "./utils/testnetClient";
 import { AccountData } from "./utils/testnetUtils";
+import { wait } from "./utils/utils";
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const extractTxHash = (messages: any[]) => {
   return messages.reduce((acc, { content }) => {

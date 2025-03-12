@@ -5,8 +5,8 @@ import { NetworkClientWrapper } from "./utils/testnetClient";
 import { AccountData } from "./utils/testnetUtils";
 import { DetailedTokenBalance } from "./types";
 import { LangchainAgent } from "./utils/langchainAgent";
+import { wait } from "./utils/utils";
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const extractBalances = (messages: any[]): DetailedTokenBalance[] => {
   const result = messages.reduce((acc, { content }) => {
