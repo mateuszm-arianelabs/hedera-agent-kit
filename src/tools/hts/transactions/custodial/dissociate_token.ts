@@ -1,12 +1,12 @@
-import { AssociateTokenResult } from "../../../types";
-import {Client, TokenAssociateTransaction, TokenId} from "@hashgraph/sdk";
+import { DissociateTokenResult } from "../../../../types";
+import { Client, TokenDissociateTransaction, TokenId } from "@hashgraph/sdk";
 
-export const associate_token = async (
+export const dissociate_token = async (
     tokenId: TokenId,
     client: Client
-): Promise<AssociateTokenResult> => {
+): Promise<DissociateTokenResult> => {
 
-    const tx = await new TokenAssociateTransaction()
+    const tx = await new TokenDissociateTransaction()
         .setAccountId(client.operatorAccountId!.toString())
         .setTokenIds([tokenId])
 
@@ -15,7 +15,7 @@ export const associate_token = async (
     const txStatus = receipt.status;
 
     if (!txStatus.toString().includes('SUCCESS'))
-        throw new Error("Token Association failed")
+        throw new Error("Token dissociation failed")
 
     return {
         status: txStatus.toString(),

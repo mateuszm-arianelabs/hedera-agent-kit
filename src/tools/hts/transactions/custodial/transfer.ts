@@ -1,5 +1,5 @@
 import { Client, TokenId, TransferTransaction, AccountId } from "@hashgraph/sdk"
-import { TransferTokenResult } from "../../../types";
+import { TransferTokenResult } from "../../../../types";
 
 export const transfer_token = async (
   tokenId: TokenId,

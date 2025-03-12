@@ -1,5 +1,5 @@
 import { Client, TokenId, TokenMintTransaction } from "@hashgraph/sdk"
-import { MintNFTResult } from "../../../types";
+import { MintNFTResult } from "../../../../types";
 
 // supports adding one metadata with length max 100 bytes
 // adding array of metadatas is not implemented

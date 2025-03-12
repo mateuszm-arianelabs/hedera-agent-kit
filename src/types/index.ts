@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 import { TokenId } from "@hashgraph/sdk";
-import { CreateTokenOptions } from "../tools/hts/transactions/create_token";
+import { CreateTokenOptions } from "../tools/hts/transactions/custodial/create_token";
 
 export type HederaNetworkType = "mainnet" | "testnet" | "previewnet";
 

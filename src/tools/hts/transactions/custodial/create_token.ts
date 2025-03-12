@@ -1,5 +1,5 @@
 import { Client, TokenCreateTransaction, TokenSupplyType, TokenType } from "@hashgraph/sdk";
-import { CreateTokenResult } from "../../../types";
+import { CreateTokenResult } from "../../../../types";
 
 export interface CreateTokenOptions {
   name: string;

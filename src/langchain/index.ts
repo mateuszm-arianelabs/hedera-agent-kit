@@ -1,5 +1,5 @@
 import { Tool } from "@langchain/core/tools";
-import HederaAgentKit from "../agent";
+import HederaAgentKit from "../agent/custodial";
 import * as dotenv from "dotenv";
 import { HederaNetworkType } from "../types";
 import { AccountId, PendingAirdropId, TokenId, TopicId } from "@hashgraph/sdk";

@@ -2,7 +2,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import * as dotenv from "dotenv";
-import HederaAgentKit from "../../agent";
+import HederaAgentKit from "../../agent/custodial";
 import { createHederaTools } from "../../langchain";
 
 dotenv.config();

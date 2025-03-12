@@ -22,7 +22,7 @@ import {
   get_topic_info,
   get_topic_messages,
   mint_nft
-} from "../tools";
+} from "../../tools";
 import {
   Airdrop,
   AirdropResult,
@@ -46,8 +46,8 @@ import {
   CreateNFTOptions,
   CreateFTOptions,
   MintNFTResult
-} from "../types";
-import { AirdropRecipient } from "../tools/hts/transactions/airdrop";
+} from "../../types";
+import { AirdropRecipient } from "../../tools/hts/transactions/custodial/airdrop";
 
 
 export default class HederaAgentKit {

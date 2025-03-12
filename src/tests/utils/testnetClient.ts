@@ -8,15 +8,15 @@ import {
   TokenId,
 } from "@hashgraph/sdk";
 import { AccountData, hederaPrivateKeyFromString } from "./testnetUtils";
-
-import HederaAgentKit from "../../agent";
+import HederaAgentKit from "../../agent/custodial";
 import {
   AirdropResult,
   CreateFTOptions,
   CreateTopicResult,
   HederaNetworkType,
 } from "../../types";
-import { AirdropRecipient } from "../../tools/hts/transactions/airdrop";
+import { AirdropRecipient } from "../../tools/hts/transactions/custodial/airdrop";
+
 export class NetworkClientWrapper {
   private readonly accountId: AccountId;
   private readonly privateKey: PrivateKey;

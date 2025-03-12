@@ -1,5 +1,5 @@
 import { Client, TokenId, TokenMintTransaction } from "@hashgraph/sdk"
-import { MintTokenResult } from "../../../types";
+import { MintTokenResult } from "../../../../types";
 
 export const mint_token = async (
     tokenId: TokenId,

@@ -1,5 +1,5 @@
 import { Client, TokenClaimAirdropTransaction, PendingAirdropId } from "@hashgraph/sdk"
-import { ClaimAirdropResult } from "../../../types";
+import { ClaimAirdropResult } from "../../../../types";
 
 export const claim_airdrop = async (
     client: Client,

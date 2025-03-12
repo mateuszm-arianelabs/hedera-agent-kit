@@ -1,5 +1,5 @@
 import { Client, TokenId, AccountId, TokenAirdropTransaction } from "@hashgraph/sdk"
-import { AirdropResult } from "../../../types";
+import { AirdropResult } from "../../../../types";
 
 export interface AirdropRecipient {
   accountId: string | AccountId;

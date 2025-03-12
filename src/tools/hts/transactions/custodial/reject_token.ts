@@ -1,5 +1,5 @@
 import { Client, TokenId, TokenRejectTransaction } from "@hashgraph/sdk";
-import { RejectTokenResult } from "../../../types";
+import { RejectTokenResult } from "../../../../types";
 
 export const reject_token = async (
     tokenId: TokenId,
