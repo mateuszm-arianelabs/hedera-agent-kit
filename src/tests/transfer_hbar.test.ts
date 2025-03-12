@@ -128,6 +128,6 @@ describe("Test HBAR transfer", async () => {
 
         await wait(1000);
       }
-    }, 120_000);
+    });
   });
 });

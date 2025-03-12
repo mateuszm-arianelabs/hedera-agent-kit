@@ -160,6 +160,6 @@ describe("get_pending_airdrops", () => {
 
                 await wait(5000);
             }
-        }, 240_000);
+        });
     })
 })

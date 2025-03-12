@@ -161,6 +161,6 @@ describe("claim_pending_airdrops", () => {
 
                 expect(tokenBalance ?? 0).toBe(expectedClaimedAmount);
             }
-        }, 240_000);
+        });
     })
 })

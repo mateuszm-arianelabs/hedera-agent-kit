@@ -79,7 +79,7 @@ describe("Token Unit Conversion Functions", () => {
             // Test token with 8 decimals
             const decimals8 = await getHTSDecimals(tokenDecimals8, networkType);
             expect(decimals8).toEqual("8");
-        }, 30000);
+        });
 
         it("should handle non-existent tokens gracefully", async () => {
             try {
@@ -88,7 +88,7 @@ describe("Token Unit Conversion Functions", () => {
             } catch (error) {
                 expect(error).toBeDefined();
             }
-        }, 30000);
+        });
     });
 
     describe("toDisplayUnit", () => {
@@ -97,7 +97,7 @@ describe("Token Unit Conversion Functions", () => {
             const baseValue = new BigNumber(100);
             const displayValue = await toDisplayUnit(tokenDecimals0, baseValue, networkType);
             expect(displayValue.toString()).toEqual("100");
-        }, 30000);
+        });
 
         it("should convert base units to display units for 2 decimal token", async () => {
             // For 2 decimals, 100 base units = 1.00 display units
@@ -109,7 +109,7 @@ describe("Token Unit Conversion Functions", () => {
             const baseValue2 = new BigNumber(12345);
             const displayValue2 = await toDisplayUnit(tokenDecimals2, baseValue2, networkType);
             expect(displayValue2.toString()).toEqual("123.45");
-        }, 30000);
+        });
 
         it("should convert base units to display units for 8 decimal token", async () => {
             // For 8 decimals, 100000000 base units = 1.00000000 display units
@@ -121,19 +121,19 @@ describe("Token Unit Conversion Functions", () => {
             const baseValue2 = new BigNumber(123456789);
             const displayValue2 = await toDisplayUnit(tokenDecimals8, baseValue2, networkType);
             expect(displayValue2.toString()).toEqual("1.23456789");
-        }, 30000);
+        });
 
         it("should handle number inputs correctly", async () => {
             // Test with regular number instead of BigNumber
             const baseValue = 12345;
             const displayValue = await toDisplayUnit(tokenDecimals2, baseValue, networkType);
             expect(displayValue.toString()).toEqual("123.45");
-        }, 30000);
+        });
 
         it("should return 0 for invalid tokens", async () => {
             const displayValue = await toDisplayUnit("0.0.999999999", 100, networkType);
             expect(displayValue.toString()).toEqual("0");
-        }, 30000);
+        });
     });
 
     describe("toBaseUnit", () => {
@@ -142,7 +142,7 @@ describe("Token Unit Conversion Functions", () => {
             const displayValue = new BigNumber(100);
             const baseValue = await toBaseUnit(tokenDecimals0, displayValue, networkType);
             expect(baseValue.toString()).toEqual("100");
-        }, 30000);
+        });
 
         it("should convert display units to base units for 2 decimal token", async () => {
             // For 2 decimals, 1.00 display units = 100 base units
@@ -154,7 +154,7 @@ describe("Token Unit Conversion Functions", () => {
             const displayValue2 = new BigNumber(123.45);
             const baseValue2 = await toBaseUnit(tokenDecimals2, displayValue2, networkType);
             expect(baseValue2.toString()).toEqual("12345");
-        }, 30000);
+        });
 
         it("should convert display units to base units for 8 decimal token", async () => {
             // For 8 decimals, 1.00000000 display units = 100000000 base units
@@ -166,26 +166,26 @@ describe("Token Unit Conversion Functions", () => {
             const displayValue2 = new BigNumber(1.23456789);
             const baseValue2 = await toBaseUnit(tokenDecimals8, displayValue2, networkType);
             expect(baseValue2.toString()).toEqual("123456789");
-        }, 30000);
+        });
 
         it("should handle number inputs correctly", async () => {
             // Test with regular number instead of BigNumber
             const displayValue = 123.45;
             const baseValue = await toBaseUnit(tokenDecimals2, displayValue, networkType);
             expect(baseValue.toString()).toEqual("12345");
-        }, 30000);
+        });
 
         it("should handle very small fractional values", async () => {
             // Very small fraction that tests precision
             const displayValue = new BigNumber("0.00000001");
             const baseValue = await toBaseUnit(tokenDecimals8, displayValue, networkType);
             expect(baseValue.toString()).toEqual("1");
-        }, 30000);
+        });
 
         it("should return 0 for invalid tokens", async () => {
             const baseValue = await toBaseUnit("0.0.999999999", 100, networkType);
             expect(baseValue.toString()).toEqual("0");
-        }, 30000);
+        });
     });
 
     describe("Conversion roundtrip", () => {
@@ -197,7 +197,7 @@ describe("Token Unit Conversion Functions", () => {
             const roundtripDisplay = await toDisplayUnit(tokenDecimals8, baseValue, networkType);
 
             expect(roundtripDisplay.toString()).toEqual("123.456789");
-        }, 30000);
+        });
 
         it("should handle multiple roundtrips consistently", async () => {
             // Start with base value
@@ -208,6 +208,6 @@ describe("Token Unit Conversion Functions", () => {
             const roundtripBase = await toBaseUnit(tokenDecimals2, displayValue, networkType);
 
             expect(roundtripBase.toString()).toEqual(originalBase.toString());
-        }, 30000);
+        });
     });
 });

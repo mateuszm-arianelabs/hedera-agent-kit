@@ -134,6 +134,6 @@ describe("get_hts_balance", () => {
 
         expect(String(hederaActionBalance)).toEqual(String(mirrorNodeBalance));
       }
-    }, 240_000);
+    });
   });
 });
