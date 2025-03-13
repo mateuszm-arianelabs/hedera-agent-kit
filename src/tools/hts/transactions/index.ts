@@ -1,2 +1,2 @@
 export * from './custodial'
-export * from './noncustodial'
+export * from './non-custodial'

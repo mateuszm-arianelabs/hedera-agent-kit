@@ -1,15 +1,15 @@
 import { AccountId, Client, TokenId, TransactionId, TransferTransaction } from "@hashgraph/sdk"
 
 export const transfer_token_non_custodial = async (
+    client: Client,
     tokenId: string | TokenId,
     toAccountId: string | AccountId,
     amount: number,
-    fromAccountId: string | AccountId,
-    client: Client,
+    issuerAccountId: AccountId | string
 ): Promise<string> => {
-    const txId = TransactionId.generate(toAccountId);
+    const txId = TransactionId.generate(issuerAccountId);
     const tx = new TransferTransaction()
-        .addTokenTransfer(tokenId, fromAccountId, -amount)
+        .addTokenTransfer(tokenId, issuerAccountId, -amount)
         .addTokenTransfer(tokenId, toAccountId, amount)
         .setTransactionId(txId);
 
