@@ -6,6 +6,7 @@ import {
   Hbar,
   PrivateKey,
   TokenId,
+  TopicId,
 } from "@hashgraph/sdk";
 import { AccountData, hederaPrivateKeyFromString } from "./testnetUtils";
 
@@ -16,6 +17,7 @@ import {
   CreateNFTOptions,
   CreateTopicResult,
   HederaNetworkType,
+  SubmitMessageResult,
 } from "../../types";
 import { AirdropRecipient } from "../../tools/hts/transactions/airdrop";
 export class NetworkClientWrapper {
@@ -127,6 +129,13 @@ export class NetworkClientWrapper {
       accountId: string
   ): Promise<number> {
     return this.agentKit.getHtsBalance(tokenId, networkType as HederaNetworkType, accountId);
+  }
+
+  submitTopicMessage(topicId: string, message: string): Promise<SubmitMessageResult> {
+    return this.agentKit.submitTopicMessage(
+      TopicId.fromString(topicId),
+      message
+    );
   }
 
 }

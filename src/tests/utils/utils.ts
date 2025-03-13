@@ -74,3 +74,6 @@ export async function initializeAgent() {
     throw error;
   }
 }
+
+export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+

@@ -1,33 +1,36 @@
-import { describe, expect, it, beforeAll } from "vitest";
+import { describe, expect, it } from "vitest";
 import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import * as dotenv from "dotenv";
+import { wait } from "./utils/utils";
 import { LangchainAgent } from "./utils/langchainAgent";
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+function extractTokenId(messages) {
+  const toolMessages = messages.filter((msg) =>
+      (msg.id && msg.id[2] === "ToolMessage") ||
+      msg.name === "hedera_create_fungible_token"
+  );
 
-const extractTokenId = (messages: any[]) => {
-  return messages.reduce((acc, { content }) => {
+  for (const message of toolMessages) {
     try {
-      const response = JSON.parse(content);
+      const toolResponse = JSON.parse(message.content);
 
-      if (response.status === "error") {
-        throw new Error(response.message);
+      if (toolResponse.status !== "success" || !toolResponse.tokenId) {
+        continue;
       }
 
-      return String(response.tokenId);
-    } catch {
-      return acc;
+      return toolResponse.tokenId;
+
+    } catch (error) {
+      console.error("Error parsing tool message:", error);
     }
-  }, "");
-};
+  }
+
+  return null;
+}
 
 dotenv.config();
 describe("create_fungible_token", () => {
-  let langchainAgent: LangchainAgent;
 
-  beforeAll(async () => {
-    langchainAgent = await LangchainAgent.create();
-  });
   it("Create token with all possible parameters", async () => {
     const hederaApiClient = new HederaMirrorNodeClient("testnet");
 
@@ -37,6 +40,7 @@ describe("create_fungible_token", () => {
       user: "user",
       text: promptText,
     };
+    const langchainAgent = await LangchainAgent.create();
 
     const response = await langchainAgent.sendPrompt(prompt);
     const tokenId = extractTokenId(response.messages);
@@ -67,6 +71,7 @@ describe("create_fungible_token", () => {
       user: "user",
       text: promptText,
     };
+    const langchainAgent = await LangchainAgent.create();
 
     const response = await langchainAgent.sendPrompt(prompt);
     const tokenId = extractTokenId(response.messages);
@@ -95,6 +100,7 @@ describe("create_fungible_token", () => {
       user: "user",
       text: promptText,
     };
+    const langchainAgent = await LangchainAgent.create();
 
     const response = await langchainAgent.sendPrompt(prompt);
     const tokenId = extractTokenId(response.messages);
@@ -123,6 +129,7 @@ describe("create_fungible_token", () => {
       user: "user",
       text: promptText,
     };
+    const langchainAgent = await LangchainAgent.create();
 
     const response = await langchainAgent.sendPrompt(prompt);
     const tokenId = extractTokenId(response.messages);
@@ -151,6 +158,7 @@ describe("create_fungible_token", () => {
       user: "user",
       text: promptText,
     };
+    const langchainAgent = await LangchainAgent.create();
 
     const response = await langchainAgent.sendPrompt(prompt);
     const tokenId = extractTokenId(response.messages);
@@ -179,6 +187,7 @@ describe("create_fungible_token", () => {
       user: "user",
       text: promptText,
     };
+    const langchainAgent = await LangchainAgent.create();
 
     const response = await langchainAgent.sendPrompt(prompt);
     const tokenId = extractTokenId(response.messages);
@@ -197,4 +206,5 @@ describe("create_fungible_token", () => {
     expect(tokenDetails?.admin_key?.key).not.toBeUndefined();
     expect(tokenDetails?.metadata_key?.key).toBeUndefined();
   });
+
 });

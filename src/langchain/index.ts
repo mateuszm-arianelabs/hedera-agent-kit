@@ -6,6 +6,7 @@ import { AccountId, PendingAirdropId, TokenId, TopicId } from "@hashgraph/sdk";
 import { fromBaseToDisplayUnit } from "../utils/format-units";
 import { toBaseUnit } from "../utils/hts-format-utils";
 import {getHTSDecimals} from "../utils/hts-format-utils";
+import { convertStringToTimestamp } from "../utils/date-format-utils";
 
 dotenv.config();
 // Tool for creating fungible tokens
@@ -716,19 +717,25 @@ Example usage:
 export class HederaGetAllTokenBalancesTool extends Tool {
   name = 'hedera_get_all_token_balances'
 
-  description = `Get all token balances for an account on Hedera
-Inputs ( input is a JSON string ):
-accountId : string, the account ID to get the token balances for e.g. 0.0.789012,
-- **accountId** (*string*, optional): The Hedera account ID to check the balance for (e.g., "0.0.789012").  
-  - If omitted, the tool will return the balance of the connected account.  
+  description = `Fetch all token balances for an account on the Hedera network.
 
-Example usage:
-1. Get all token balances for account 0.0.789012:
-  '{
-    "accountId": "0.0.789012"
-  }'
-2. Get all token balances for the connected account:
-   '{}'
+### Inputs:
+- **accountId** (*string*, optional): The Hedera account ID to check the balance for (e.g., "0.0.789012").  
+  - If **provided**, returns token balances for the specified account.  
+  - If **omitted**, returns token balances for the currently connected account.
+
+### Example Usage:
+#### 1. Get all token balances for a specific account (0.0.789012):
+\`\`\`json
+{
+  "accountId": "0.0.789012"
+}
+\`\`\`
+
+#### 2. Get all token balances for the connected account:
+\`\`\`json
+{}
+\`\`\`
 `
 
   constructor(private hederaKit: HederaAgentKit) {
@@ -1046,11 +1053,12 @@ Example usage:
       console.log('hedera_get_topic_messages tool has been called');
 
       const parsedInput = JSON.parse(input);
+      console.log(`parsed input: ${JSON.stringify(parsedInput)}`);
       const messages = await this.hederaKit.getTopicMessages(
         TopicId.fromString(parsedInput.topicId),
         process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet",
-        parsedInput.lowerThreshold,
-        parsedInput.upperThreshold
+          parsedInput.lowerThreshold != null ? convertStringToTimestamp(parsedInput.lowerThreshold) : undefined,
+          parsedInput.upperThreshold != null ? convertStringToTimestamp(parsedInput.upperThreshold) : undefined
       );
       return JSON.stringify({
         status: "success",
