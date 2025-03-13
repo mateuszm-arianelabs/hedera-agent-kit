@@ -18,7 +18,7 @@ Inputs ( input is a JSON string ):
 name: string, the name of the token e.g. My Token,
 symbol: string, the symbol of the token e.g. MT,
 decimals: number, the amount of decimals of the token,
-initialSupply: number, the initial supply of the token e.g. 100000, given in base unit
+initialSupply: number, the initial supply of the token e.g. (10.55, 10,55, 10.0, 10), given in display units
 isSupplyKey: boolean, decides whether supply key should be set, false if not passed
 isMetadataKey: boolean, decides whether metadata key should be set, false if not passed
 isAdminKey: boolean, decides whether admin key should be set, false if not passed
@@ -35,11 +35,13 @@ tokenMetadata: string, containing metadata associated with this token, empty str
     try {
       const parsedInput = JSON.parse(input);
 
+      const initialSupplyInBaseUnit = parsedInput.initialSupply * 10 ** parsedInput.decimals;
+
       const result = (await this.hederaKit.createFT({
         name: parsedInput.name,
         symbol: parsedInput.symbol,
         decimals: parsedInput.decimals,
-        initialSupply: parsedInput.initialSupply, // given in base unit
+        initialSupply: initialSupplyInBaseUnit,
         isSupplyKey: parsedInput.isSupplyKey,
         isAdminKey: parsedInput.isAdminKey,
         isMetadataKey: parsedInput.isMetadataKey,
@@ -50,7 +52,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
       return JSON.stringify({
         status: "success",
         message: "Token creation successful",
-        initialSupply: parsedInput.initialSupply,
+        initialSupply: parsedInput.initialSupply, // should be in display units
         tokenId: result.tokenId.toString(),
         decimals: parsedInput.decimals,
         solidityAddress: result.tokenId.toSolidityAddress(),
