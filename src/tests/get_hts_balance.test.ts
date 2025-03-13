@@ -125,13 +125,21 @@ describe("get_hts_balance", () => {
         const response = await langchainAgent.sendPrompt(prompt);
         await wait(5000);
 
-        const hederaActionBalance = extractTokenBalance(response.messages);
-        const mirrorNodeBalance = await hederaApiClient.getTokenBalance(
+        const hederaActionBalanceInDisplayUnits = extractTokenBalance(response.messages);
+        const mirrorNodeBalanceInDisplayUnits = await hederaApiClient.getTokenBalance(
           accountId,
           tokenId
         );
 
-        expect(String(hederaActionBalance)).toEqual(String(mirrorNodeBalance));
+        const mirrorNodeBalanceInBaseUnits = (await hederaApiClient.getAccountToken(
+          accountId,
+          tokenId
+        ))?.balance;
+
+        const decimals = (await hederaApiClient.getTokenDetails(tokenId))?.decimals;
+
+        expect(String(hederaActionBalanceInDisplayUnits)).toEqual(String(mirrorNodeBalanceInDisplayUnits));
+        expect(String(hederaActionBalanceInDisplayUnits * 10 ** Number(decimals))).toEqual(String(mirrorNodeBalanceInBaseUnits));
       }
     });
   });
