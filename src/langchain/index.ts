@@ -9,6 +9,7 @@ import {getHTSDecimals} from "../utils/hts-format-utils";
 import { convertStringToTimestamp } from "../utils/date-format-utils";
 
 dotenv.config();
+// Tool for creating fungible tokens
 export class HederaCreateFungibleTokenTool extends Tool {
   name = 'hedera_create_fungible_token'
 
@@ -65,6 +66,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
   }
 }
 
+// Tool for creating non-fungible tokens (nft)
 export class HederaCreateNonFungibleTokenTool extends Tool {
   name = 'hedera_create_non_fungible_token'
 
@@ -72,11 +74,15 @@ export class HederaCreateNonFungibleTokenTool extends Tool {
 Inputs ( input is a JSON string ):
 name: string, the name of the token e.g. My Token,
 symbol: string, the symbol of the token e.g. MT,
-maxSupply: number, the max supply of the token e.g. 100000,
+maxSupply: number, the max supply of the token e.g. 100000, if not given set to null
 isMetadataKey: boolean, decides whether metadata key should be set, false if not passed
 isAdminKey: boolean, decides whether admin key should be set, false if not passed
 memo: string, containing memo associated with this token, empty string if not passed
 tokenMetadata: string, containing metadata associated with this token, empty string if not passed
+
+**note**
+Passing tokenMetadata string does not mean setting isMetadataKey to true.
+Keys must be set explicitly
 `
 
   constructor(private hederaKit: HederaAgentKit) {
@@ -117,6 +123,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
   }
 }
 
+// Tool for transferring HTS tokens
 export class HederaTransferTokenTool extends Tool {
   name = 'hedera_transfer_token'
 
@@ -169,6 +176,7 @@ amount: number, the amount of tokens to transfer e.g. 100 in base unit
   }
 }
 
+// Tool for querying HBAR balance
 export class HederaGetBalanceTool extends Tool {
   name = 'hedera_get_hbar_balance'
 
@@ -215,6 +223,7 @@ constructor(private hederaKit: HederaAgentKit) {
   }
 }
 
+// Tool for querying HBAR balance
 export class HederaGetHtsBalanceTool extends Tool {
   name = 'hedera_get_hts_balance'
 
@@ -278,6 +287,7 @@ If no account ID is given, it returns the balance for the connected account.
   }
 }
 
+// Tool for creating airdrops of HTS tokens
 export class HederaAirdropTokenTool extends Tool {
   name = 'hedera_airdrop_token'
 
@@ -331,7 +341,8 @@ Example usage:
   }
 }
 
-export class HederaAssociateTokenTool extends Tool { 
+// Tool for association account with HTS token
+export class HederaAssociateTokenTool extends Tool {
   name = 'hedera_associate_token'
 
   description = `Associate a token to an account on Hedera
@@ -374,6 +385,7 @@ Example usage:
   }
 }
 
+// Tool for dissociation account with HTS token
 export class HederaDissociateTokenTool extends Tool {
   name = 'hedera_dissociate_token'
 
@@ -417,6 +429,7 @@ Example usage:
   }
 }
 
+// Tool for rejecting HTS token
 export class HederaRejectTokenTool extends Tool {
   name = 'hedera_reject_token'
 
@@ -460,6 +473,7 @@ Example usage:
   }
 }
 
+// Tool for minting fungible tokens
 export class HederaMintFungibleTokenTool extends Tool {
   name = 'hedera_mint_fungible_token'
 
@@ -507,6 +521,7 @@ Example usage:
   }
 }
 
+// Tool for sending HBAR
 export class HederaTransferHbarTool extends Tool {
   name = 'hedera_transfer_native_hbar_token'
 
@@ -553,6 +568,7 @@ Example usage:
   }
 }
 
+// Tool for minting NFT tokens
 export class HederaMintNFTTool extends Tool {
   name = 'hedera_mint_nft'
 
@@ -601,6 +617,7 @@ Example usage:
   }
 }
 
+// Tool for claiming airdrops
 export class HederaClaimAirdropTool extends Tool {
   name = 'hedera_claim_airdrop'
 
@@ -652,6 +669,7 @@ Example usage:
   }
 }
 
+// Tool for querying list of pending airdrops
 export class HederaGetPendingAirdropTool extends Tool {
   name = 'hedera_get_pending_airdrop'
 
@@ -695,6 +713,7 @@ Example usage:
   }
 }
 
+// Tool for querying balances of all tokens associated with a account
 export class HederaGetAllTokenBalancesTool extends Tool {
   name = 'hedera_get_all_token_balances'
 
@@ -748,6 +767,7 @@ export class HederaGetAllTokenBalancesTool extends Tool {
   }
 }
 
+// Tool for querying all holders of a token
 export class HederaGetTokenHoldersTool extends Tool {
   name = 'hedera_get_token_holders'
 
@@ -808,6 +828,7 @@ Example usage:
   }
 }
 
+// Tool for topic creation
 export class HederaCreateTopicTool extends Tool {
   name = 'hedera_create_topic'
 
@@ -862,6 +883,7 @@ Example usage:
   }
 }
 
+// Tool for topic deletion
 export class HederaDeleteTopicTool extends Tool {
   name = 'hedera_delete_topic'
 
@@ -903,6 +925,7 @@ Example usage:
   }
 }
 
+// Tool for submitting messages to a topic
 export class HederaSubmitTopicMessageTool extends Tool {
   name = 'hedera_submit_topic_message'
 
@@ -948,6 +971,7 @@ Example usage:
   }
 }
 
+// Tool for querying details about a topic
 export class HederaGetTopicInfoTool extends Tool {
   name = 'hedera_get_topic_info'
 
@@ -989,6 +1013,7 @@ Example usage:
   }
 }
 
+// Tool for getting topic messages
 export class HederaGetTopicMessagesTool extends Tool {
   name = 'hedera_get_topic_messages'
 

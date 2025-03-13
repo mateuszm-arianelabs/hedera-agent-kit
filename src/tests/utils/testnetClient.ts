@@ -14,6 +14,7 @@ import HederaAgentKit from "../../agent";
 import {
   AirdropResult,
   CreateFTOptions,
+  CreateNFTOptions,
   CreateTopicResult,
   HederaNetworkType,
   SubmitMessageResult,
@@ -84,6 +85,11 @@ export class NetworkClientWrapper {
 
   async createFT(options: CreateFTOptions): Promise<string> {
     const result = await this.agentKit.createFT(options);
+    return result.tokenId.toString();
+  }
+
+  async createNFT(options: CreateNFTOptions): Promise<string> {
+    const result = await this.agentKit.createNFT(options);
     return result.tokenId.toString();
   }
 
