@@ -6,8 +6,19 @@ import { AccountData } from "./utils/testnetUtils";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { wait } from "./utils/utils";
 
+interface TransferDetailsFromToolResponse {
+  status: string;
+  message: string;
+  tokenId: string;
+  toAccountId: string;
+  amount: number;
+  txHash: string;
+  decimals: number;
+}
 
-const extractTxHash = (messages: any[]) => {
+const extractTransferDetails = (
+  messages: any[]
+): TransferDetailsFromToolResponse | null => {
   return messages.reduce((acc, { content }) => {
     try {
       const response = JSON.parse(content);
@@ -16,11 +27,11 @@ const extractTxHash = (messages: any[]) => {
         throw new Error(response.message);
       }
 
-      return String(response.txHash);
+      return response as TransferDetailsFromToolResponse;
     } catch {
       return acc;
     }
-  }, "");
+  }, null);
 };
 
 const formatTxHash = (txHash: string) => {
@@ -82,12 +93,13 @@ describe("Test Token transfer", async () => {
         token1 = _token1;
         token2 = _token2;
       });
-      
+
       await wait(5000);
 
       hederaApiClient = new HederaMirrorNodeClient("testnet");
 
       // Define test cases using created accounts and tokens
+      // Operate on display units
       testCases = [
         [
           acc1.accountId,
@@ -118,7 +130,7 @@ describe("Test Token transfer", async () => {
     it("should process token transfers for dynamically created accounts", async () => {
       for (const [
         receiversAccountId,
-        transferAmount,
+        transferAmountInDisplayUnits,
         tokenId,
         promptText,
       ] of testCases) {
@@ -130,15 +142,22 @@ describe("Test Token transfer", async () => {
           );
         }
 
-        // Get balances before
-        const balanceAgentBefore = await hederaApiClient.getTokenBalance(
-          agentsAccountId,
-          tokenId
-        );
-        const balanceReceiverBefore = await hederaApiClient.getTokenBalance(
+        const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+
+        const balanceAgentBeforeInDisplayUnits =
+          await hederaApiClient.getTokenBalance(agentsAccountId, tokenId);
+        const balanceAgentBeforeInBaseUnits = (
+          await hederaApiClient.getAccountToken(agentsAccountId, tokenId)
+        )?.balance;
+
+        const balanceReceiverBeforeInDisplayUnits = await hederaApiClient.getTokenBalance(
           receiversAccountId,
           tokenId
         );
+
+        const balanceReceiverBeforeInBaseUnits = (
+          await hederaApiClient.getAccountToken(receiversAccountId, tokenId)
+        )?.balance;
 
         const prompt = {
           user: "user",
@@ -147,24 +166,28 @@ describe("Test Token transfer", async () => {
 
         const langchainAgent = await LangchainAgent.create();
         const response = await langchainAgent.sendPrompt(prompt);
-        const txHash = extractTxHash(response.messages);
-        const formattedTxHash = formatTxHash(txHash);
+        const transferDetails = extractTransferDetails(response.messages);
+        const formattedTxHash = formatTxHash(transferDetails?.txHash ?? "");
 
         if (!formattedTxHash) {
           throw new Error("No match for transaction hash found in response.");
         }
 
-        // Get balances after transaction being successfully processed by mirror node
         await wait(5000);
-        const balanceAgentAfter = await hederaApiClient.getTokenBalance(
-          agentsAccountId,
-          tokenId
-        );
 
-        const balanceReceiverAfter = await hederaApiClient.getTokenBalance(
-          receiversAccountId,
-          tokenId
-        );
+        const balanceAgentAfterInDisplayUnits =
+          await hederaApiClient.getTokenBalance(agentsAccountId, tokenId);
+
+        const balanceAgentAfterInBaseUnits =
+          (await hederaApiClient.getAccountToken(agentsAccountId, tokenId))
+            ?.balance ?? 0;
+
+        const balanceReceiverAfterInDisplayUnits =
+          await hederaApiClient.getTokenBalance(receiversAccountId, tokenId);
+
+        const balanceReceiverAfterInBaseUnits =
+          (await hederaApiClient.getAccountToken(receiversAccountId, tokenId))
+            ?.balance ?? 0;
 
         const txReport = await hederaApiClient.getTransactionReport(
           formattedTxHash,
@@ -174,11 +197,24 @@ describe("Test Token transfer", async () => {
 
         // Compare before and after including the difference due to paid fees
         expect(txReport.status).toEqual("SUCCESS");
-        expect(balanceAgentBefore).toEqual(balanceAgentAfter + transferAmount);
-        expect(balanceReceiverBefore).toEqual(
-          balanceReceiverAfter - transferAmount
+        // check if balance is correct in display units
+        expect(balanceAgentBeforeInDisplayUnits).toEqual(
+          balanceAgentAfterInDisplayUnits + transferAmountInDisplayUnits
         );
-
+        // check if balance is correct in base units
+        expect(balanceAgentBeforeInBaseUnits).toEqual(
+          balanceAgentAfterInBaseUnits +
+            transferAmountInDisplayUnits * 10 ** Number(tokenDetails.decimals)
+        );
+        // check if balance is correct in display units for receiver
+        expect(balanceReceiverBeforeInDisplayUnits).toEqual(
+          balanceReceiverAfterInDisplayUnits - transferAmountInDisplayUnits
+        );
+        // check if balance is correct in base units for receiver
+        expect(balanceReceiverBeforeInBaseUnits).toEqual(
+          balanceReceiverAfterInBaseUnits -
+            transferAmountInDisplayUnits * 10 ** Number(tokenDetails.decimals)
+        );
         await wait(1000);
       }
     });
