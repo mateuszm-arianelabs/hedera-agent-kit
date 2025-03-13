@@ -1,7 +1,6 @@
-import { describe, expect, it, beforeEach, beforeAll } from "vitest";
+import { describe, expect, it, beforeAll } from "vitest";
 import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import * as dotenv from "dotenv";
-import { fromDisplayToBaseUnit } from "./utils/utils";
 import { LangchainAgent } from "./utils/langchainAgent";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -49,9 +48,7 @@ describe("create_fungible_token", () => {
     expect(tokenDetails.symbol).toEqual("GG");
     expect(tokenDetails.name).toEqual("GameGold");
     expect(tokenDetails.decimals).toEqual("2");
-    expect(tokenDetails.initial_supply).toEqual(
-      fromDisplayToBaseUnit(750000, 2).toString()
-    );
+    expect(tokenDetails.initial_supply).toEqual("750000");
     expect(tokenDetails.memo).toEqual("This is an example memo");
     expect(atob(tokenDetails.metadata!)).toEqual(
       "And that's an example metadata"
@@ -81,9 +78,7 @@ describe("create_fungible_token", () => {
     expect(tokenDetails.symbol).toEqual("MT");
     expect(tokenDetails.name).toEqual("Minimal Token");
     expect(tokenDetails.decimals).toEqual("3");
-    expect(tokenDetails.initial_supply).toEqual(
-      fromDisplayToBaseUnit(333, 3).toString()
-    );
+    expect(tokenDetails.initial_supply).toEqual("333");
     expect(tokenDetails.memo).toBe("");
     expect(tokenDetails.metadata).toBe("");
     expect(tokenDetails?.supply_key?.key).toBeUndefined();
@@ -111,9 +106,7 @@ describe("create_fungible_token", () => {
     expect(tokenDetails.symbol).toEqual("MPMT");
     expect(tokenDetails.name).toEqual("Minimal Plus Memo Token");
     expect(tokenDetails.decimals).toEqual("4");
-    expect(tokenDetails.initial_supply).toEqual(
-      fromDisplayToBaseUnit(444, 4).toString()
-    );
+    expect(tokenDetails.initial_supply).toEqual("444");
     expect(tokenDetails.memo).toEqual("Automatic tests memo");
     expect(tokenDetails.metadata).toBe("");
     expect(tokenDetails?.supply_key?.key).toBeUndefined();
@@ -141,9 +134,7 @@ describe("create_fungible_token", () => {
     expect(tokenDetails.symbol).toEqual("MPMKT");
     expect(tokenDetails.name).toEqual("Minimal Plus Metadata Key Token");
     expect(tokenDetails.decimals).toEqual("5");
-    expect(tokenDetails.initial_supply).toEqual(
-      fromDisplayToBaseUnit(555, 5).toString()
-    );
+    expect(tokenDetails.initial_supply).toEqual("555");
     expect(tokenDetails.memo).toBe("");
     expect(tokenDetails.metadata).toBe("");
     expect(tokenDetails?.supply_key?.key).toBeUndefined();
@@ -171,9 +162,7 @@ describe("create_fungible_token", () => {
     expect(tokenDetails.symbol).toEqual("MPASKT");
     expect(tokenDetails.name).toEqual("Minimal Plus Admin Supply Keys Token");
     expect(tokenDetails.decimals).toEqual("1");
-    expect(tokenDetails.initial_supply).toEqual(
-      fromDisplayToBaseUnit(111, 1).toString()
-    );
+    expect(tokenDetails.initial_supply).toEqual("111");
     expect(tokenDetails.memo).toBe("");
     expect(tokenDetails.memo).toBe("");
     expect(tokenDetails?.supply_key?.key).not.toBeUndefined();
@@ -201,9 +190,7 @@ describe("create_fungible_token", () => {
     expect(tokenDetails.symbol).toEqual("CPLXT");
     expect(tokenDetails.name).toEqual("Complex Token");
     expect(tokenDetails.decimals).toEqual("1");
-    expect(tokenDetails.initial_supply).toEqual(
-      fromDisplayToBaseUnit(1111, 1).toString()
-    );
+    expect(tokenDetails.initial_supply).toEqual("1111");
     expect(tokenDetails.memo).toBe("This a complex token");
     expect(atob(tokenDetails.metadata!)).toBe("this could be a link to image");
     expect(tokenDetails?.supply_key?.key).not.toBeUndefined();

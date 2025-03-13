@@ -73,11 +73,15 @@ export class HederaCreateNonFungibleTokenTool extends Tool {
 Inputs ( input is a JSON string ):
 name: string, the name of the token e.g. My Token,
 symbol: string, the symbol of the token e.g. MT,
-maxSupply: number, the max supply of the token e.g. 100000,
+maxSupply: number, the max supply of the token e.g. 100000, if not given set to null
 isMetadataKey: boolean, decides whether metadata key should be set, false if not passed
 isAdminKey: boolean, decides whether admin key should be set, false if not passed
 memo: string, containing memo associated with this token, empty string if not passed
 tokenMetadata: string, containing metadata associated with this token, empty string if not passed
+
+**note**
+Passing tokenMetadata string does not mean setting isMetadataKey to true.
+Keys must be set explicitly
 `
 
   constructor(private hederaKit: HederaAgentKit) {
