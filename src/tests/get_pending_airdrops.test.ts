@@ -4,8 +4,8 @@ import { LangchainAgent } from "./utils/langchainAgent";
 import { NetworkClientWrapper } from "./utils/testnetClient";
 import * as dotenv from "dotenv";
 import { Airdrop } from "../types";
+import { wait } from "./utils/utils";
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function findRelevantAirdrop(messages, accountId, tokenId) {
     const toolMessages = messages.filter((msg) =>
@@ -160,6 +160,6 @@ describe("get_pending_airdrops", () => {
 
                 await wait(5000);
             }
-        }, 240_000);
+        });
     })
 })

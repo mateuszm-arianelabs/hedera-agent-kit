@@ -3,7 +3,7 @@ import { createBaseMirrorNodeApiUrl } from "../../../utils/api-utils";
 import { HederaNetworkType, HCSMessage, HCSMessageApiResponse } from "../../../types";
 
 /**
- * Method for fetching messages for given topic between timestamps. Messages are paginated, with 100 messages per page.
+ * Method for fetching messages for a given topic between timestamps. Messages are paginated, with 100 messages per page.
  * @param topicId id of requested topic
  * @param networkType network on which requested topic is hosted
  * @param lowerTimestamp optional unix timestamp in format seconds.milliseconds.
@@ -35,11 +35,12 @@ export const get_topic_messages = async (
 
             array.push(...data.messages);
 
-            // Update URL for pagination. This endpoint does not return full path to next page, it has to be built first
+            // Update URL for pagination.
+            // This endpoint does not return a full path to the next page, it has to be built first
             url = data.links.next ? baseUrl + data.links.next : null;
         }
     } catch (error) {
-        console.error("Failed to fetch token holders and their balances. Error:", error);
+        console.error("Failed to fetch topic messages. Error:", error);
         throw error;
     }
     return array;

@@ -3,10 +3,10 @@ import { AccountData } from "./utils/testnetUtils";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { NetworkClientWrapper } from "./utils/testnetClient";
 import * as dotenv from "dotenv";
-import {HederaMirrorNodeClient} from "./utils/hederaMirrorNodeClient";
-import {NetworkType} from "./types";
+import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
+import { NetworkType } from "./types";
+import { wait } from "./utils/utils";
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("claim_pending_airdrops", () => {
     let airdropCreatorAccount: AccountData;
@@ -161,6 +161,6 @@ describe("claim_pending_airdrops", () => {
 
                 expect(tokenBalance ?? 0).toBe(expectedClaimedAmount);
             }
-        }, 240_000);
+        });
     })
 })
