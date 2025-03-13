@@ -510,16 +510,22 @@ Example usage:
 
       const parsedInput = JSON.parse(input);
 
+      const amountInBaseUnit = Number((await toBaseUnit(
+        parsedInput.tokenId,
+        parsedInput.amount,
+        this.hederaKit.network
+      )).toString());
+
       const result = await this.hederaKit.mintToken(
         parsedInput.tokenId,
-        parsedInput.amount // given in base unit
+        amountInBaseUnit // given in base units
       );
 
       return JSON.stringify({
         status: "success",
         message: "Token minting successful",
         tokenId: parsedInput.tokenId,
-        amount: parsedInput.amount, // in base unit
+        amount: parsedInput.amount, // in display units
         txHash: result.txHash
       });
     } catch (error: any) {
