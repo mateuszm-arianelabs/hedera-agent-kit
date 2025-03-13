@@ -258,24 +258,23 @@ If no account ID is given, it returns the balance for the connected account.
       if (!parsedInput.tokenId) {
         throw new Error("tokenId is required");
       }
-      if(!process.env.HEDERA_NETWORK) {
-        throw new Error("HEDERA_NETWORK environment variable is required");
-      }
 
       const balance = await this.hederaKit.getHtsBalance(
           parsedInput.tokenId,
-          process.env.HEDERA_NETWORK as HederaNetworkType,
+          this.hederaKit.network,
           parsedInput?.accountId
       )
-
+      
       const details = await this.hederaKit.getHtsTokenDetails(
-          parsedInput?.tokenId,
-          process.env.HEDERA_NETWORK as HederaNetworkType
+        parsedInput?.tokenId,
+        this.hederaKit.network
       )
+      
+      const balanceInDisplayUnits = fromBaseToDisplayUnit(balance, Number(details.decimals));
 
       return JSON.stringify({
         status: "success",
-        balance: balance, // in base unit
+        balance: balanceInDisplayUnits, 
         unit: details.symbol,
         decimals: details.decimals
       });
