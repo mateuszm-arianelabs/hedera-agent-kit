@@ -297,7 +297,7 @@ Inputs ( input is a JSON string ):
 tokenId: string, the ID of the token to airdrop e.g. 0.0.123456,
 recipients: array of objects containing:
   - accountId: string, the account ID to send tokens to e.g. 0.0.789012
-  - amount: number, the amount of tokens to send e.g. 100
+  - amount: number, the amount of tokens to send e.g. 100, given in display units
 Example usage:
 1. Airdrop 100 tokens to account 0.0.789012 and 200 tokens to account 0.0.789013:
   '{
@@ -318,10 +318,20 @@ Example usage:
       console.log('hedera_airdrop_token token tool has been called')
 
       const parsedInput = JSON.parse(input);
+      const inputRecipients = parsedInput.recipients as { accountId: string, amount: number }[];
+
+      const recipientsWithAmountInBaseUnits = await Promise.all(inputRecipients.map(async (r: any) => ({
+        accountId: r.accountId,
+        amount: Number((await toBaseUnit(
+          parsedInput.tokenId,
+          r.amount,
+          this.hederaKit.network
+        )).toString()),
+      })));
       
       const result = await this.hederaKit.airdropToken(
         parsedInput.tokenId,
-        parsedInput.recipients // token amounts given in base unit
+        recipientsWithAmountInBaseUnits // token amounts given in base units
       );
 
       return JSON.stringify({
@@ -329,7 +339,7 @@ Example usage:
         message: "Token airdrop successful",
         tokenId: parsedInput.tokenId,
         recipientCount: parsedInput.recipients.length,
-        totalAmount: parsedInput.recipients.reduce((sum: number, r: any) => sum + r.amount, 0), // in base unit
+        totalAmount: parsedInput.recipients.reduce((sum: number, r: any) => sum + r.amount, 0), // in display units
         txHash: result.txHash
       });
     } catch (error: any) {
