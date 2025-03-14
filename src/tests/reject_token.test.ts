@@ -58,7 +58,7 @@ describe("reject_token", async () => {
             }
 
             // Create test account
-            const startingHbars = 10;
+            const startingHbars = 20;
             const autoAssociation = -1; // unlimited
             acc1 = await networkClientWrapper.createAccount(startingHbars, autoAssociation);
 
@@ -127,8 +127,7 @@ describe("reject_token", async () => {
                     text: promptText,
                 };
 
-                const response = await langchainAgent.sendPrompt(prompt);
-
+                await langchainAgent.sendPrompt(prompt);
                 await wait(5000);
 
                 const tokenInfo = await hederaMirrorNodeClient.getAccountToken(
