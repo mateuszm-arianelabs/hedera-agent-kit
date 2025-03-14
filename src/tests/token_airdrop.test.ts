@@ -43,6 +43,32 @@ function extractLangchainResponse(
   return null;
 }
 
+const formatTxHash = (txHash: string) => {
+  const [txId, txTimestamp] = txHash.split("@");
+
+  if (!txId || !txTimestamp) {
+    throw new Error("Invalid tx hash");
+  }
+
+  return `${txId}-${txTimestamp?.replace(".", "-")}`;
+};
+
+const extractTxHash = (messages: any[]) => {
+  return messages.reduce((acc, { content }) => {
+    try {
+      const response = JSON.parse(content);
+
+      if (response.status === "error") {
+        throw new Error(response.message);
+      }
+
+      return String(response.txHash);
+    } catch {
+      return acc;
+    }
+  }, "");
+};
+
 describe("Test Token Airdrop", async () => {
   let acc1: AccountData;
   let acc2: AccountData;
@@ -183,7 +209,7 @@ describe("Test Token Airdrop", async () => {
         };
         const response = await langchainAgent.sendPrompt(prompt);
         const airdropResponse = extractLangchainResponse(response.messages);
-        const txHash = airdropResponse?.txHash ?? '';
+        const txHash = formatTxHash(airdropResponse?.txHash ?? '');
 
         // Get balances after transaction being successfully processed by mirror node
         await wait(5000);
