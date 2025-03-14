@@ -44,7 +44,7 @@ describe("get_hts_balance", () => {
         "testnet"
       );
 
-      Promise.all([
+      await Promise.all([
         networkClientWrapper.createAccount(0, -1),
         networkClientWrapper.createAccount(0, -1),
         networkClientWrapper.createAccount(0, -1),
@@ -67,13 +67,13 @@ describe("get_hts_balance", () => {
         decimals: 0,
       });
 
-      Promise.all([
+      await Promise.all([
         networkClientWrapper.transferToken(acc1.accountId, token1, 100),
         networkClientWrapper.transferToken(acc2.accountId, token2, 123),
         networkClientWrapper.transferToken(acc3.accountId, token2, 10),
         networkClientWrapper.transferToken(acc3.accountId, token1, 7),
       ]);
-
+      await wait(5000);
       hederaApiClient = new HederaMirrorNodeClient("testnet");
 
       testCases = [
@@ -123,7 +123,6 @@ describe("get_hts_balance", () => {
         };
 
         const response = await langchainAgent.sendPrompt(prompt);
-        await wait(5000);
 
         const hederaActionBalanceInDisplayUnits = extractTokenBalance(response.messages);
         const mirrorNodeBalanceInDisplayUnits = await hederaApiClient.getTokenBalance(
@@ -134,12 +133,13 @@ describe("get_hts_balance", () => {
         const mirrorNodeBalanceInBaseUnits = (await hederaApiClient.getAccountToken(
           accountId,
           tokenId
-        ))?.balance;
-
+        ))?.balance ?? 0;
+        
         const decimals = (await hederaApiClient.getTokenDetails(tokenId))?.decimals;
+        const hederaActionBalanceInBaseUnits = (Number(hederaActionBalanceInDisplayUnits) * 10 ** Number(decimals)).toFixed(0);
 
         expect(String(hederaActionBalanceInDisplayUnits)).toEqual(String(mirrorNodeBalanceInDisplayUnits));
-        expect(String(hederaActionBalanceInDisplayUnits * 10 ** Number(decimals))).toEqual(String(mirrorNodeBalanceInBaseUnits));
+        expect(hederaActionBalanceInBaseUnits).toEqual(String(mirrorNodeBalanceInBaseUnits));
       }
     });
   });
