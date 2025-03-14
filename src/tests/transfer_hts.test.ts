@@ -157,7 +157,7 @@ describe("Test Token transfer", async () => {
 
         const balanceReceiverBeforeInBaseUnits = (
           await hederaApiClient.getAccountToken(receiversAccountId, tokenId)
-        )?.balance;
+        )?.balance ?? 0;
 
         const prompt = {
           user: "user",
