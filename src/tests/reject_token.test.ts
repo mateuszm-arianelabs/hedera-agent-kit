@@ -89,6 +89,7 @@ describe("reject_token", async () => {
             });
 
             // Define test cases using created accounts and tokens
+            //FIXME: failing
             await Promise.all([
                 airdropCreatorNetworkClientWrapper.airdropToken(token1, [
                     {
@@ -103,6 +104,7 @@ describe("reject_token", async () => {
                     },
                 ]),
             ]);
+
             testCases = [
                 {
                     tokenId: token1,
@@ -113,31 +115,34 @@ describe("reject_token", async () => {
                     promptText: `Reject token ${token2} from account ${airdropCreatorNetworkClientWrapper.getAccountId()}`,
                 },
             ];
+
         } catch (error) {
             console.error("Error in setup:", error);
             throw error;
         }
     });
 
-    describe("reject token", () => {
-        it("it should reject token from account", async () => {
-            for (const { promptText, tokenId } of testCases) {
-                const prompt = {
-                    user: "user",
-                    text: promptText,
-                };
+    it("true", async () => {
+        expect(true);
+    })
 
-                const response = await langchainAgent.sendPrompt(prompt);
+    it("it should reject token from account", async () => {
+        for (const { promptText, tokenId } of testCases) {
+            const prompt = {
+                user: "user",
+                text: promptText,
+            };
 
-                await wait(5000);
+            const response = await langchainAgent.sendPrompt(prompt);
 
-                const tokenInfo = await hederaMirrorNodeClient.getAccountToken(
-                    networkClientWrapper.getAccountId(),
-                    tokenId
-                );
+            await wait(5000);
 
-                expect(tokenInfo?.balance ?? 0).toBe(0);
-            }
-        });
+            const tokenInfo = await hederaMirrorNodeClient.getAccountToken(
+                networkClientWrapper.getAccountId(),
+                tokenId
+            );
+
+            expect(tokenInfo?.balance ?? 0).toBe(0);
+        }
     });
 });

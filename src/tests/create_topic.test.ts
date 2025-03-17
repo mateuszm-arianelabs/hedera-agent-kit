@@ -1,4 +1,4 @@
-import { describe, it, beforeAll, expect } from "vitest";
+import { describe, it, expect } from "vitest";
 import * as dotenv from "dotenv";
 import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { LangchainAgent } from "./utils/langchainAgent";
@@ -42,6 +42,7 @@ describe("create_topic", () => {
       const langchainAgent = await LangchainAgent.create();
 
       const response = await langchainAgent.sendPrompt(prompt);
+      console.log(JSON.stringify(response, null, 2));
       const topicId = extractTopicId(response.messages);
       await wait(5000);
 

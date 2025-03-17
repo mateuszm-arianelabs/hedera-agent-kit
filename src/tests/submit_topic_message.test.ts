@@ -92,16 +92,18 @@ describe("submit_topic_message", () => {
 
         const langchainAgent = await LangchainAgent.create();
         const response = await langchainAgent.sendPrompt(prompt);
-        const topicId = extractTopicId(response.messages);
+        console.log(JSON.stringify(response, null, 2));
+        const extractedTopicId = extractTopicId(response.messages);
         await wait(5000);
 
         const topicMessages =
-          await hederaMirrorNodeClient.getTopicMessages(topicId);
+          await hederaMirrorNodeClient.getTopicMessages(extractedTopicId);
 
         const receivedMessage = topicMessages.find(({ message: _message }) => {
-          const decodedMessage = Buffer.from(_message, "base64").toString();
-          return message === decodedMessage;
+          return message === _message;
         });
+
+        expect(topicId).toEqual(extractedTopicId);
         expect(receivedMessage).toBeTruthy();
       }
     });

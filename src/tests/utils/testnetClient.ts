@@ -9,7 +9,7 @@ import {
   TopicId,
 } from "@hashgraph/sdk";
 import { AccountData, hederaPrivateKeyFromString } from "./testnetUtils";
-import HederaAgentKit from "../../agent/custodial";
+import HederaAgentKit from "../../agent";
 import {
   AirdropResult,
   CreateFTOptions,

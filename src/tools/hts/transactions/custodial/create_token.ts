@@ -12,7 +12,7 @@ export interface CreateTokenOptions {
   maxSupply?: number;
   isMetadataKey?: boolean;
   isAdminKey?: boolean;
-  tokenMetadata?: Uint8Array<ArrayBufferLike>;
+  tokenMetadata?: Uint8Array;
   memo?: string;
 }
 

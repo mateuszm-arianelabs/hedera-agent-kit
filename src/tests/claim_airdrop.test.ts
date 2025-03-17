@@ -27,8 +27,6 @@ describe("claim_pending_airdrops", () => {
     beforeAll(async () => {
         dotenv.config()
         try {
-            langchainAgent = await LangchainAgent.create();
-
             hederaMirrorNodeClient = new HederaMirrorNodeClient("testnet" as NetworkType);
 
             networkClientWrapper = new NetworkClientWrapper(
@@ -150,7 +148,7 @@ describe("claim_pending_airdrops", () => {
                     user: "user",
                     text: promptText,
                 };
-
+                langchainAgent = await LangchainAgent.create();
                 const response = await langchainAgent.sendPrompt(prompt);
 
                 const tokenBalance = await networkClientWrapper.getAccountTokenBalance(

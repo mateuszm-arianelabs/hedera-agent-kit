@@ -5,7 +5,7 @@ import { MintNFTResult } from "../../../../types";
 // adding array of metadatas is not implemented
 export const mint_nft = async (
     tokenId: TokenId,
-    tokenMetadata: Uint8Array<ArrayBufferLike>,
+    tokenMetadata: Uint8Array,
     client: Client
 ): Promise<MintNFTResult> => {
     const tx = await new TokenMintTransaction()

@@ -2,8 +2,8 @@ import { ChatOpenAI } from "@langchain/openai";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import * as dotenv from "dotenv";
-import HederaAgentKit from "../../agent/custodial";
 import { createHederaTools } from "../../langchain";
+import HederaAgentKit from "../../agent";
 
 dotenv.config();
 
@@ -29,17 +29,17 @@ export function fromDisplayToBaseUnit(
 export async function initializeAgent() {
   try {
     const llm = new ChatOpenAI({
-      modelName: "gpt-4o",
-      temperature: 0.7,
+      modelName: "o3-mini", // TODO: rollback
     });
 
     // Initialize HederaAgentKit
     const hederaKit = new HederaAgentKit(
-      process.env.HEDERA_ACCOUNT_ID!,
-      process.env.HEDERA_PRIVATE_KEY!,
-      // Pass your network of choice. Default is "mainnet".
-      // You can specify 'testnet', 'previewnet', or 'mainnet'.
-      process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet"
+        process.env.HEDERA_ACCOUNT_ID!,
+        process.env.HEDERA_PRIVATE_KEY!,
+        '302d300706052b8104000a032200032f6760780cf46cdd63225691fb00dd4da26118aff03e4663c411e4f90aaea637',
+        // Pass your network of choice. Default is "mainnet".
+        // You can specify 'testnet', 'previewnet', or 'mainnet'.
+        process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet"
     );
 
     // Create the LangChain-compatible tools

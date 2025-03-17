@@ -8,8 +8,8 @@ import {TokenType} from "@hashgraph/sdk";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-function extractTokenId(messages) {
-    const toolMessages = messages.filter((msg) =>
+function extractTokenId(messages: any) {
+    const toolMessages = messages.filter((msg: any) =>
         (msg.id && msg.id[2] === "ToolMessage") ||
         msg.name === "hedera_create_non_fungible_token"
     );
@@ -36,6 +36,7 @@ describe("create_nft_token", () => {
     let langchainAgent: LangchainAgent;
     let hederaApiClient: HederaMirrorNodeClient;
     let wrapper;
+    const INFINITE_SUPPLY = 0;
 
     beforeAll(async () => {
         wrapper = new NetworkClientWrapper(
@@ -119,7 +120,6 @@ describe("create_nft_token", () => {
 
         langchainAgent = await LangchainAgent.create();
         const response = await langchainAgent.sendPrompt(prompt);
-        console.log(JSON.stringify(response, null, 2));
 
         const tokenId = extractTokenId(response.messages);
 
@@ -130,7 +130,7 @@ describe("create_nft_token", () => {
         expect(tokenDetails.symbol).toEqual("TT");
         expect(tokenDetails.name).toEqual("TestToken");
         expect(tokenDetails.type).toEqual(TokenType.NonFungibleUnique.toString());
-        expect(Number(tokenDetails.max_supply)).toEqual(0);
+        expect(Number(tokenDetails.max_supply)).toEqual(INFINITE_SUPPLY);
         expect(tokenDetails.memo).toEqual("");
         expect(tokenDetails.metadata).toEqual("");
         expect(tokenDetails?.supply_key?.key).toBeTruthy(); // all NFTs have supply key set by default
@@ -138,15 +138,14 @@ describe("create_nft_token", () => {
         expect(tokenDetails?.metadata_key?.key).toBeFalsy();
     });
 
-    it("Create token with minimal parameters plus memo", async () => {
+    it("Create token with minimal parameters plus memo and max supply", async () => {
         const prompt = {
             user: "user",
-            text: "Create non-fungible token with name TestToken, symbol TT. Set memo to 'This is memo'.",
+            text: "Create non-fungible token with name TestToken, symbol TT. Set memo to 'This is memo'. Set max supply to 10.",
         };
 
         langchainAgent = await LangchainAgent.create();
         const response = await langchainAgent.sendPrompt(prompt);
-        console.log(JSON.stringify(response, null, 2));
 
         const tokenId = extractTokenId(response.messages);
 
@@ -157,7 +156,7 @@ describe("create_nft_token", () => {
         expect(tokenDetails.symbol).toEqual("TT");
         expect(tokenDetails.name).toEqual("TestToken");
         expect(tokenDetails.type).toEqual(TokenType.NonFungibleUnique.toString());
-        expect(Number(tokenDetails.max_supply)).toEqual(0);
+        expect(Number(tokenDetails.max_supply)).toEqual(10);
         expect(tokenDetails.memo).toEqual("This is memo");
         expect(tokenDetails.metadata).toEqual("");
         expect(tokenDetails?.supply_key?.key).toBeTruthy(); // all NFTs have supply key set by default
@@ -173,7 +172,6 @@ describe("create_nft_token", () => {
 
         langchainAgent = await LangchainAgent.create();
         const response = await langchainAgent.sendPrompt(prompt);
-        console.log(JSON.stringify(response, null, 2));
 
         const tokenId = extractTokenId(response.messages);
 
@@ -184,7 +182,7 @@ describe("create_nft_token", () => {
         expect(tokenDetails.symbol).toEqual("TT");
         expect(tokenDetails.name).toEqual("TestToken");
         expect(tokenDetails.type).toEqual(TokenType.NonFungibleUnique.toString());
-        expect(Number(tokenDetails.max_supply)).toEqual(0);
+        expect(Number(tokenDetails.max_supply)).toEqual(INFINITE_SUPPLY);
         expect(tokenDetails.memo).toEqual("");
         expect(tokenDetails.metadata).toEqual("");
         expect(tokenDetails?.supply_key?.key).toBeTruthy(); // all NFTs have supply key set by default
@@ -200,7 +198,6 @@ describe("create_nft_token", () => {
 
         langchainAgent = await LangchainAgent.create();
         const response = await langchainAgent.sendPrompt(prompt);
-        console.log(JSON.stringify(response, null, 2));
 
         const tokenId = extractTokenId(response.messages);
 
@@ -211,11 +208,11 @@ describe("create_nft_token", () => {
         expect(tokenDetails.symbol).toEqual("TT");
         expect(tokenDetails.name).toEqual("TestToken");
         expect(tokenDetails.type).toEqual(TokenType.NonFungibleUnique.toString());
-        expect(Number(tokenDetails.max_supply)).toEqual(0);
+        expect(Number(tokenDetails.max_supply)).toEqual(INFINITE_SUPPLY);
         expect(tokenDetails.memo).toEqual("thats memo");
         expect(atob(tokenDetails.metadata!)).toEqual("thats metadata");
         expect(tokenDetails?.supply_key?.key).toBeTruthy(); // all NFTs have supply key set by default
         expect(tokenDetails?.admin_key?.key).toBeTruthy();
         expect(tokenDetails?.metadata_key?.key).toBeTruthy();
     });
-}, 240_000);
+});

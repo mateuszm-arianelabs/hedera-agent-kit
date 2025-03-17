@@ -4,8 +4,8 @@ import * as dotenv from "dotenv";
 import { wait } from "./utils/utils";
 import { LangchainAgent } from "./utils/langchainAgent";
 
-function extractTokenId(messages) {
-  const toolMessages = messages.filter((msg) =>
+function extractTokenId(messages: any) {
+  const toolMessages = messages.filter((msg: any) =>
       (msg.id && msg.id[2] === "ToolMessage") ||
       msg.name === "hedera_create_fungible_token"
   );
