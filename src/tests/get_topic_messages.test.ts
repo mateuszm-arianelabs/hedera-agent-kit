@@ -7,7 +7,7 @@ import { LangchainAgent } from "./utils/langchainAgent";
 import { wait } from "./utils/utils";
 
 
-function extractTopicMessages(messages) {
+function extractTopicMessages(messages: any[]) {
     const toolMessages = messages.filter((msg) =>
         (msg.id && msg.id[2] === "ToolMessage") ||
         msg.name === "hedera_get_topic_messages"
@@ -67,6 +67,8 @@ describe("get_topic_messages", () => {
 
             const timestampBefore: string = new Date().toISOString();
 
+            await wait(1000);
+            
             await Promise.all([
                 networkClientWrapper.submitTopicMessage(topic1, "(1) Test message for topic 1."),
             ]);
@@ -137,8 +139,6 @@ describe("get_topic_messages", () => {
                 };
 
                 const response = await langchainAgent.sendPrompt(prompt);
-
-                console.log(JSON.stringify(response, null, 2));
                 const messages = extractTopicMessages(response.messages);
 
                 await wait(5000);
@@ -153,8 +153,7 @@ describe("get_topic_messages", () => {
                         const messageText = mirrorNodeMessage.message;
                         const messageFound = messages.some(msg => msg.message === messageText);
 
-                        expect(messageFound).toBe(true,
-                            `Message '${messageText}' not found in the response`);
+                        expect(messageFound).toBe(true);
                     }
                 }
             }

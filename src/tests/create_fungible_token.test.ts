@@ -182,7 +182,7 @@ describe("create_fungible_token", () => {
     const hederaApiClient = new HederaMirrorNodeClient("testnet");
 
     const promptText =
-      "Create token 'Complex Token' with symbol CPLXT, 1 decimal places, and starting supply of 1111. Set admin key and supply keys. Set memo to 'This a complex token'. Set metadata to 'this could be a link to image'";
+      "Create token 'Complex Token' with symbol CPLXT, 1 decimal places, and starting supply of 1111. Set admin key and supply keys. Set memo to 'This a complex token'. Set metadata to 'this could be a link to image'. Don't set metadata key";
     const prompt = {
       user: "user",
       text: promptText,
