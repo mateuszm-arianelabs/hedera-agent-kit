@@ -6,14 +6,17 @@ import {
   Hbar,
   PrivateKey,
   TokenId,
+  TopicId,
 } from "@hashgraph/sdk";
 import { AccountData, hederaPrivateKeyFromString } from "./testnetUtils";
 import HederaAgentKit from "../../agent/custodial";
 import {
   AirdropResult,
   CreateFTOptions,
+  CreateNFTOptions,
   CreateTopicResult,
   HederaNetworkType,
+  SubmitMessageResult,
 } from "../../types";
 import { AirdropRecipient } from "../../tools/hts/transactions/custodial/airdrop";
 
@@ -85,6 +88,11 @@ export class NetworkClientWrapper {
     return result.tokenId.toString();
   }
 
+  async createNFT(options: CreateNFTOptions): Promise<string> {
+    const result = await this.agentKit.createNFT(options);
+    return result.tokenId.toString();
+  }
+
   async transferToken(
     receiverId: string,
     tokenId: string,
@@ -121,6 +129,13 @@ export class NetworkClientWrapper {
       accountId: string
   ): Promise<number> {
     return this.agentKit.getHtsBalance(tokenId, networkType as HederaNetworkType, accountId);
+  }
+
+  submitTopicMessage(topicId: string, message: string): Promise<SubmitMessageResult> {
+    return this.agentKit.submitTopicMessage(
+      TopicId.fromString(topicId),
+      message
+    );
   }
 
 }

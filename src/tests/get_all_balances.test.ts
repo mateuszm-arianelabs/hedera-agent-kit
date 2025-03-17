@@ -1,11 +1,12 @@
 import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
+import { describe, expect, it, beforeAll } from "vitest";
 import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "./utils/testnetClient";
 import { AccountData } from "./utils/testnetUtils";
 import { DetailedTokenBalance } from "./types";
 import { LangchainAgent } from "./utils/langchainAgent";
+import { wait } from "./utils/utils";
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const extractBalances = (messages: any[]): DetailedTokenBalance[] => {
   const result = messages.reduce((acc, { content }) => {
@@ -106,8 +107,8 @@ describe("get_all_balances", () => {
           acc3.accountId,
           `Show me all token balances for account ${acc3.accountId}`,
         ],
-        [process.env.HEDERA_ACCOUNT_ID!, "Show me all your token balances."],
-        [process.env.HEDERA_ACCOUNT_ID!, "Show me all my token balances."],
+        [process.env.HEDERA_ACCOUNT_ID! as string, "Show me all your token balances."],
+        [process.env.HEDERA_ACCOUNT_ID! as string, "Show me all my token balances."],
       ];
     } catch (error) {
       console.error("Error in setup:", error);
@@ -151,6 +152,6 @@ describe("get_all_balances", () => {
 
         await wait(1000);
       }
-    }, 120_000);
+    });
   });
 });

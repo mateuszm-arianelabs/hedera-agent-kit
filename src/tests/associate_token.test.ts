@@ -5,8 +5,8 @@ import { AccountData } from "./utils/testnetUtils";
 import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { NetworkType } from "./types";
+import { wait } from "./utils/utils";
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 dotenv.config();
 describe("associate_token", () => {
