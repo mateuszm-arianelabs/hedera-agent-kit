@@ -5,7 +5,6 @@ import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { wait } from "./utils/utils";
 
-
 const extractTopicId = (messages: any[]): string => {
   const result = messages.reduce((acc, message) => {
     try {
@@ -84,7 +83,11 @@ describe("submit_topic_message", () => {
 
   describe("submit topic message checks", () => {
     it("should submit message to topic", async () => {
-      for (const { textPrompt, topicId, message } of testCases) {
+      for (const {
+        textPrompt,
+        message,
+        topicId: expectedTopicId,
+      } of testCases) {
         const prompt = {
           user: "user",
           text: textPrompt,
@@ -98,10 +101,10 @@ describe("submit_topic_message", () => {
         const topicMessages =
           await hederaMirrorNodeClient.getTopicMessages(topicId);
 
-        const receivedMessage = topicMessages.find(({ message: _message }) => {
-          const decodedMessage = Buffer.from(_message, "base64").toString();
-          return message === decodedMessage;
-        });
+        const receivedMessage = topicMessages.find(
+          ({ message: _message }) => message === _message
+        );
+        expect(topicId).toEqual(expectedTopicId);
         expect(receivedMessage).toBeTruthy();
       }
     });
