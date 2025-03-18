@@ -1,8 +1,9 @@
-import { Tool } from "@langchain/core/tools";
+import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
-import { CreateTopicResult } from "../../../types";
+import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 
-export abstract class AbstractHederaCreateTopicTool extends Tool {
+export class HederaCreateTopicTool extends Tool {
+
     name = 'hedera_create_topic'
 
     description = `Create a topic on Hedera
@@ -27,35 +28,22 @@ Example usage:
   }'
 `
 
-    protected constructor() {
-        super()
-    }
-
-    protected async _call(input: string): Promise<string> {
-        return Promise.resolve('');
-    }
-
-}
-export class CustodialHederaCreateTopicTool extends AbstractHederaCreateTopicTool {
     constructor(private hederaKit: HederaAgentKit) {
         super();
     }
 
-    protected override async _call(input: string): Promise<string> {
+    protected override async _call(input: any, _runManager?: CallbackManagerForToolRun, config?: ToolRunnableConfig):  Promise<string> {
         try {
-            console.log('hedera_create_topic tool (custodial) has been called');
-            const parsedInput = JSON.parse(input);
-            const result  = await this.hederaKit.createTopic(
-                parsedInput.name,
-                parsedInput.isSubmitKey
-            ) as CreateTopicResult;
+            console.log('hedera_create_topic tool has been called');
 
-            return JSON.stringify({
-                status: "success",
-                message: "Topic created",
-                topicId: result.topicId,
-                txHash: result.txHash
-            });
+            const isCustodial = config?.configurable?.isCustodial === true;
+            console.log(`Extracted 'isCustodial' flag: ${isCustodial.toString()}`);
+
+            const parsedInput = JSON.parse(input);
+            return await this.hederaKit
+                .createTopic(parsedInput.name, parsedInput.isSubmitKey, isCustodial)
+                .then(response => response.getStringifiedResponse());
+
         } catch (error: any) {
             return JSON.stringify({
                 status: "error",
@@ -64,33 +52,5 @@ export class CustodialHederaCreateTopicTool extends AbstractHederaCreateTopicToo
             });
         }
     }
+
 }
-
-export class NonCustodialHederaCreateTopicTool extends AbstractHederaCreateTopicTool {
-    constructor(private hederaKit: HederaAgentKit) {
-        super();
-    }
-
-    protected override async _call(input: string): Promise<string> {
-        try {
-            console.log('hedera_create_topic tool (non-custodial) has been called');
-            const parsedInput = JSON.parse(input);
-            const txBytes = await this.hederaKit.createTopicNonCustodial(
-                parsedInput.name,
-                parsedInput.isSubmitKey,
-            ) as string;
-            return JSON.stringify({
-                status: "success",
-                txBytes: txBytes,
-                message: `Topic creation transaction bytes have been successfully created.`,
-            });
-        } catch (error: any) {
-            return JSON.stringify({
-                status: "error",
-                message: error.message,
-                code: error.code || "UNKNOWN_ERROR",
-            });
-        }
-    }
-}
-

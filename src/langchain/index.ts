@@ -1,7 +1,7 @@
 import { Tool } from "@langchain/core/tools";
 import HederaAgentKit from "../agent";
 import * as dotenv from "dotenv";
-import { CustodialHederaCreateTopicTool, NonCustodialHederaCreateTopicTool } from "./tools/hcs/create_topic_tool";
+import { HederaCreateTopicTool } from "./tools/hcs/create_topic_tool";
 import {
   CustodialHederaCreateFungibleTokenTool,
   NonCustodialHederaCreateFungibleTokenTool
@@ -65,7 +65,7 @@ export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
     new HederaGetPendingAirdropTool(hederaKit),
     new HederaGetAllTokenBalancesTool(hederaKit),
     new HederaGetTokenHoldersTool(hederaKit),
-    new CustodialHederaCreateTopicTool(hederaKit),
+    new HederaCreateTopicTool(hederaKit),
     new CustodialHederaDeleteTopicTool(hederaKit),
     new CustodialHederaSubmitTopicMessageTool(hederaKit),
     new HederaGetTopicInfoTool(hederaKit),
@@ -89,7 +89,7 @@ export function createHederaTools(hederaKit: HederaAgentKit): Tool[] {
     new HederaGetPendingAirdropTool(hederaKit),
     new HederaGetAllTokenBalancesTool(hederaKit),
     new HederaGetTokenHoldersTool(hederaKit),
-    new NonCustodialHederaCreateTopicTool(hederaKit),
+    new HederaCreateTopicTool(hederaKit),
     new NonCustodialHederaDeleteTopicTool(hederaKit),
     new NonCustodialHederaSubmitTopicMessageTool(hederaKit),
     new HederaGetTopicInfoTool(hederaKit),

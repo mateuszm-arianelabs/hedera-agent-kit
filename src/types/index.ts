@@ -146,12 +146,6 @@ export type SubmitMessageResult = {
     txHash: string,
 }
 
-export type CreateTopicResult = {
-    status: string,
-    txHash: string,
-    topicId: string,
-}
-
 export type DeleteTopicResult = {
     status: string,
     txHash: string,
@@ -225,5 +219,3 @@ export interface CreateNFTOptions extends Omit<CreateTokenOptions, "tokenType" |
 
 export interface CreateFTOptions extends Omit<CreateTokenOptions, "tokenType" | "client"> {
 }
-
-export type TransactionResult = CreateTopicResult | DeleteTopicResult | TransferTokenResult | CreateTokenResult;

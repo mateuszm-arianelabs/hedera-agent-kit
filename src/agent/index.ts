@@ -16,7 +16,6 @@ import {
     CreateFTOptions,
     CreateNFTOptions,
     CreateTokenResult,
-    CreateTopicResult,
     DeleteTopicResult,
     DissociateTokenResult,
     HCSMessage,
@@ -40,10 +39,17 @@ import {
     get_hts_token_details,
     get_pending_airdrops,
     get_token_holders,
-    get_topic_info, get_topic_messages,
+    get_topic_info,
+    get_topic_messages,
 } from "../tools";
 import { AccountTransactionBuilder } from "../tools/transactions/builders/account_transaction_builder";
 import { AirdropRecipient } from "../tools/transactions/strategies/hts/airdrop_token_strategy";
+import {
+    CreateTopicResult,
+    CustodialCreateTopicResult,
+    NonCustodialCreateTopicResult
+} from "../tools/results/hcs/createTopicResults";
+import {BaseResult} from "../tools/results/BaseResult";
 
 
 export default class HederaAgentKit {
@@ -53,6 +59,7 @@ export default class HederaAgentKit {
     readonly publicKey: PublicKey | undefined;
     private readonly privateKey: string | undefined;
     readonly accountId: string;
+    private readonly isCustodial: boolean;
 
     constructor(
         accountId: string,
@@ -64,12 +71,14 @@ export default class HederaAgentKit {
             // @ts-ignore
             this.client = Client.forNetwork(network).setOperator(accountId, privateKey);
             this.privateKey = privateKey;
+            this.isCustodial = true;
         } else {
             // @ts-ignore
             this.client = Client.forNetwork(network);
-            if(!publicKey){
+            if(!publicKey) {
                 throw new Error("Public key is missing. To perform non custodial action you should pass public key!");
             }
+            this.isCustodial = false;
         }
         this.publicKey = PublicKey.fromString(publicKey!);
         this.network = network;
@@ -79,21 +88,42 @@ export default class HederaAgentKit {
     async createTopic(
         topicMemo: string,
         isSubmitKey: boolean,
-    ) : Promise<CreateTopicResult> {
-        if(!this.privateKey) throw new Error("Custodial actions require privateKey!");
-
-        return await HcsTransactionBuilder
-            .createTopic(topicMemo, this.client.operatorPublicKey, isSubmitKey)
-            .signAndExecute(this.client);
+        custodial?: boolean,
+    ): Promise<BaseResult<string> | BaseResult<CreateTopicResult>> {
+        if(custodial) {
+            if(!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.createTopicCustodial(topicMemo, isSubmitKey);
+        } else {
+            return this.isCustodial
+                ? this.createTopicCustodial(topicMemo, isSubmitKey)
+                : this.createTopicNonCustodial(topicMemo, isSubmitKey);
+        }
     }
 
-    async createTopicNonCustodial(
+    private async createTopicCustodial(
         topicMemo: string,
         isSubmitKey: boolean,
-    ) : Promise<string> {
-        return await HcsTransactionBuilder
+    ) : Promise<CustodialCreateTopicResult> {
+        if(!this.privateKey) throw new Error("Custodial actions require privateKey!");
+
+        const response: CreateTopicResult =  await HcsTransactionBuilder
+            .createTopic(topicMemo, this.client.operatorPublicKey, isSubmitKey)
+            .signAndExecute(this.client);
+
+        return new CustodialCreateTopicResult(response.topicId, response.txHash, response.status)
+    }
+
+    private async createTopicNonCustodial(
+        topicMemo: string,
+        isSubmitKey: boolean,
+    ) : Promise<NonCustodialCreateTopicResult> {
+        const txBytes =  await HcsTransactionBuilder
             .createTopic(topicMemo, this.client.operatorPublicKey, isSubmitKey)
             .getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialCreateTopicResult(txBytes);
     }
 
     async submitTopicMessage(

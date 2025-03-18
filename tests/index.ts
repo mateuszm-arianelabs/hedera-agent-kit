@@ -12,6 +12,7 @@ dotenv.config();
 function validateEnvironment(): void {
   const missingVars: string[] = [];
   // You can tweak these as needed
+  // TODO: Should be later aligned to match the refactored implementation
   const requiredVars = ["OPENAI_API_KEY", "HEDERA_ACCOUNT_ID", "HEDERA_PRIVATE_KEY"];
 
   requiredVars.forEach((varName) => {
@@ -40,7 +41,8 @@ async function initializeAgent() {
     // Initialize HederaAgentKit
     const hederaKit = new HederaAgentKit(
         process.env.HEDERA_ACCOUNT_ID!,
-        process.env.CUSTODIAL_MODE === 'true' ? process.env.HEDERA_PRIVATE_KEY! : undefined,
+        // process.env.CUSTODIAL_MODE === 'true' ? process.env.HEDERA_PRIVATE_KEY! : undefined,
+        process.env.HEDERA_PRIVATE_KEY!,
         process.env.HEDERA_PUBLIC_KEY!,
         // Pass your network of choice. Default is "testnet".
         // You can specify 'testnet', 'previewnet', or 'mainnet'.
@@ -137,8 +139,8 @@ async function runChatMode(agent: any, config: any) {
         break;
       }
 
-      const stream = await agent.stream({ messages: [new HumanMessage(userInput)] }, config);
-
+      // for now, isCustodial is hardcoded, but later it can be changed and passed with prompt text coming from FE
+      const stream = await sendPrompt(agent, config, userInput, true);
       for await (const chunk of stream) {
         if ("agent" in chunk) {
           console.log(chunk.agent.messages[0].content);
@@ -156,6 +158,12 @@ async function runChatMode(agent: any, config: any) {
   } finally {
     rl.close();
   }
+}
+async function sendPrompt(agent: any, config: any, userInput: string, isCustodial: boolean) {
+  return agent.stream(
+      { messages: [new HumanMessage(userInput)] },
+      {...config, configurable: {...config.configurable, isCustodial: isCustodial}}
+  );
 }
 
 async function chooseMode(): Promise<"chat" | "auto"> {

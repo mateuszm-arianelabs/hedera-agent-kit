@@ -1,8 +1,7 @@
-import { TransactionResult } from "../../../types";
 import { AccountId, Client, TransactionId } from "@hashgraph/sdk";
 import { TransactionStrategy } from "../strategies/base_strategy";
 
-export class BaseTransactionBuilder<T extends TransactionResult> {
+export class BaseTransactionBuilder<T> {
     constructor(private strategy: TransactionStrategy<T>) {}
 
     async signAndExecute(client: Client): Promise<T> {

@@ -1,9 +1,10 @@
-import {CreateTopicResult, DeleteTopicResult, SubmitMessageResult} from "../../../types";
+import { DeleteTopicResult, SubmitMessageResult } from "../../../types";
 import { BaseTransactionBuilder } from "./base_transaction_builder";
 import { CreateTopicStrategy } from "../strategies/hcs/create_topic_strategy";
 import { TopicId } from "@hashgraph/sdk";
 import { SubmitTopicMessageStrategy } from "../strategies/hcs/submit_topic_message_strategy";
-import {DeleteTopicStrategy} from "../strategies/hcs/delete_topic_strategy";
+import { DeleteTopicStrategy } from "../strategies/hcs/delete_topic_strategy";
+import { CreateTopicResult } from "../../results/hcs/createTopicResults";
 
 export class HcsTransactionBuilder {
     static createTopic(

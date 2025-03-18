@@ -8,17 +8,11 @@ import {
   TokenId,
   TopicId,
 } from "@hashgraph/sdk";
-import { AccountData, hederaPrivateKeyFromString } from "./testnetUtils";
+import {AccountData, hederaPrivateKeyFromString} from "./testnetUtils";
 import HederaAgentKit from "../../agent";
-import {
-  AirdropResult,
-  CreateFTOptions,
-  CreateNFTOptions,
-  CreateTopicResult,
-  HederaNetworkType,
-  SubmitMessageResult,
-} from "../../types";
-import { AirdropRecipient } from "../../tools/transactions/strategies/hts/airdrop_token_strategy";
+import {AirdropResult, CreateFTOptions, CreateNFTOptions, HederaNetworkType, SubmitMessageResult,} from "../../types";
+import {AirdropRecipient} from "../../tools/transactions/strategies/hts/airdrop_token_strategy";
+import {CreateTopicResult} from "../../tools/results/hcs/createTopicResults";
 
 export class NetworkClientWrapper {
   private readonly accountId: AccountId;
@@ -116,11 +110,12 @@ export class NetworkClientWrapper {
     return this.accountId.toString();
   }
 
-  createTopic(
+  async createTopic(
     topicMemo: string,
     submitKey: boolean
   ): Promise<CreateTopicResult> {
-    return this.agentKit.createTopic(topicMemo, submitKey);
+    const response = await this.agentKit.createTopic(topicMemo, submitKey);
+    return response.getRawResponse() as CreateTopicResult;
   }
 
   getAccountTokenBalance(

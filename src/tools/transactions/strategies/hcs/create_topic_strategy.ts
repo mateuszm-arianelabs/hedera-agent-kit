@@ -1,7 +1,6 @@
-
-import { CreateTopicResult } from "../../../../types";
-import {TopicCreateTransaction, Transaction, TransactionReceipt, TransactionResponse} from "@hashgraph/sdk";
+import { TopicCreateTransaction, Transaction, TransactionReceipt, TransactionResponse } from "@hashgraph/sdk";
 import { TransactionStrategy } from "../base_strategy";
+import { CreateTopicResult } from "../../../results/hcs/createTopicResults";
 
 export class CreateTopicStrategy implements TransactionStrategy<CreateTopicResult> {
     constructor(
