@@ -4,42 +4,26 @@ import * as dotenv from "dotenv";
 import { wait } from "./utils/utils";
 import { LangchainAgent } from "./utils/langchainAgent";
 
-interface TokenDetailsFromToolResponse {
-  status: string;
-  message: string;
-  initialSupply: number;
+interface TokenDetails {
   tokenId: string;
-  decimals: number;
-  solidityAddress: string;
-  txHash: string;
+  initialSupply: number;
 }
 
-function extractTokenDetails(
-  messages: any[]
-): TokenDetailsFromToolResponse | null {
-  const toolMessages = messages.filter(
-    (msg) =>
-      (msg.id && msg.id[2] === "ToolMessage") ||
-      msg.name === "hedera_create_fungible_token"
-  );
-  let result: null | TokenDetailsFromToolResponse = null
-  for (const message of toolMessages) {
+function extractTokenDetails(messages: any[]): TokenDetails {
+  const result = messages.reduce<TokenDetails | null>((acc, message) => {
     try {
       const toolResponse = JSON.parse(message.content);
-
-      if (toolResponse.status !== "success" || !toolResponse.tokenId) {
-        throw new Error(toolResponse.message ?? 'Unknown error');
+      if (toolResponse.status === "success" && toolResponse.tokenId) {
+        return { tokenId: toolResponse.tokenId, initialSupply: toolResponse.initialSupply } as TokenDetails;
       }
-
-      result = toolResponse;
-
+      return acc;
     } catch (error) {
-      console.error("Error parsing tool message:", error);
+      return acc;
     }
-  }
+  }, null);
 
   if (!result) {
-    throw new Error("No token details found");
+    throw new Error("No token id found");
   }
 
   return result;

@@ -5,32 +5,26 @@ import { NetworkClientWrapper } from "./utils/testnetClient";
 import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { wait } from "./utils/utils";
+import { HCSMessage } from "../types";
 
 
-function extractTopicMessages(messages: any[]) {
-    const toolMessages = messages.filter((msg) =>
-        (msg.id && msg.id[2] === "ToolMessage") ||
-        msg.name === "hedera_get_topic_messages"
-    );
-
-    let result: null | any[] = null
-    for (const message of toolMessages) {
+function extractTopicMessages(messages: any[]): HCSMessage[] {
+    const result = messages.reduce<HCSMessage[] | null>((acc, message) => {
         try {
             const toolResponse = JSON.parse(message.content);
-
-            if (toolResponse.status !== "success" || !toolResponse.messages) {
-                continue;
+            if (toolResponse.status === "success" && toolResponse.messages) {
+                return toolResponse.messages as HCSMessage[];
             }
 
-            result = toolResponse.messages;
+            return acc;
 
         } catch (error) {
-            continue;
+            return acc;
         }
-    }
+    }, null);
 
     if (!result) {
-        throw new Error("No messages found");
+        throw new Error("No topic messages found");
     }
 
     return result;
