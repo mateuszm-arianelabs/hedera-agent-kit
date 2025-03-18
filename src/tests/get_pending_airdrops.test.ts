@@ -13,6 +13,7 @@ function findRelevantAirdrop(messages, accountId, tokenId) {
         msg.name === "hedera_get_pending_airdrop"
     );
 
+    let result: null | Airdrop = null
     for (const message of toolMessages) {
         try {
             const toolResponse = JSON.parse(message.content);
@@ -28,14 +29,14 @@ function findRelevantAirdrop(messages, accountId, tokenId) {
             );
 
             if (matchingAirdrop) {
-                return matchingAirdrop;
+                result = matchingAirdrop;
             }
         } catch (error) {
-            console.error("Error parsing tool message:", error);
+           continue;
         }
     }
 
-    return null;
+    return result;
 }
 
 describe("get_pending_airdrops", () => {

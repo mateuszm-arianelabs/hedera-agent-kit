@@ -9,7 +9,7 @@ function extractTokenId(messages) {
       (msg.id && msg.id[2] === "ToolMessage") ||
       msg.name === "hedera_create_fungible_token"
   );
-
+  let result: null | string = null
   for (const message of toolMessages) {
     try {
       const toolResponse = JSON.parse(message.content);
@@ -18,14 +18,18 @@ function extractTokenId(messages) {
         continue;
       }
 
-      return toolResponse.tokenId;
+      result = toolResponse.tokenId;
 
     } catch (error) {
       console.error("Error parsing tool message:", error);
     }
   }
 
-  return null;
+  if (!result) {
+    throw new Error("No token id found");
+  }
+
+  return result;
 }
 
 dotenv.config();
