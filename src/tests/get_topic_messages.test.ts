@@ -13,6 +13,7 @@ function extractTopicMessages(messages: any[]) {
         msg.name === "hedera_get_topic_messages"
     );
 
+    let result: null | any[] = null
     for (const message of toolMessages) {
         try {
             const toolResponse = JSON.parse(message.content);
@@ -21,14 +22,18 @@ function extractTopicMessages(messages: any[]) {
                 continue;
             }
 
-            return toolResponse.messages;
+            result = toolResponse.messages;
 
         } catch (error) {
-            console.error("Error parsing tool message:", error);
+            continue;
         }
     }
 
-    return null;
+    if (!result) {
+        throw new Error("No messages found");
+    }
+
+    return result;
 }
 
 
