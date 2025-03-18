@@ -18,7 +18,7 @@ Inputs ( input is a JSON string ):
 name: string, the name of the token e.g. My Token,
 symbol: string, the symbol of the token e.g. MT,
 decimals: number, the amount of decimals of the token,
-initialSupply: number, the initial supply of the token e.g. 100000, given in base unit
+initialSupply: number, the initial supply of the token e.g. (10.55, 10,55, 10.0, 10), given in display units
 isSupplyKey: boolean, decides whether supply key should be set, false if not passed
 isMetadataKey: boolean, decides whether metadata key should be set, false if not passed
 isAdminKey: boolean, decides whether admin key should be set, false if not passed
@@ -35,11 +35,13 @@ tokenMetadata: string, containing metadata associated with this token, empty str
     try {
       const parsedInput = JSON.parse(input);
 
+      const initialSupplyInBaseUnit = parsedInput.initialSupply * 10 ** parsedInput.decimals;
+
       const result = (await this.hederaKit.createFT({
         name: parsedInput.name,
         symbol: parsedInput.symbol,
         decimals: parsedInput.decimals,
-        initialSupply: parsedInput.initialSupply, // given in base unit
+        initialSupply: initialSupplyInBaseUnit,
         isSupplyKey: parsedInput.isSupplyKey,
         isAdminKey: parsedInput.isAdminKey,
         isMetadataKey: parsedInput.isMetadataKey,
@@ -50,7 +52,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
       return JSON.stringify({
         status: "success",
         message: "Token creation successful",
-        initialSupply: parsedInput.initialSupply,
+        initialSupply: parsedInput.initialSupply, // should be in display units
         tokenId: result.tokenId.toString(),
         decimals: parsedInput.decimals,
         solidityAddress: result.tokenId.toSolidityAddress(),
@@ -256,24 +258,23 @@ If no account ID is given, it returns the balance for the connected account.
       if (!parsedInput.tokenId) {
         throw new Error("tokenId is required");
       }
-      if(!process.env.HEDERA_NETWORK) {
-        throw new Error("HEDERA_NETWORK environment variable is required");
-      }
 
       const balance = await this.hederaKit.getHtsBalance(
           parsedInput.tokenId,
-          process.env.HEDERA_NETWORK as HederaNetworkType,
+          this.hederaKit.network,
           parsedInput?.accountId
       )
-
+      
       const details = await this.hederaKit.getHtsTokenDetails(
-          parsedInput?.tokenId,
-          process.env.HEDERA_NETWORK as HederaNetworkType
+        parsedInput?.tokenId,
+        this.hederaKit.network
       )
+      
+      const balanceInDisplayUnits = fromBaseToDisplayUnit(balance, Number(details.decimals));
 
       return JSON.stringify({
         status: "success",
-        balance: balance, // in base unit
+        balance: balanceInDisplayUnits, 
         unit: details.symbol,
         decimals: details.decimals
       });
@@ -296,7 +297,7 @@ Inputs ( input is a JSON string ):
 tokenId: string, the ID of the token to airdrop e.g. 0.0.123456,
 recipients: array of objects containing:
   - accountId: string, the account ID to send tokens to e.g. 0.0.789012
-  - amount: number, the amount of tokens to send e.g. 100
+  - amount: number, the amount of tokens to send e.g. 100, given in display units
 Example usage:
 1. Airdrop 100 tokens to account 0.0.789012 and 200 tokens to account 0.0.789013:
   '{
@@ -317,10 +318,20 @@ Example usage:
       console.log('hedera_airdrop_token token tool has been called')
 
       const parsedInput = JSON.parse(input);
+      const inputRecipients = parsedInput.recipients as { accountId: string, amount: number }[];
+
+      const recipientsWithAmountInBaseUnits = await Promise.all(inputRecipients.map(async (r: any) => ({
+        accountId: r.accountId,
+        amount: Number((await toBaseUnit(
+          parsedInput.tokenId,
+          r.amount,
+          this.hederaKit.network
+        )).toString()),
+      })));
       
       const result = await this.hederaKit.airdropToken(
         parsedInput.tokenId,
-        parsedInput.recipients // token amounts given in base unit
+        recipientsWithAmountInBaseUnits // token amounts given in base units
       );
 
       return JSON.stringify({
@@ -328,7 +339,7 @@ Example usage:
         message: "Token airdrop successful",
         tokenId: parsedInput.tokenId,
         recipientCount: parsedInput.recipients.length,
-        totalAmount: parsedInput.recipients.reduce((sum: number, r: any) => sum + r.amount, 0), // in base unit
+        totalAmount: parsedInput.recipients.reduce((sum: number, r: any) => sum + r.amount, 0), // in display units
         txHash: result.txHash
       });
     } catch (error: any) {
@@ -499,16 +510,22 @@ Example usage:
 
       const parsedInput = JSON.parse(input);
 
+      const amountInBaseUnit = Number((await toBaseUnit(
+        parsedInput.tokenId,
+        parsedInput.amount,
+        this.hederaKit.network
+      )).toString());
+
       const result = await this.hederaKit.mintToken(
         parsedInput.tokenId,
-        parsedInput.amount // given in base unit
+        amountInBaseUnit // given in base units
       );
 
       return JSON.stringify({
         status: "success",
         message: "Token minting successful",
         tokenId: parsedInput.tokenId,
-        amount: parsedInput.amount, // in base unit
+        amount: parsedInput.amount, // in display units
         txHash: result.txHash
       });
     } catch (error: any) {

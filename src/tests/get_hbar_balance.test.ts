@@ -65,10 +65,16 @@ describe("get_hbar_balance", () => {
             "No match for HBAR balance found in response."
           );
         }
-        const mirrorNodeBalance =
+        const accountInfo = await hederaApiClient.getAccountInfo(accountId);
+        const accountBalanceInBaseUnits = accountInfo.balance.balance;
+        const mirrorNodeBalanceInDisplayUnits =
           await hederaApiClient.getHbarBalance(accountId);
 
-        expect(hederaActionBalance).toEqual(mirrorNodeBalance);
+        const HBAR_DECIMALS = 8;
+        // compare balance in display units
+        expect(hederaActionBalance).toEqual(mirrorNodeBalanceInDisplayUnits);
+        // compare balance in base units
+        expect(hederaActionBalance * 10 ** HBAR_DECIMALS).toEqual(accountBalanceInBaseUnits);
 
         await wait(1000);
       }
