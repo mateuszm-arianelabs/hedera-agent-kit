@@ -30,9 +30,9 @@ import {
     TransferHBARResult,
     TransferTokenResult,
 } from "../types";
-import { HcsTransactionBuilder } from "../tools/builders/hcs_transaction_builder";
-import { HtsTransactionBuilder } from "../tools/builders/hts_transaction_builder";
-import { HbarTransactionBuilder } from "../tools/builders/hbar_transaction_builder";
+import { HcsTransactionBuilder } from "../tools/transactions/builders/hcs_transaction_builder";
+import { HtsTransactionBuilder } from "../tools/transactions/builders/hts_transaction_builder";
+import { HbarTransactionBuilder } from "../tools/transactions/builders/hbar_transaction_builder";
 import {
     get_all_tokens_balances,
     get_hbar_balance,
@@ -42,8 +42,8 @@ import {
     get_token_holders,
     get_topic_info, get_topic_messages,
 } from "../tools";
-import { AirdropRecipient } from "../tools/hts/transactions/custodial/airdrop";
-import { AccountTransactionBuilder } from "../tools/builders/account_transaction_builder";
+import { AccountTransactionBuilder } from "../tools/transactions/builders/account_transaction_builder";
+import { AirdropRecipient } from "../tools/transactions/strategies/hts/airdrop_token_strategy";
 
 
 export default class HederaAgentKit {
@@ -90,7 +90,7 @@ export default class HederaAgentKit {
     async createTopicNonCustodial(
         topicMemo: string,
         isSubmitKey: boolean,
-    ) : Promise<CreateTopicResult | string> {
+    ) : Promise<string> {
         return await HcsTransactionBuilder
             .createTopic(topicMemo, this.client.operatorPublicKey, isSubmitKey)
             .getTxBytesString(this.client, this.accountId);

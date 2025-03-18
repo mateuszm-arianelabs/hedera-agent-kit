@@ -18,7 +18,7 @@ import {
   HederaNetworkType,
   SubmitMessageResult,
 } from "../../types";
-import { AirdropRecipient } from "../../tools/hts/transactions/custodial/airdrop";
+import { AirdropRecipient } from "../../tools/transactions/strategies/hts/airdrop_token_strategy";
 
 export class NetworkClientWrapper {
   private readonly accountId: AccountId;
