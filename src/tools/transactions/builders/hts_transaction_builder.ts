@@ -48,7 +48,6 @@ export class HtsTransactionBuilder {
         issuerAccountId: string | AccountId,
     ): BaseTransactionBuilder<CreateTokenResult> {
         const strategy = new CreateTokenStrategy(options, publicKey, issuerAccountId);
-        console.log('after creating strategy');
         return new BaseTransactionBuilder<CreateTokenResult>(strategy);
     }
 

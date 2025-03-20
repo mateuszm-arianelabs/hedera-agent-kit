@@ -45,7 +45,7 @@ describe("get_pending_airdrops", () => {
     let token1: string;
     let langchainAgent: LangchainAgent;
     let testCases: [string, string, string, number][];
-    let networkClientWrapper;
+    let networkClientWrapper: NetworkClientWrapper;
 
     beforeAll(async () => {
         dotenv.config()

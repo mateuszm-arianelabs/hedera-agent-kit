@@ -46,8 +46,6 @@ export class CustodialHederaCreateFungibleTokenTool extends AbstractHederaCreate
                 tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata), // encoding to Uint8Array
             }));
 
-            console.log(`Result inside hedera_create_fungible_token: ` + JSON.stringify(result, null, 2));
-
             return JSON.stringify({
                 status: "success",
                 message: "Token creation successful",

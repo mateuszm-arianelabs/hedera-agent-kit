@@ -64,7 +64,7 @@ export default class HederaAgentKit {
     constructor(
         accountId: string,
         privateKey?: string | undefined,
-        publicKey?: string | undefined, // TODO: can be fetched from mirror node
+        publicKey?: string | undefined,
         network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet',
     ) {
         if(privateKey){
@@ -90,17 +90,18 @@ export default class HederaAgentKit {
         isSubmitKey: boolean,
         custodial?: boolean,
     ): Promise<BaseResult<string> | BaseResult<CreateTopicResult>> {
-        if(custodial) {
-            if(!this.privateKey) {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
                 throw new Error("Private key is missing. To perform custodial action you should pass private key!");
             }
             return this.createTopicCustodial(topicMemo, isSubmitKey);
-        } else {
-            return this.isCustodial
-                ? this.createTopicCustodial(topicMemo, isSubmitKey)
-                : this.createTopicNonCustodial(topicMemo, isSubmitKey);
         }
+
+        return this.createTopicNonCustodial(topicMemo, isSubmitKey);
     }
+
 
     private async createTopicCustodial(
         topicMemo: string,

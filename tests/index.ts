@@ -13,7 +13,7 @@ function validateEnvironment(): void {
   const missingVars: string[] = [];
   // You can tweak these as needed
   // TODO: Should be later aligned to match the refactored implementation
-  const requiredVars = ["OPENAI_API_KEY", "HEDERA_ACCOUNT_ID", "HEDERA_PRIVATE_KEY"];
+  const requiredVars = ["OPENAI_API_KEY", "HEDERA_ACCOUNT_ID"];
 
   requiredVars.forEach((varName) => {
     if (!process.env[varName]) {
@@ -139,8 +139,9 @@ async function runChatMode(agent: any, config: any) {
         break;
       }
 
-      // for now, isCustodial is hardcoded, but later it can be changed and passed with prompt text coming from FE
-      const stream = await sendPrompt(agent, config, userInput, true);
+      // for now, isCustodial is based on env, but later it can be changed and passed with a prompt text coming from FE
+      const isCustodial = process.env.IS_CUSTODIAL === "true";
+      const stream = await sendPrompt(agent, config, userInput, isCustodial);
       for await (const chunk of stream) {
         if ("agent" in chunk) {
           console.log(chunk.agent.messages[0].content);
