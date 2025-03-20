@@ -77,3 +77,7 @@ export async function initializeAgent() {
 
 export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+export const getHbarWithMultiplierFactor = (hbarAmount: number) => {
+  const multiplierFactor = Number(process.env.HBAR_MULTIPLIER_FACTOR) || 1;
+  return hbarAmount * multiplierFactor;
+};

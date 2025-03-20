@@ -5,7 +5,7 @@ import { NetworkClientWrapper } from "./utils/testnetClient";
 import { AccountData } from "./utils/testnetUtils";
 import {LangchainAgent} from "./utils/langchainAgent";
 import {NetworkType} from "./types";
-import { wait } from "./utils/utils";
+import { getHbarWithMultiplierFactor, wait } from "./utils/utils";
 
 
 describe("reject_token", async () => {
@@ -58,7 +58,7 @@ describe("reject_token", async () => {
             }
 
             // Create test account
-            const startingHbars = 20;
+            const startingHbars = getHbarWithMultiplierFactor(20);
             const autoAssociation = -1; // unlimited
             acc1 = await networkClientWrapper.createAccount(startingHbars, autoAssociation);
 
