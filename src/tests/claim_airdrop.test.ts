@@ -5,7 +5,7 @@ import { NetworkClientWrapper } from "./utils/testnetClient";
 import * as dotenv from "dotenv";
 import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { NetworkType } from "./types";
-import { wait } from "./utils/utils";
+import { getHbarWithMultiplierFactor, wait } from "./utils/utils";
 
 
 describe("claim_pending_airdrops", () => {
@@ -40,7 +40,7 @@ describe("claim_pending_airdrops", () => {
 
 
             // Create test account
-            const startingHbars = 10;
+            const startingHbars = getHbarWithMultiplierFactor(20);
             const autoAssociation = 0; // no auto association
             airdropCreatorAccount = await networkClientWrapper.createAccount(
                 startingHbars,
@@ -151,7 +151,8 @@ describe("claim_pending_airdrops", () => {
                     text: promptText,
                 };
 
-                const response = await langchainAgent.sendPrompt(prompt);
+                await langchainAgent.sendPrompt(prompt);
+                await wait(5000);
 
                 const tokenBalance = await networkClientWrapper.getAccountTokenBalance(
                     tokenId,
