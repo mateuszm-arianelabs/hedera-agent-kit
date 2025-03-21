@@ -8,29 +8,25 @@ import {TokenType} from "@hashgraph/sdk";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-function extractTokenId(messages) {
-    const toolMessages = messages.filter((msg) =>
-        (msg.id && msg.id[2] === "ToolMessage") ||
-        msg.name === "hedera_create_non_fungible_token"
-    );
-
-    for (const message of toolMessages) {
+function extractTokenId(messages: any[]): string {
+    const result = messages.reduce<string | null>((acc, message) => {
         try {
             const toolResponse = JSON.parse(message.content);
-
-            if (toolResponse.status !== "success" || !toolResponse.tokenId) {
-                continue;
+            if (toolResponse.status === "success" && toolResponse.tokenId) {
+                return toolResponse.tokenId;
             }
-
-            return toolResponse.tokenId;
-
+            return acc;
         } catch (error) {
-            console.error("Error parsing tool message:", error);
+            return acc;
         }
+    }, null);
+  
+    if (!result) {
+        throw new Error("No token id found");
     }
-
-    return null;
-}
+  
+    return result;
+  }
 
 describe("create_nft_token", () => {
     let langchainAgent: LangchainAgent;

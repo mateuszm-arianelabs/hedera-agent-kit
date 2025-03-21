@@ -7,35 +7,24 @@ import { Airdrop } from "../types";
 import { wait } from "./utils/utils";
 
 
-function findRelevantAirdrop(messages, accountId, tokenId) {
-    const toolMessages = messages.filter((msg) =>
-        (msg.id && msg.id[2] === "ToolMessage") ||
-        msg.name === "hedera_get_pending_airdrop"
-    );
-
-    for (const message of toolMessages) {
+function findAirdrops(messages: any[]): Airdrop[] { 
+    const result = messages.reduce<Airdrop[] | null>((acc, message) => {
         try {
             const toolResponse = JSON.parse(message.content);
-
-            if (toolResponse.status !== "success" || !toolResponse.airdrop) {
-                continue;
+            if (toolResponse.status === "success" && toolResponse.airdrop) {
+                return toolResponse.airdrop as Airdrop[];
             }
-
-            const matchingAirdrop = toolResponse.airdrop.find(
-                (airdrop) =>
-                    airdrop.token_id === tokenId &&
-                    airdrop.receiver_id === accountId
-            );
-
-            if (matchingAirdrop) {
-                return matchingAirdrop;
-            }
+            return acc;
         } catch (error) {
-            console.error("Error parsing tool message:", error);
+            return acc;
         }
+    }, null);
+
+    if (!result) {
+        throw new Error("No airdrops found");
     }
 
-    return null;
+    return result;
 }
 
 describe("get_pending_airdrops", () => {
@@ -140,7 +129,9 @@ describe("get_pending_airdrops", () => {
 
                 const response = await langchainAgent.sendPrompt(prompt);
 
-                const relevantAirdrop = findRelevantAirdrop(response.messages, accountId, tokenId);
+                const airdrops = findAirdrops(response.messages);
+                const relevantAirdrop = airdrops.find((airdrop) => airdrop.receiver_id === accountId && airdrop.token_id === tokenId);
+
 
                 if (!relevantAirdrop) {
                     throw new Error(`No matching airdrop found for account ${accountId} and token ${tokenId}`);

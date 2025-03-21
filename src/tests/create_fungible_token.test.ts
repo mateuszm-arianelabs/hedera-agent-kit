@@ -4,40 +4,29 @@ import * as dotenv from "dotenv";
 import { wait } from "./utils/utils";
 import { LangchainAgent } from "./utils/langchainAgent";
 
-interface TokenDetailsFromToolResponse {
-  status: string;
-  message: string;
-  initialSupply: number;
+interface TokenDetails {
   tokenId: string;
-  decimals: number;
-  solidityAddress: string;
-  txHash: string;
+  initialSupply: number;
 }
 
-function extractTokenDetails(
-  messages: any[]
-): TokenDetailsFromToolResponse | null {
-  const toolMessages = messages.filter(
-    (msg) =>
-      (msg.id && msg.id[2] === "ToolMessage") ||
-      msg.name === "hedera_create_fungible_token"
-  );
-
-  for (const message of toolMessages) {
+function extractTokenDetails(messages: any[]): TokenDetails {
+  const result = messages.reduce<TokenDetails | null>((acc, message) => {
     try {
       const toolResponse = JSON.parse(message.content);
-
-      if (toolResponse.status !== "success" || !toolResponse.tokenId) {
-        throw new Error(toolResponse.message ?? 'Unknown error');
+      if (toolResponse.status === "success" && toolResponse.tokenId) {
+        return { tokenId: toolResponse.tokenId, initialSupply: toolResponse.initialSupply } as TokenDetails;
       }
-
-      return toolResponse as TokenDetailsFromToolResponse;
+      return acc;
     } catch (error) {
-      console.error("Error parsing tool message:", error);
+      return acc;
     }
+  }, null);
+
+  if (!result) {
+    throw new Error("No token id found");
   }
 
-  return null;
+  return result;
 }
 
 dotenv.config();
@@ -222,7 +211,7 @@ describe("create_fungible_token", () => {
     const hederaApiClient = new HederaMirrorNodeClient("testnet");
 
     const promptText =
-      "Create token 'Complex Token' with symbol CPLXT, 1 decimal places, and starting supply of 1111. Set admin key and supply keys. Set memo to 'This a complex token'. Set metadata to 'this could be a link to image'";
+      "Create token 'Complex Token' with symbol CPLXT, 1 decimal places, and starting supply of 1111. Set admin key and supply keys. Set memo to 'This a complex token'. Set metadata to 'this could be a link to image'. Don't set metadata key";
     const prompt = {
       user: "user",
       text: promptText,
