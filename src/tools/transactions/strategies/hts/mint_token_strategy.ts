@@ -1,6 +1,6 @@
 import {TokenId, TokenMintTransaction, Transaction, TransactionReceipt, TransactionResponse} from "@hashgraph/sdk";
 import { TransactionStrategy } from "../base_strategy";
-import { MintTokenResult } from "../../../../types";
+import { MintTokenResult } from "../../../results";
 
 export class MintTokenStrategy implements TransactionStrategy<MintTokenResult> {
     constructor(

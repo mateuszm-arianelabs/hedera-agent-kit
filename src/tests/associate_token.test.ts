@@ -7,6 +7,7 @@ import { LangchainAgent } from "./utils/langchainAgent";
 import { NetworkType } from "./types";
 import { wait } from "./utils/utils";
 
+const IS_CUSTODIAL = true;
 
 dotenv.config();
 describe("associate_token", () => {
@@ -117,7 +118,7 @@ describe("associate_token", () => {
                     text: promptText,
                 };
 
-                const response = await langchainAgent.sendPrompt(prompt);
+                const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
                 await wait(5000);
 

@@ -5,6 +5,7 @@ import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { wait } from "./utils/utils";
 
+const IS_CUSTODIAL = true;
 
 const extractTopicId = (messages: any[]): string => {
   const result = messages.reduce((acc, message) => {
@@ -91,7 +92,7 @@ describe("submit_topic_message", () => {
         };
 
         const langchainAgent = await LangchainAgent.create();
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
         console.log(JSON.stringify(response, null, 2));
         const extractedTopicId = extractTopicId(response.messages);
         await wait(5000);

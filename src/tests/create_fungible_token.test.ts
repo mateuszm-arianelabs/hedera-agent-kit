@@ -4,6 +4,8 @@ import * as dotenv from "dotenv";
 import { wait } from "./utils/utils";
 import { LangchainAgent } from "./utils/langchainAgent";
 
+const IS_CUSTODIAL = true;
+
 function extractTokenId(messages: any) {
   const toolMessages = messages.filter((msg: any) =>
       (msg.id && msg.id[2] === "ToolMessage") ||
@@ -42,7 +44,7 @@ describe("create_fungible_token", () => {
     };
     const langchainAgent = await LangchainAgent.create();
 
-    const response = await langchainAgent.sendPrompt(prompt);
+    const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
     const tokenId = extractTokenId(response.messages);
 
     await wait(5000);
@@ -73,7 +75,7 @@ describe("create_fungible_token", () => {
     };
     const langchainAgent = await LangchainAgent.create();
 
-    const response = await langchainAgent.sendPrompt(prompt);
+    const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
     const tokenId = extractTokenId(response.messages);
 
     await wait(5000);
@@ -102,7 +104,7 @@ describe("create_fungible_token", () => {
     };
     const langchainAgent = await LangchainAgent.create();
 
-    const response = await langchainAgent.sendPrompt(prompt);
+    const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
     const tokenId = extractTokenId(response.messages);
 
     await wait(5000);
@@ -131,7 +133,7 @@ describe("create_fungible_token", () => {
     };
     const langchainAgent = await LangchainAgent.create();
 
-    const response = await langchainAgent.sendPrompt(prompt);
+    const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
     const tokenId = extractTokenId(response.messages);
 
     await wait(5000);
@@ -160,7 +162,7 @@ describe("create_fungible_token", () => {
     };
     const langchainAgent = await LangchainAgent.create();
 
-    const response = await langchainAgent.sendPrompt(prompt);
+    const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
     const tokenId = extractTokenId(response.messages);
 
     await wait(5000);
@@ -189,7 +191,7 @@ describe("create_fungible_token", () => {
     };
     const langchainAgent = await LangchainAgent.create();
 
-    const response = await langchainAgent.sendPrompt(prompt);
+    const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
     const tokenId = extractTokenId(response.messages);
 
     await wait(5000);

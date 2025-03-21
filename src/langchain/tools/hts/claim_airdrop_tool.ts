@@ -1,8 +1,9 @@
-import { Tool } from "@langchain/core/tools";
+import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
-import {AccountId, PendingAirdropId, TokenId} from "@hashgraph/sdk";
+import { AccountId, PendingAirdropId, TokenId } from "@hashgraph/sdk";
+import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 
-abstract class AbstractHederaClaimAirdropTool extends Tool {
+export class HederaClaimAirdropTool extends Tool {
     name = 'hedera_claim_airdrop';
 
     description = `Claim an airdrop for a token on Hedera
@@ -17,19 +18,14 @@ Example usage:
   }'
 `;
 
-    protected constructor() {
-        super();
-    }
-}
-
-export class CustodialHederaClaimAirdropTool extends AbstractHederaClaimAirdropTool {
     constructor(private hederaKit: HederaAgentKit) {
         super();
     }
 
-    protected async _call(input: string): Promise<string> {
+    protected override async _call(input: any, _runManager?: CallbackManagerForToolRun, config?: ToolRunnableConfig): Promise<string> {
         try {
-            console.log('hedera_claim_airdrop (custodial) tool has been called');
+            const isCustodial = config?.configurable?.isCustodial === true;
+            console.log(`hedera_claim_airdrop tool has been called (${isCustodial ? 'custodial' : 'non-custodial'})`);
 
             const parsedInput = JSON.parse(input);
             const airdropId = new PendingAirdropId({
@@ -37,48 +33,10 @@ export class CustodialHederaClaimAirdropTool extends AbstractHederaClaimAirdropT
                 senderId: AccountId.fromString(parsedInput.senderAccountId),
                 receiverId: this.hederaKit.client.operatorAccountId!
             });
-            const result = await this.hederaKit.claimAirdrop(airdropId);
 
-            return JSON.stringify({
-                status: "success",
-                message: "Airdrop claim successful",
-                tokenId: parsedInput.tokenId,
-                senderAccountId: parsedInput.senderAccountId,
-                receiverAccountId: AccountId.fromString(process.env.HEDERA_ACCOUNT_ID!),
-                txHash: result.txHash
-            });
-        } catch (error: any) {
-            return JSON.stringify({
-                status: "error",
-                message: error.message,
-                code: error.code || "UNKNOWN_ERROR",
-            });
-        }
-    }
-}
-
-export class NonCustodialHederaClaimAirdropTool extends AbstractHederaClaimAirdropTool {
-    constructor(private hederaKit: HederaAgentKit) {
-        super();
-    }
-
-    protected async _call(input: string): Promise<string> {
-        try {
-            console.log('hedera_claim_airdrop (non-custodial) tool has been called');
-
-            const parsedInput = JSON.parse(input);
-            const airdropId = new PendingAirdropId({
-                tokenId: TokenId.fromString(parsedInput.tokenId),
-                senderId: AccountId.fromString(parsedInput.senderAccountId),
-                receiverId: this.hederaKit.client.operatorAccountId!
-            });
-            const txBytes = await this.hederaKit.claimAirdropNonCustodial(airdropId);
-
-            return JSON.stringify({
-                status: "success",
-                message: "Airdrop claim transaction bytes created successfully",
-                txBytes: txBytes,
-            });
+            return await this.hederaKit
+                .claimAirdrop(airdropId, isCustodial)
+                .then(response => response.getStringifiedResponse());
         } catch (error: any) {
             return JSON.stringify({
                 status: "error",

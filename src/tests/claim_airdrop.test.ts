@@ -7,6 +7,7 @@ import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { NetworkType } from "./types";
 import { wait } from "./utils/utils";
 
+const IS_CUSTODIAL = true;
 
 describe("claim_pending_airdrops", () => {
     let airdropCreatorAccount: AccountData;
@@ -149,7 +150,7 @@ describe("claim_pending_airdrops", () => {
                     text: promptText,
                 };
                 langchainAgent = await LangchainAgent.create();
-                const response = await langchainAgent.sendPrompt(prompt);
+                const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
                 const tokenBalance = await networkClientWrapper.getAccountTokenBalance(
                     tokenId,

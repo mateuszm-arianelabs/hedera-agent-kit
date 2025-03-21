@@ -6,6 +6,7 @@ import { NetworkClientWrapper } from "./utils/testnetClient";
 import { AccountData } from "./utils/testnetUtils";
 import { wait } from "./utils/utils";
 
+const IS_CUSTODIAL = true;
 
 const extractTxHash = (messages: any[]) => {
   return messages.reduce((acc, { content }) => {
@@ -95,7 +96,7 @@ describe("Test HBAR transfer", async () => {
           user: "user",
           text: promptText,
         };
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
         const txHash = extractTxHash(response.messages);
 
         // Get balances after transaction being successfully processed by mirror node

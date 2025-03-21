@@ -7,7 +7,7 @@ import {
     TransactionResponse
 } from "@hashgraph/sdk";
 import { TransactionStrategy } from "../base_strategy";
-import { AssociateTokenResult } from "../../../../types";
+import { AssociateTokenResult } from "../../../results";
 
 export class AssociateTokenStrategy implements TransactionStrategy<AssociateTokenResult> {
     constructor(

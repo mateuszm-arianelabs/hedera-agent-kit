@@ -7,7 +7,7 @@ import {
     TransferTransaction
 } from "@hashgraph/sdk";
 import { TransactionStrategy } from "../base_strategy";
-import { TransferTokenResult } from "../../../../types";
+import { TransferTokenResult } from "../../../results";
 
 export class TransferTokenStrategy implements TransactionStrategy<TransferTokenResult> {
     constructor(

@@ -7,7 +7,7 @@ import {
     TransactionResponse
 } from "@hashgraph/sdk";
 import { TransactionStrategy } from "../base_strategy";
-import { RejectTokenResult } from "../../../../types";
+import { RejectTokenResult } from "../../../results";
 
 export class RejectTokenStrategy implements TransactionStrategy<RejectTokenResult> {
     constructor(

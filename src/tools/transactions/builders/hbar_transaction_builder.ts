@@ -1,7 +1,7 @@
 import { AccountId } from "@hashgraph/sdk";
 import { BaseTransactionBuilder } from "./base_transaction_builder";
-import { TransferHBARResult } from "../../../types";
-import { TransferHbarStrategy } from "../strategies/hbar/transfer_hbar_strategy";
+import { TransferHbarStrategy } from "../strategies";
+import { TransferHBARResult } from "../../results";
 
 export class HbarTransactionBuilder {
     static transferHbar(

@@ -5,7 +5,7 @@ import {
     Transaction, TransactionReceipt, TransactionResponse
 } from "@hashgraph/sdk";
 import { TransactionStrategy } from "../base_strategy";
-import { AssetAllowanceResult } from "../../../../types";
+import { AssetAllowanceResult } from "../../../results";
 
 export class AssetAllowanceStrategy implements TransactionStrategy<AssetAllowanceResult> {
     constructor(

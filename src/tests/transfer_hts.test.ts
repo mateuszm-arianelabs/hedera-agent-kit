@@ -6,6 +6,7 @@ import { AccountData } from "./utils/testnetUtils";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { wait } from "./utils/utils";
 
+const IS_CUSTODIAL = true;
 
 const extractTxHash = (messages: any[]) => {
   return messages.reduce((acc, { content }) => {
@@ -146,7 +147,7 @@ describe("Test Token transfer", async () => {
         };
 
         const langchainAgent = await LangchainAgent.create();
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
         const txHash = extractTxHash(response.messages);
         const formattedTxHash = formatTxHash(txHash);
 

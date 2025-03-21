@@ -1,4 +1,3 @@
-import { TransferHBARResult } from "../../../../types";
 import {
     AccountId,
     Hbar,
@@ -8,6 +7,7 @@ import {
     TransferTransaction
 } from "@hashgraph/sdk";
 import { TransactionStrategy } from "../base_strategy";
+import { TransferHBARResult } from "../../../results";
 
 export class TransferHbarStrategy implements TransactionStrategy<TransferHBARResult> {
     constructor(

@@ -1,7 +1,8 @@
-import { Tool } from "@langchain/core/tools";
+import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
+import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 
-abstract class AbstractHederaMintNFTTool extends Tool {
+export class HederaMintNFTTool extends Tool {
     name = 'hedera_mint_nft';
 
     description = `Mint an NFT to an account on Hedera
@@ -16,65 +17,19 @@ Example usage:
   }'
 `;
 
-    protected constructor() {
-        super();
-    }
-}
-
-export class CustodialHederaMintNFTTool extends AbstractHederaMintNFTTool {
     constructor(private hederaKit: HederaAgentKit) {
         super();
     }
 
-    protected async _call(input: string): Promise<string> {
+    protected override async _call(input: any, _runManager?: CallbackManagerForToolRun, config?: ToolRunnableConfig): Promise<string> {
         try {
-            console.log('hedera_mint_nft (custodial) tool has been called');
+            const isCustodial = config?.configurable?.isCustodial === true;
+            console.log(`hedera_mint_nft tool has been called (${isCustodial ? 'custodial' : 'non-custodial'})`);
 
             const parsedInput = JSON.parse(input);
-
-            const result = await this.hederaKit.mintNFTToken(
-                parsedInput.tokenId,
-                parsedInput.tokenMetadata
-            );
-
-            return JSON.stringify({
-                status: "success",
-                message: "NFT minting successful",
-                tokenId: parsedInput.tokenId,
-                tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata), // encoding to Uint8Array
-                txHash: result.txHash
-            });
-        } catch (error: any) {
-            return JSON.stringify({
-                status: "error",
-                message: error.message,
-                code: error.code || "UNKNOWN_ERROR",
-            });
-        }
-    }
-}
-
-export class NonCustodialHederaMintNFTTool extends AbstractHederaMintNFTTool {
-    constructor(private hederaKit: HederaAgentKit) {
-        super();
-    }
-
-    protected async _call(input: string): Promise<string> {
-        try {
-            console.log('hedera_mint_nft (non-custodial) tool has been called');
-
-            const parsedInput = JSON.parse(input);
-
-            const txBytes = await this.hederaKit.mintNFTTokenNonCustodial(
-                parsedInput.tokenId,
-                parsedInput.tokenMetadata
-            );
-
-            return JSON.stringify({
-                status: "success",
-                message: "NFT minting transaction bytes created successfully",
-                txBytes: txBytes,
-            });
+            return await this.hederaKit
+                .mintNFTToken(parsedInput.tokenId, parsedInput.tokenMetadata, isCustodial) //FIXME:shouldn't the metadata be passed encoded?
+                .then(response => response.getStringifiedResponse());
         } catch (error: any) {
             return JSON.stringify({
                 status: "error",

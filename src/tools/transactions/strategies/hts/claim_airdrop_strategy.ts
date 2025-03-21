@@ -4,7 +4,7 @@ import {
     Transaction, TransactionReceipt, TransactionResponse
 } from "@hashgraph/sdk";
 import { TransactionStrategy } from "../base_strategy";
-import { ClaimAirdropResult } from "../../../../types";
+import { ClaimAirdropResult } from "../../../results";
 
 export class ClaimAirdropStrategy implements TransactionStrategy<ClaimAirdropResult> {
     constructor(

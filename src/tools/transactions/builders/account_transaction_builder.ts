@@ -1,7 +1,7 @@
-import { AssetAllowanceResult } from "../../../types";
 import { AccountId, TokenId } from "@hashgraph/sdk";
 import { BaseTransactionBuilder } from "./base_transaction_builder";
-import { AssetAllowanceStrategy } from "../strategies/account/asset_allowance_strategy";
+import { AssetAllowanceStrategy } from "../strategies";
+import {AssetAllowanceResult} from "../../results";
 
 
 export class AccountTransactionBuilder {

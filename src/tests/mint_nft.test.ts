@@ -8,6 +8,8 @@ import { wait } from "./utils/utils";
 
 dotenv.config();
 
+const IS_CUSTODIAL = true;
+
 describe("hedera_mint_nft", () => {
     let langchainAgent: LangchainAgent;
     let hederaApiClient: HederaMirrorNodeClient;
@@ -45,7 +47,7 @@ describe("hedera_mint_nft", () => {
         };
 
         langchainAgent = await LangchainAgent.create();
-        await langchainAgent.sendPrompt(prompt);
+        await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
         await wait(5000);
 

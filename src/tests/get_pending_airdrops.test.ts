@@ -6,6 +6,7 @@ import * as dotenv from "dotenv";
 import { Airdrop } from "../types";
 import { wait } from "./utils/utils";
 
+const IS_CUSTODIAL = true;
 
 function findRelevantAirdrop(messages, accountId, tokenId) {
     const toolMessages = messages.filter((msg) =>
@@ -138,7 +139,7 @@ describe("get_pending_airdrops", () => {
                     text: promptText,
                 };
 
-                const response = await langchainAgent.sendPrompt(prompt);
+                const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
                 const relevantAirdrop = findRelevantAirdrop(response.messages, accountId, tokenId);
 

@@ -1,7 +1,7 @@
-import {Tool} from "@langchain/core/tools";
+import { Tool } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
-import {toBaseUnit} from "../../../utils/hts-format-utils";
-import {fromBaseToDisplayUnit} from "../../../utils/format-units";
+import { toBaseUnit } from "../../../utils/hts-format-utils";
+import { fromBaseToDisplayUnit } from "../../../utils/format-units";
 
 export class HederaGetTokenHoldersTool extends Tool {
     name = 'hedera_get_token_holders'

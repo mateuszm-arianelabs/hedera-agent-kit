@@ -1,21 +1,26 @@
 import { AccountId, PendingAirdropId, PublicKey, TokenId } from "@hashgraph/sdk";
-
 import { BaseTransactionBuilder } from "./base_transaction_builder";
+import {
+    AirdropRecipient,
+    AirdropTokenStrategy,
+    AssociateTokenStrategy,
+    ClaimAirdropStrategy,
+    CreateTokenOptions,
+    CreateTokenStrategy,
+    DissociateTokenStrategy,
+    MintNftStrategy,
+    MintTokenStrategy,
+    RejectTokenStrategy,
+    TransferTokenStrategy
+} from "../strategies";
 import {
     AirdropResult,
     ClaimAirdropResult,
     CreateTokenResult,
-    DissociateTokenResult, MintNFTResult, MintTokenResult, RejectTokenResult, TransferTokenResult
-} from "../../../types";
-import {AirdropRecipient, AirdropTokenStrategy} from "../strategies/hts/airdrop_token_strategy";
-import { AssociateTokenStrategy } from "../strategies/hts/associate_token_strategy";
-import { ClaimAirdropStrategy } from "../strategies/hts/claim_airdrop_strategy";
-import { CreateTokenOptions, CreateTokenStrategy } from "../strategies/hts/create_token_strategy";
-import { DissociateTokenStrategy } from "../strategies/hts/dissociate_token_strategy";
-import { MintNftStrategy } from "../strategies/hts/mint_nft_strategy";
-import { MintTokenStrategy } from "../strategies/hts/mint_token_strategy";
-import { RejectTokenStrategy } from "../strategies/hts/reject_token_strategy";
-import { TransferTokenStrategy } from "../strategies/hts/transfer_token_strategy";
+    DissociateTokenResult,
+    MintNFTResult, MintTokenResult, RejectTokenResult, TransferTokenResult
+} from "../../results";
+
 
 export class HtsTransactionBuilder {
     static airdropToken(

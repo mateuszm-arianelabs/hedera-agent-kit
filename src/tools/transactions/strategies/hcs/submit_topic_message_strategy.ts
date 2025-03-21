@@ -1,4 +1,3 @@
-import { SubmitMessageResult } from "../../../../types";
 import {
     TopicId,
     TopicMessageSubmitTransaction,
@@ -7,6 +6,7 @@ import {
     TransactionResponse
 } from "@hashgraph/sdk";
 import { TransactionStrategy } from "../base_strategy";
+import { SubmitMessageResult } from "../../../results";
 
 export class SubmitTopicMessageStrategy implements TransactionStrategy<SubmitMessageResult> {
     constructor(

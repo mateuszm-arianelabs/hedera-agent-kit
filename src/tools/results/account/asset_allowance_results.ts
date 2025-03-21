@@ -1,35 +1,32 @@
-import { AgentKitActionName, BaseResult } from "../BaseResult";
+import { BaseResult } from "../base_result";
+import { AgentKitActionName } from "../../../types";
 
-export type CreateTopicResult = {
+export type AssetAllowanceResult = {
     status: string,
     txHash: string,
-    topicId: string,
 }
 
-export class CustodialCreateTopicResult implements BaseResult <CreateTopicResult> {
+export class CustodialAssetAllowanceResult implements BaseResult <AssetAllowanceResult> {
+    actionName: AgentKitActionName;
+
     constructor(
-        public readonly topicId: string,
         public readonly txHash: string,
         public readonly status: string
     ) {
-        this.actionName = AgentKitActionName.CREATE_TOPIC_CUSTODIAL;
+        this.actionName = AgentKitActionName.ASSET_ALLOWANCE_CUSTODIAL;
     }
 
-    actionName: AgentKitActionName;
-
-    getRawResponse(): CreateTopicResult {
+    getRawResponse(): AssetAllowanceResult {
         return {
             status: this.status,
             txHash: this.txHash,
-            topicId: this.topicId,
         };
     }
 
     getStringifiedResponse(): string {
         return JSON.stringify({
             status: this.status,
-            message: "Topic created",   
-            topicId: this.topicId,
+            message: "Asset allowance created",
             txHash: this.txHash
         });
     }
@@ -39,12 +36,12 @@ export class CustodialCreateTopicResult implements BaseResult <CreateTopicResult
     }
 }
 
-export class NonCustodialCreateTopicResult implements BaseResult <string> {
-    constructor(public readonly txBytes: string) {
-        this.actionName = AgentKitActionName.CREATE_TOPIC_NON_CUSTODIAL;
-    }
-
+export class NonCustodialAssetAllowanceResult implements BaseResult <string> {
     actionName: AgentKitActionName;
+
+    constructor(public readonly txBytes: string) {
+        this.actionName = AgentKitActionName.ASSET_ALLOWANCE_NON_CUSTODIAL;
+    }
 
     getRawResponse(): string {
         return this.txBytes;
@@ -54,7 +51,7 @@ export class NonCustodialCreateTopicResult implements BaseResult <string> {
         return JSON.stringify({
             status: "success",
             txBytes: this.txBytes,
-            message: "Topic creation transaction bytes have been successfully created.",
+            message: "Asset allowance transaction bytes have been successfully created.",
         });
     }
 

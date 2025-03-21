@@ -6,6 +6,8 @@ import { NetworkClientWrapper } from "./utils/testnetClient";
 import { AccountData } from "./utils/testnetUtils";
 import { wait } from "./utils/utils";
 
+const IS_CUSTODIAL = true;
+
 const extractTokenBalance = (messages: any[]) => {
   return messages.reduce((acc, { content }) => {
     try {
@@ -67,7 +69,7 @@ describe("get_hts_balance", () => {
         decimals: 0,
       });
 
-      Promise.all([
+      await Promise.all([
         networkClientWrapper.transferToken(acc1.accountId, token1, 100),
         networkClientWrapper.transferToken(acc2.accountId, token2, 123),
         networkClientWrapper.transferToken(acc3.accountId, token2, 10),
@@ -122,7 +124,7 @@ describe("get_hts_balance", () => {
           text: promptText,
         };
 
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
         await wait(5000);
 
         const hederaActionBalance = extractTokenBalance(response.messages);

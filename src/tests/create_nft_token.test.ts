@@ -6,6 +6,8 @@ import { LangchainAgent } from "./utils/langchainAgent";
 import { NetworkClientWrapper } from "./utils/testnetClient";
 import {TokenType} from "@hashgraph/sdk";
 
+const IS_CUSTODIAL = true;
+
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function extractTokenId(messages: any) {
@@ -63,7 +65,7 @@ describe("create_nft_token", () => {
         };
 
         langchainAgent = await LangchainAgent.create();
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
         const tokenId = extractTokenId(response.messages);
 
@@ -91,7 +93,7 @@ describe("create_nft_token", () => {
         };
 
         langchainAgent = await LangchainAgent.create();
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
         const tokenId = extractTokenId(response.messages);
 
@@ -119,7 +121,7 @@ describe("create_nft_token", () => {
         };
 
         langchainAgent = await LangchainAgent.create();
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
         const tokenId = extractTokenId(response.messages);
 
@@ -145,7 +147,7 @@ describe("create_nft_token", () => {
         };
 
         langchainAgent = await LangchainAgent.create();
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
         const tokenId = extractTokenId(response.messages);
 
@@ -171,7 +173,7 @@ describe("create_nft_token", () => {
         };
 
         langchainAgent = await LangchainAgent.create();
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
         const tokenId = extractTokenId(response.messages);
 
@@ -197,7 +199,7 @@ describe("create_nft_token", () => {
         };
 
         langchainAgent = await LangchainAgent.create();
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
         const tokenId = extractTokenId(response.messages);
 

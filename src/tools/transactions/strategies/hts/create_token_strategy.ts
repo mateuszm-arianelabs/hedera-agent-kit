@@ -7,7 +7,7 @@ import {
     Transaction, TransactionReceipt, TransactionResponse
 } from "@hashgraph/sdk";
 import { TransactionStrategy } from "../base_strategy";
-import { CreateTokenResult } from "../../../../types";
+import { CreateTokenResult } from "../../../results";
 
 export interface CreateTokenOptions {
     name: string;

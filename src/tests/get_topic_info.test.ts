@@ -7,6 +7,7 @@ import { LangchainAgent } from "./utils/langchainAgent";
 import { TopicInfoApiResponse } from "../types";
 import { wait } from "./utils/utils";
 
+const IS_CUSTODIAL = true;
 
 function extractTopicInfo(messages: any[]): TopicInfoApiResponse {
   const result = messages.reduce((acc, message) => {
@@ -89,7 +90,7 @@ describe("get_topic_info", () => {
           text: textPrompt,
         };
 
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
         await wait(5000);
 
         const topicInfo = extractTopicInfo(response.messages);

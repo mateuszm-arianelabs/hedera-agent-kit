@@ -16,6 +16,8 @@ interface TokenData {
 }
 [];
 
+const IS_CUSTODIAL = true;
+
 const extractHoldersData = (messages: any[]): TokenData[] => {
   const result = messages.reduce((acc, { content }) => {
     try {
@@ -155,7 +157,7 @@ describe("get_list_of_token_holders", () => {
         };
 
         const langchainAgent = await LangchainAgent.create();
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
         const langchainResponseHolders = extractHoldersData(response.messages);
         expect(langchainResponseHolders.length).toBe(holders.length);
@@ -177,7 +179,7 @@ describe("get_list_of_token_holders", () => {
           text: promptText,
         };
         const langchainAgent = await LangchainAgent.create();
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
         const langchainResponseHolders = extractHoldersData(response.messages);
 
         expect(langchainResponseHolders.length).toBe(holders.length);

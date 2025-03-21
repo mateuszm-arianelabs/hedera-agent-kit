@@ -1,5 +1,5 @@
 import { AccountId, Client, TransactionId } from "@hashgraph/sdk";
-import { TransactionStrategy } from "../strategies/base_strategy";
+import { TransactionStrategy } from "../strategies";
 
 export class BaseTransactionBuilder<T> {
     constructor(private strategy: TransactionStrategy<T>) {}

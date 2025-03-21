@@ -6,6 +6,7 @@ import { NetworkType } from "./types";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { wait } from "./utils/utils";
 
+const IS_CUSTODIAL = true;
 
 dotenv.config();
 describe("delete_topic", () => {
@@ -68,7 +69,7 @@ describe("delete_topic", () => {
           text: textPrompt,
         };
 
-        await langchainAgent.sendPrompt(prompt);
+        await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
         await wait(5000);
 
         const topicInfo = await hederaMirrorNodeClient.getTopic(topicId);

@@ -19,7 +19,6 @@ If no input is given (empty JSON '{}'), it returns the balance of the connected 
    '{}'
 `
 
-
     constructor(private hederaKit: HederaAgentKit) {
         super()
     }

@@ -1,6 +1,5 @@
 import BigNumber from "bignumber.js";
-import { TokenId } from "@hashgraph/sdk";
-import {CreateTokenOptions} from "../tools/transactions/strategies/hts/create_token_strategy";
+import { CreateTokenOptions } from "../tools/transactions/strategies";
 
 export type HederaNetworkType = "mainnet" | "testnet" | "previewnet";
 
@@ -93,77 +92,11 @@ export type AllTokensBalancesApiResponse = {
     };
 }
 
-export type RejectTokenResult = {
-    status: string,
-    txHash: string,
-}
-
-export type AssociateTokenResult = {
-    status: string,
-    txHash: string,
-}
-
-export type DissociateTokenResult = {
-    status: string,
-    txHash: string,
-}
-
 export type Airdrop = {
     amount: number;
     receiver_id: string;
     sender_id: string;
     token_id: string;
-}
-
-export type AirdropResult = {
-    status: string,
-    txHash: string,
-}
-
-export type ClaimAirdropResult = {
-    status: string,
-    txHash: string,
-}
-
-export type CreateTokenResult = {
-    status: string,
-    txHash: string,
-    tokenId: TokenId,
-}
-
-export type TransferTokenResult = {
-    status: string,
-    txHash: string,
-}
-
-export type TransferHBARResult = {
-    status: string,
-    txHash: string,
-}
-
-export type SubmitMessageResult = {
-    status: string,
-    txHash: string,
-}
-
-export type DeleteTopicResult = {
-    status: string,
-    txHash: string,
-}
-
-export type MintTokenResult = {
-    status: string,
-    txHash: string,
-}
-
-export type MintNFTResult = {
-    status: string,
-    txHash: string,
-}
-
-export type AssetAllowanceResult = {
-    status: string,
-    txHash: string,
 }
 
 export type PendingAirdropsApiResponse = {
@@ -218,4 +151,36 @@ export interface CreateNFTOptions extends Omit<CreateTokenOptions, "tokenType" |
 }
 
 export interface CreateFTOptions extends Omit<CreateTokenOptions, "tokenType" | "client"> {
+}
+
+
+export enum AgentKitActionName {
+    CREATE_TOPIC_CUSTODIAL = 'createTopicCustodial',
+    CREATE_TOPIC_NON_CUSTODIAL = 'createTopicNonCustodial',
+    DELETE_TOPIC_CUSTODIAL = 'deleteTopicCustodial',
+    DELETE_TOPIC_NON_CUSTODIAL = 'deleteTopicNonCustodial',
+    SUBMIT_TOPIC_MESSAGE_CUSTODIAL = 'submitTopicMessageCustodial',
+    SUBMIT_TOPIC_MESSAGE_NON_CUSTODIAL = 'submitTopicMessageCustodial',
+    CREATE_TOKEN_CUSTODIAL = 'createTokenCustodial',
+    CREATE_TOKEN_NON_CUSTODIAL = 'createTokenNonCustodial',
+    ASSOCIATE_TOKEN_CUSTODIAL = 'associateTokenCustodial',
+    ASSOCIATE_TOKEN_NON_CUSTODIAL = 'associateTokenNonCustodial',
+    DISSOCIATE_TOKEN_CUSTODIAL = 'dissociateTokenCustodial',
+    DISSOCIATE_TOKEN_NON_CUSTODIAL = 'dissociateTokenNonCustodial',
+    AIRDROP_TOKEN_CUSTODIAL = 'airdropTokenCustodial',
+    AIRDROP_TOKEN_NON_CUSTODIAL = 'airdropTokenNonCustodial',
+    REJECT_TOKEN_CUSTODIAL = 'rejectedTokenCustodial',
+    REJECT_TOKEN_NON_CUSTODIAL = 'rejectedTokenNonCustodial',
+    MINT_TOKEN_CUSTODIAL = 'mintTokenCustodial',
+    MINT_TOKEN_NON_CUSTODIAL = 'mintTokenNonCustodial',
+    MINT_NFT_TOKEN_CUSTODIAL = 'mintNFTTokenCustodial',
+    MINT_NFT_TOKEN_NON_CUSTODIAL = 'mintNFTTokenNonCustodial',
+    CLAIM_AIRDROP_CUSTODIAL = 'claimAirdropCustodial',
+    CLAIM_AIRDROP_NON_CUSTODIAL = 'claimAirdropNonCustodial',
+    TRANSFER_TOKEN_CUSTODIAL = 'transferTokenCustodial',
+    TRANSFER_TOKEN_NON_CUSTODIAL = 'transferTokenNonCustodial',
+    TRANSFER_HBAR_CUSTODIAL = 'transferHbarCustodial',
+    TRANSFER_HBAR_NON_CUSTODIAL = 'transferHbarNonCustodial',
+    ASSET_ALLOWANCE_CUSTODIAL = 'assetAllowedCustodial',
+    ASSET_ALLOWANCE_NON_CUSTODIAL = 'assetAllowedNonCustodial',
 }

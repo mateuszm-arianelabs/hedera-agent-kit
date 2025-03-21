@@ -6,6 +6,7 @@ import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { wait } from "./utils/utils";
 
+const IS_CUSTODIAL = true;
 
 function extractTopicMessages(messages) {
     const toolMessages = messages.filter((msg) =>
@@ -136,7 +137,7 @@ describe("get_topic_messages", () => {
                     text: textPrompt,
                 };
 
-                const response = await langchainAgent.sendPrompt(prompt);
+                const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
                 console.log(JSON.stringify(response, null, 2));
                 const messages = extractTopicMessages(response.messages);

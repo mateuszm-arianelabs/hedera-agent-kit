@@ -7,7 +7,7 @@ import {
     TransactionResponse
 } from "@hashgraph/sdk";
 import { TransactionStrategy } from "../base_strategy";
-import { AirdropResult } from "../../../../types";
+import { AirdropResult } from "../../../results";
 
 export interface AirdropRecipient {
     accountId: string | AccountId;

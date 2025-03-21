@@ -34,10 +34,8 @@ Example usage:
 
     protected override async _call(input: any, _runManager?: CallbackManagerForToolRun, config?: ToolRunnableConfig):  Promise<string> {
         try {
-            console.log('hedera_create_topic tool has been called');
-
             const isCustodial = config?.configurable?.isCustodial === true;
-            console.log(`Extracted 'isCustodial' flag: ${isCustodial.toString()}`);
+            console.log(`hedera_create_topic tool has been called (${isCustodial ? 'custodial' : 'non-custodial'})`);
 
             const parsedInput = JSON.parse(input);
             return await this.hederaKit
@@ -52,5 +50,4 @@ Example usage:
             });
         }
     }
-
 }

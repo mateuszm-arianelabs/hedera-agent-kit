@@ -6,6 +6,7 @@ import { AccountData } from "./utils/testnetUtils";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { wait } from "./utils/utils";
 
+const IS_CUSTODIAL = true;
 
 describe("get_hbar_balance", () => {
   let acc1: AccountData;
@@ -51,7 +52,7 @@ describe("get_hbar_balance", () => {
           text: promptText,
         };
 
-        const response = await langchainAgent.sendPrompt(prompt);
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
         let hederaActionBalance: number;
 
         const match = response.messages[

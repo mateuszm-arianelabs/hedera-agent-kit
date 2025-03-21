@@ -7,7 +7,7 @@ import {
     TransactionResponse
 } from "@hashgraph/sdk";
 import { TransactionStrategy } from "../base_strategy";
-import { DissociateTokenResult } from "../../../../types";
+import { DissociateTokenResult } from "../../../results";
 
 export class DissociateTokenStrategy implements TransactionStrategy<DissociateTokenResult> {
     constructor(

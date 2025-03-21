@@ -9,30 +9,19 @@ import {
 } from "@hashgraph/sdk";
 import {
     Airdrop,
-    AirdropResult,
-    AssetAllowanceResult,
-    AssociateTokenResult,
-    ClaimAirdropResult,
     CreateFTOptions,
     CreateNFTOptions,
-    CreateTokenResult,
-    DeleteTopicResult,
-    DissociateTokenResult,
     HCSMessage,
     HederaNetworkType,
     HtsTokenDetails,
-    MintNFTResult,
-    MintTokenResult,
-    RejectTokenResult,
-    SubmitMessageResult,
-    TokenBalance, TopicInfoApiResponse,
-    TransferHBARResult,
-    TransferTokenResult,
+    TokenBalance,
+    TopicInfoApiResponse,
 } from "../types";
-import { HcsTransactionBuilder } from "../tools/transactions/builders/hcs_transaction_builder";
-import { HtsTransactionBuilder } from "../tools/transactions/builders/hts_transaction_builder";
-import { HbarTransactionBuilder } from "../tools/transactions/builders/hbar_transaction_builder";
+import { HcsTransactionBuilder } from "../tools/transactions/builders";
+import { HtsTransactionBuilder } from "../tools/transactions/builders";
+import { HbarTransactionBuilder } from "../tools/transactions/builders";
 import {
+    CustodialDissociateTokenResult,
     get_all_tokens_balances,
     get_hbar_balance,
     get_hts_balance,
@@ -40,16 +29,69 @@ import {
     get_pending_airdrops,
     get_token_holders,
     get_topic_info,
-    get_topic_messages,
+    get_topic_messages, NonCustodialDissociateTokenResult,
 } from "../tools";
-import { AccountTransactionBuilder } from "../tools/transactions/builders/account_transaction_builder";
-import { AirdropRecipient } from "../tools/transactions/strategies/hts/airdrop_token_strategy";
+import { AccountTransactionBuilder } from "../tools/transactions/builders";
+import { AirdropRecipient } from "../tools/transactions/strategies";
 import {
     CreateTopicResult,
     CustodialCreateTopicResult,
     NonCustodialCreateTopicResult
-} from "../tools/results/hcs/createTopicResults";
-import {BaseResult} from "../tools/results/BaseResult";
+} from "../tools";
+import { BaseResult} from "../tools";
+import {
+    CustodialSubmitMessageResult,
+    NonCustodialSubmitMessageResult,
+    SubmitMessageResult
+} from "../tools";
+import {
+    CustodialTransferHbarResult,
+    NonCustodialTransferHbarResult,
+    TransferHBARResult
+} from "../tools";
+import {
+    CreateTokenResult,
+    CustodialCreateTokenResult,
+    NonCustodialCreateTokenResult
+} from "../tools";
+import {
+    CustodialTransferTokenResult,
+    NonCustodialTransferTokenResult,
+    TransferTokenResult
+} from "../tools";
+import {
+    AssociateTokenResult,
+    CustodialAssociateTokenResult,
+    NonCustodialAssociateTokenResult
+} from "../tools";
+import {
+    AirdropResult,
+    CustodialAirdropTokenResult,
+    NonCustodialAirdropTokenResult
+} from "../tools";
+import { DissociateTokenResult } from "../tools";
+import {
+    CustodialRejectTokenResult,
+    NonCustodialRejectTokenResult,
+    RejectTokenResult
+} from "../tools";
+import {
+    CustodialMintTokenResult,
+    MintTokenResult,
+    NonCustodialMintTokenResult
+} from "../tools";
+import { CustodialMintNFTResult, NonCustodialMintNFTResult } from "../tools";
+import { ClaimAirdropResult, CustodialClaimAirdropResult, NonCustodialClaimAirdropResult } from "../tools";
+import {
+    CustodialDeleteTopicResult,
+    DeleteTopicResult,
+    NonCustodialDeleteTopicResult
+} from "../tools";
+import {
+    AssetAllowanceResult,
+    CustodialAssetAllowanceResult,
+    NonCustodialAssetAllowanceResult
+} from "../tools";
 
 
 export default class HederaAgentKit {
@@ -102,7 +144,6 @@ export default class HederaAgentKit {
         return this.createTopicNonCustodial(topicMemo, isSubmitKey);
     }
 
-
     private async createTopicCustodial(
         topicMemo: string,
         isSubmitKey: boolean,
@@ -127,52 +168,112 @@ export default class HederaAgentKit {
         return new NonCustodialCreateTopicResult(txBytes);
     }
 
+
     async submitTopicMessage(
         topicId: TopicId,
         message: string,
-    ): Promise<SubmitMessageResult> {
-        if(!this.privateKey) throw new Error("Custodial actions require privateKey!");
+        custodial?: boolean,
+    ): Promise<BaseResult<string> | BaseResult<SubmitMessageResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
 
-        return await HcsTransactionBuilder
-            .submitTopicMessage(topicId, message)
-            .signAndExecute(this.client);
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.submitTopicMessageCustodial(topicId, message);
+        }
+
+        return this.submitTopicMessageNonCustodial(topicId, message);
     }
 
-    async submitTopicMessageNonCustodial(
+    private async submitTopicMessageCustodial(
         topicId: TopicId,
         message: string,
-    ): Promise<string> {
+    ): Promise<CustodialSubmitMessageResult> {
+        if(!this.privateKey) throw new Error("Custodial actions require privateKey!");
 
-        return await HcsTransactionBuilder
+        const response: SubmitMessageResult =  await HcsTransactionBuilder
+            .submitTopicMessage(topicId, message)
+            .signAndExecute(this.client);
+
+        return new CustodialSubmitMessageResult(response.txHash, response.status);
+    }
+
+    private async submitTopicMessageNonCustodial(
+        topicId: TopicId,
+        message: string,
+    ): Promise<NonCustodialSubmitMessageResult> {
+
+        const txBytes = await HcsTransactionBuilder
             .submitTopicMessage(topicId, message)
             .getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialSubmitMessageResult(txBytes);
     }
+
 
     async transferHbar(
         toAccountId: string | AccountId,
-        amount: string
-    ): Promise<TransferHBARResult> {
-        if(!this.privateKey) throw new Error("Custodial actions require privateKey!");
+        amount: string,
+        custodial?: boolean,
+    ): Promise<BaseResult<string> | BaseResult<TransferHBARResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
 
-        return await HbarTransactionBuilder
-            .transferHbar(this.client.operatorAccountId!, toAccountId, amount)
-            .signAndExecute(this.client);
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.transferHbarCustodial(toAccountId, amount);
+        }
+
+        return this.transferHbarNonCustodial(toAccountId, amount);
     }
 
-    async transferHbarNonCustodial(
+    private async transferHbarCustodial(
         toAccountId: string | AccountId,
         amount: string
-    ): Promise<string> {
+    ): Promise<CustodialTransferHbarResult> {
+        if(!this.privateKey) throw new Error("Custodial actions require privateKey!");
 
-        return await HbarTransactionBuilder
+        const response = await HbarTransactionBuilder
+            .transferHbar(this.client.operatorAccountId!, toAccountId, amount)
+            .signAndExecute(this.client);
+
+        return new CustodialTransferHbarResult(response.txHash, response.status);
+    }
+
+    private async transferHbarNonCustodial(
+        toAccountId: string | AccountId,
+        amount: string
+    ): Promise<NonCustodialTransferHbarResult> {
+
+        const txBytes = await HbarTransactionBuilder
             .transferHbar(this.accountId, toAccountId, amount)
             .getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialTransferHbarResult(txBytes);
     }
 
 
-    async createFT(options: CreateFTOptions): Promise<CreateTokenResult> {
+    async createFT(
+        options: CreateFTOptions,
+        custodial?: boolean
+    ): Promise<BaseResult<string> | BaseResult<CreateTokenResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.createFTCustodial(options);
+        }
+
+        return this.createFTNonCustodial(options);
+    }
+
+    private async createFTCustodial(options: CreateFTOptions): Promise<CustodialCreateTokenResult> {
         if(!this.privateKey) throw new Error("Custodial actions require privateKey!");
-        return HtsTransactionBuilder.createToken(
+        const response: CreateTokenResult = await HtsTransactionBuilder.createToken(
             {
                 ...options,
                 tokenType: TokenType.FungibleCommon,
@@ -181,10 +282,12 @@ export default class HederaAgentKit {
             this.client.operatorPublicKey!,
             this.client.operatorAccountId!,
         ).signAndExecute(this.client);
+
+        return new CustodialCreateTokenResult(response.txHash, response.status, response.tokenId);
     }
 
-    async createFTNonCustodial(options: CreateFTOptions): Promise<string> {
-        return HtsTransactionBuilder.createToken(
+    private async createFTNonCustodial(options: CreateFTOptions): Promise<NonCustodialCreateTokenResult> {
+        const txBytes = await HtsTransactionBuilder.createToken(
             {
                 ...options,
                 tokenType: TokenType.FungibleCommon,
@@ -193,11 +296,30 @@ export default class HederaAgentKit {
             this.publicKey!,
             this.accountId,
         ).getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialCreateTokenResult(txBytes);
     }
 
-    async createNFT(options: CreateNFTOptions): Promise<CreateTokenResult> {
+
+    async createNFT(
+        options: CreateNFTOptions,
+        custodial?: boolean
+    ): Promise<BaseResult<string> | BaseResult<CreateTokenResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.createNFTCustodial(options);
+        }
+
+        return this.createNFTNonCustodial(options);
+    }
+
+    private async createNFTCustodial(options: CreateNFTOptions): Promise<CustodialCreateTokenResult> {
         if(!this.privateKey) throw new Error("Custodial actions require privateKey!");
-        return HtsTransactionBuilder.createToken(
+        const response: CreateTokenResult = await HtsTransactionBuilder.createToken(
             {
                 ...options,
                 decimals: 0,
@@ -209,10 +331,12 @@ export default class HederaAgentKit {
             this.client.operatorPublicKey!,
             this.client.operatorAccountId!,
         ).signAndExecute(this.client);
+
+        return new CustodialCreateTokenResult(response.txHash, response.status, response.tokenId);
     }
 
-    async createNFTNonCustodial(options: CreateNFTOptions): Promise<string> {
-        return HtsTransactionBuilder.createToken(
+    private async createNFTNonCustodial(options: CreateNFTOptions): Promise<NonCustodialCreateTokenResult> {
+        const txBytes = await HtsTransactionBuilder.createToken(
             {
                 ...options,
                 decimals: 0,
@@ -224,38 +348,65 @@ export default class HederaAgentKit {
             this.publicKey!,
             this.accountId,
         ).getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialCreateTokenResult(txBytes);
     }
+
 
     async transferToken(
         tokenId: TokenId,
         toAccountId: string | AccountId,
+        amount: number,
+        custodial?: boolean
+    ): Promise<BaseResult<string> | BaseResult<TransferTokenResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.transferTokenCustodial(tokenId, toAccountId, amount);
+        }
+
+        return this.transferTokenNonCustodial(tokenId, toAccountId, amount);
+    }
+
+    private async transferTokenCustodial(
+        tokenId: TokenId,
+        toAccountId: string | AccountId,
         amount: number
-    ): Promise<TransferTokenResult> {
-        return HtsTransactionBuilder.transferToken(
+    ): Promise<CustodialTransferTokenResult> {
+        const response: TransferTokenResult = await HtsTransactionBuilder.transferToken(
             tokenId,
             amount,
             toAccountId,
             this.accountId
         ).signAndExecute(this.client);
+
+        return new CustodialTransferTokenResult(response.txHash, response.status);
     }
 
-    async transferTokenNonCustodial(
+    private async transferTokenNonCustodial(
         tokenId: TokenId,
         toAccountId: string | AccountId,
         amount: number
-    ): Promise<string> {
-        return HtsTransactionBuilder.transferToken(
+    ): Promise<NonCustodialTransferTokenResult> {
+        const txBytes = await HtsTransactionBuilder.transferToken(
             tokenId,
             amount,
             toAccountId,
             this.accountId
         ).getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialTransferTokenResult(txBytes);
     }
+
 
     async getHbarBalance(accountId?: string): Promise<number> {
         const targetAccountId = accountId || this.client.operatorAccountId;
         return get_hbar_balance(this.client, targetAccountId);
     }
+
 
     async getHtsBalance(
         tokenId: string,
@@ -266,6 +417,7 @@ export default class HederaAgentKit {
         return get_hts_balance(tokenId, networkType, targetAccountId as string);
     }
 
+
     async getAllTokensBalances(
         networkType: HederaNetworkType,
         accountId?: string
@@ -274,12 +426,14 @@ export default class HederaAgentKit {
         return get_all_tokens_balances(networkType, targetAccountId as string);
     }
 
+
     async getHtsTokenDetails(
         tokenId: string,
         networkType: HederaNetworkType
     ): Promise<HtsTokenDetails> {
         return get_hts_token_details(tokenId, networkType);
     }
+
 
     async getTokenHolders(
         tokenId: string | TokenId,
@@ -289,137 +443,288 @@ export default class HederaAgentKit {
         return get_token_holders(tokenId.toString(), networkType, threshold);
     }
 
+
     async associateToken(
+        tokenId: TokenId,
+        custodial?: boolean
+    ): Promise<BaseResult<string> | BaseResult<AssociateTokenResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.associateTokenCustodial(tokenId);
+        }
+
+        return this.associateTokenNonCustodial(tokenId);
+    }
+
+    private async associateTokenCustodial(
         tokenId: TokenId
-    ): Promise<AssociateTokenResult> {
-        return HtsTransactionBuilder.associateToken(
+    ): Promise<CustodialAssociateTokenResult> {
+        const response: AirdropResult = await HtsTransactionBuilder.associateToken(
             tokenId,
             this.accountId
         ).signAndExecute(this.client);
+
+        return new CustodialAssociateTokenResult(response.txHash, response.status);
     }
 
-    async associateTokenNonCustodial(
+    private async associateTokenNonCustodial(
         tokenId: TokenId
-    ): Promise<string> {
-        return HtsTransactionBuilder.associateToken(
+    ): Promise<NonCustodialAssociateTokenResult> {
+        const txBytes = await HtsTransactionBuilder.associateToken(
             tokenId,
             this.accountId
         ).getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialAssociateTokenResult(txBytes);
     }
+
 
     async dissociateToken(
+        tokenId: TokenId,
+        custodial?: boolean
+    ): Promise<BaseResult<string> | BaseResult<DissociateTokenResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.dissociateTokenCustodial(tokenId);
+        }
+
+        return this.dissociateTokenNonCustodial(tokenId);
+    }
+
+    private async dissociateTokenCustodial(
         tokenId: TokenId
-    ): Promise <DissociateTokenResult> {
-        return HtsTransactionBuilder.dissociateToken(
+    ): Promise<CustodialDissociateTokenResult> {
+        const response: DissociateTokenResult = await HtsTransactionBuilder.dissociateToken(
             tokenId,
             this.accountId
         ).signAndExecute(this.client);
+
+        return new CustodialDissociateTokenResult(response.txHash, response.status);
     }
 
-    async dissociateTokenNonCustodial(
+    private async dissociateTokenNonCustodial(
         tokenId: TokenId
-    ): Promise<string> {
-        return HtsTransactionBuilder.dissociateToken(
+    ): Promise<NonCustodialDissociateTokenResult> {
+        const txBytes = await HtsTransactionBuilder.dissociateToken(
             tokenId,
             this.accountId
         ).getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialDissociateTokenResult(txBytes);
     }
+
 
     async airdropToken(
         tokenId: TokenId,
+        recipients: AirdropRecipient[],
+        custodial?: boolean,
+    ): Promise<BaseResult<string> | BaseResult<AirdropResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.airdropTokenCustodial(tokenId, recipients);
+        }
+
+        return this.airdropTokenNonCustodial(tokenId, recipients);
+    }
+
+    private async airdropTokenCustodial(
+        tokenId: TokenId,
         recipients: AirdropRecipient[]
-    ): Promise<AirdropResult> {
-        return HtsTransactionBuilder.airdropToken(
+    ): Promise<CustodialAirdropTokenResult> {
+        const response: AirdropResult = await HtsTransactionBuilder.airdropToken(
             tokenId,
             recipients,
             this.accountId
         ).signAndExecute(this.client);
+
+        return new CustodialAirdropTokenResult(response.txHash, response.status);
     }
 
-    async airdropTokenNonCustodial(
+    private async airdropTokenNonCustodial(
         tokenId: TokenId,
         recipients: AirdropRecipient[]
-    ): Promise<string> {
-        return HtsTransactionBuilder.airdropToken(
+    ): Promise<NonCustodialAirdropTokenResult> {
+        const txBytes = await HtsTransactionBuilder.airdropToken(
             tokenId,
             recipients,
             this.accountId
         ).getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialAirdropTokenResult(txBytes);
     }
+
 
     async rejectToken(
         tokenId: TokenId,
-    ): Promise<RejectTokenResult> {
-        return HtsTransactionBuilder.rejectToken(
+        custodial?: boolean,
+    ): Promise<BaseResult<string> | BaseResult<RejectTokenResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.rejectTokenCustodial(tokenId);
+        }
+
+        return this.rejectTokenNonCustodial(tokenId);
+    }
+
+    private async rejectTokenCustodial(
+        tokenId: TokenId,
+    ): Promise<CustodialRejectTokenResult> {
+        const response: RejectTokenResult = await HtsTransactionBuilder.rejectToken(
             tokenId,
             AccountId.fromString(this.accountId)
         ).signAndExecute(this.client);
+
+        return new CustodialRejectTokenResult(response.txHash, response.status);
     }
 
-    async rejectTokenNonCustodial(
+    private async rejectTokenNonCustodial(
         tokenId: TokenId,
-    ): Promise<string> {
-        return HtsTransactionBuilder.rejectToken(
+    ): Promise<NonCustodialRejectTokenResult> {
+        const txBytes = await HtsTransactionBuilder.rejectToken(
             tokenId,
             AccountId.fromString(this.accountId)
         ).getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialRejectTokenResult(txBytes);
     }
+
 
     async mintToken(
         tokenId: TokenId,
+        amount: number,
+        custodial?: boolean,
+    ): Promise<BaseResult<string> | BaseResult<MintTokenResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.mintTokenCustodial(tokenId, amount);
+        }
+
+        return this.mintTokenNonCustodial(tokenId, amount);
+    }
+
+    private async mintTokenCustodial(
+        tokenId: TokenId,
         amount: number
-    ): Promise<MintTokenResult> {
-        return HtsTransactionBuilder.mintToken(
+    ): Promise<CustodialMintTokenResult> {
+        const response: MintTokenResult = await HtsTransactionBuilder.mintToken(
             tokenId,
             amount,
         ).signAndExecute(this.client);
+
+        return new CustodialMintTokenResult(response.txHash, response.status);
     }
 
-    async mintTokenNonCustodial(
+    private async mintTokenNonCustodial(
         tokenId: TokenId,
         amount: number
-    ): Promise<string> {
-        return HtsTransactionBuilder.mintToken(
+    ): Promise<NonCustodialMintTokenResult> {
+        const txBytes = await HtsTransactionBuilder.mintToken(
             tokenId,
             amount,
         ).getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialMintTokenResult(txBytes);
     }
+
 
     async mintNFTToken(
         tokenId: TokenId,
-        tokenMetadata: Uint8Array
-    ): Promise<MintNFTResult> {
-        return HtsTransactionBuilder.mintNft(
-            tokenId,
-            tokenMetadata,
-        ).signAndExecute(this.client);
+        tokenMetadata: Uint8Array,
+        custodial?: boolean,
+    ): Promise<BaseResult<string> | BaseResult<MintTokenResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.mintNFTTokenCustodial(tokenId, tokenMetadata);
+        }
+
+        return this.mintNFTTokenNonCustodial(tokenId, tokenMetadata);
     }
 
-    async mintNFTTokenNonCustodial(
+    private async mintNFTTokenCustodial(
         tokenId: TokenId,
         tokenMetadata: Uint8Array
-    ): Promise<string> {
-        return HtsTransactionBuilder.mintNft(
+    ): Promise<CustodialMintNFTResult> {
+        const response: MintTokenResult = await HtsTransactionBuilder.mintNft(
+            tokenId,
+            tokenMetadata,
+        ).signAndExecute(this.client);
+
+        return new CustodialMintNFTResult(response.txHash, response.status);
+    }
+
+    private async mintNFTTokenNonCustodial(
+        tokenId: TokenId,
+        tokenMetadata: Uint8Array
+    ): Promise<NonCustodialMintNFTResult> {
+        const txBytes = await HtsTransactionBuilder.mintNft(
             tokenId,
             tokenMetadata,
         ).getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialMintNFTResult(txBytes);
     }
+
 
     async claimAirdrop(
-        airdropId: PendingAirdropId
-    ): Promise<ClaimAirdropResult> {
-        return HtsTransactionBuilder.claimAirdrop(
-            airdropId
-        ).signAndExecute(this.client);
+        airdropId: PendingAirdropId,
+        custodial?: boolean,
+    ): Promise<BaseResult<string> | BaseResult<ClaimAirdropResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.claimAirdropCustodial(airdropId);
+        }
+
+        return this.claimAirdropNonCustodial(airdropId);
     }
 
-    async claimAirdropNonCustodial(
+    private async claimAirdropCustodial(
         airdropId: PendingAirdropId
-    ): Promise<string> {
-        return HtsTransactionBuilder.claimAirdrop(
+    ): Promise<CustodialClaimAirdropResult> {
+        const response: ClaimAirdropResult =  await HtsTransactionBuilder.claimAirdrop(
+            airdropId
+        ).signAndExecute(this.client);
+
+        return new CustodialClaimAirdropResult(response.txHash, response.status);
+    }
+
+    private async claimAirdropNonCustodial(
+        airdropId: PendingAirdropId
+    ): Promise<NonCustodialClaimAirdropResult> {
+        const txBytes = await HtsTransactionBuilder.claimAirdrop(
             airdropId
         ).getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialClaimAirdropResult(txBytes);
     }
+
 
     async getPendingAirdrops(
         accountId: string,
@@ -428,21 +733,43 @@ export default class HederaAgentKit {
         return get_pending_airdrops(networkType, accountId)
     }
 
+
     async deleteTopic(
-        topicId: TopicId
-    ): Promise<DeleteTopicResult> {
-        return HcsTransactionBuilder.deleteTopic(
-            topicId
-        ).signAndExecute(this.client);
+        topicId: TopicId,
+        custodial?: boolean,
+    ): Promise<BaseResult<string> | BaseResult<DeleteTopicResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.deleteTopicCustodial(topicId);
+        }
+
+        return this.deleteTopicNonCustodial(topicId);
     }
 
-    async deleteTopicNonCustodial(
+    private async deleteTopicCustodial(
         topicId: TopicId
-    ): Promise<string> {
-        return HcsTransactionBuilder.deleteTopic(
+    ): Promise<CustodialDeleteTopicResult> {
+        const response: DeleteTopicResult = await HcsTransactionBuilder.deleteTopic(
+            topicId
+        ).signAndExecute(this.client);
+
+        return new CustodialDeleteTopicResult(response.txHash, response.status);
+    }
+
+    private async deleteTopicNonCustodial(
+        topicId: TopicId
+    ): Promise<NonCustodialDeleteTopicResult> {
+        const txBytes =  await HcsTransactionBuilder.deleteTopic(
             topicId
         ).getTxBytesString(this.client, this.accountId);
+
+        return new NonCustodialDeleteTopicResult(txBytes);
     }
+
 
     async getTopicInfo(
         topicId: TopicId,
@@ -450,6 +777,7 @@ export default class HederaAgentKit {
     ): Promise<TopicInfoApiResponse> {
         return get_topic_info(topicId, networkType)
     }
+
 
     async getTopicMessages(
         topicId: TopicId,
@@ -460,30 +788,52 @@ export default class HederaAgentKit {
         return get_topic_messages(topicId, networkType, lowerTimestamp, upperTimestamp);
     }
 
+
     async approveAssetAllowance(
         spenderAccount: AccountId | string,
         amount: number,
         tokenId?: TokenId,
-    ): Promise<AssetAllowanceResult> {
-        return AccountTransactionBuilder.approveAssetAllowance(
+        custodial?: boolean
+    ): Promise<BaseResult<string> | BaseResult<AssetAllowanceResult>> {
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (useCustodial) {
+            if (!this.privateKey) {
+                throw new Error("Private key is missing. To perform custodial action you should pass private key!");
+            }
+            return this.approveAssetAllowanceCustodial(spenderAccount, amount, tokenId);
+        }
+
+        return this.approveAssetAllowanceNonCustodial(spenderAccount, amount, tokenId);
+    }
+
+    async approveAssetAllowanceCustodial(
+        spenderAccount: AccountId | string,
+        amount: number,
+        tokenId?: TokenId,
+    ): Promise<CustodialAssetAllowanceResult> {
+        const response: AssetAllowanceResult = await AccountTransactionBuilder.approveAssetAllowance(
             spenderAccount,
             amount,
             this.accountId,
             tokenId
         ).signAndExecute(this.client);
+
+        return new CustodialAssetAllowanceResult(response.txHash, response.status);
     }
 
     async approveAssetAllowanceNonCustodial(
         spenderAccount: AccountId | string,
         amount: number,
         tokenId?: TokenId,
-    ): Promise<string> {
-        return AccountTransactionBuilder.approveAssetAllowance(
+    ): Promise<NonCustodialAssetAllowanceResult> {
+        const txBytes = await AccountTransactionBuilder.approveAssetAllowance(
             spenderAccount,
             amount,
             this.accountId,
             tokenId
         ).getTxBytesString(this.client, this.accountId);
-    }
 
+        return new NonCustodialAssetAllowanceResult(txBytes);
+    }
 }

@@ -1,7 +1,8 @@
-import { Tool } from "@langchain/core/tools";
+import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
+import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 
-abstract class AbstractHederaAssociateTokenTool extends Tool {
+export class HederaAssociateTokenTool extends Tool {
     name = 'hedera_associate_token';
 
     description = `Associate a token to an account on Hedera
@@ -14,62 +15,20 @@ Example usage:
   }'
 `;
 
-    protected constructor() {
-        super();
-    }
-}
-
-export class CustodialHederaAssociateTokenTool extends AbstractHederaAssociateTokenTool {
     constructor(private hederaKit: HederaAgentKit) {
         super();
     }
 
-    protected async _call(input: string): Promise<string> {
+    protected override async _call(input: any, _runManager?: CallbackManagerForToolRun, config?: ToolRunnableConfig): Promise<string> {
         try {
-            console.log('hedera_associate_token (custodial) tool has been called');
+            const isCustodial = config?.configurable?.isCustodial === true;
+            console.log(`hedera_associate_token tool has been called (${isCustodial ? 'custodial' : 'non-custodial'})`);
 
             const parsedInput = JSON.parse(input);
+            return await this.hederaKit
+                .associateToken(parsedInput.tokenId, isCustodial)
+                .then(response => response.getStringifiedResponse());
 
-            const result = await this.hederaKit.associateToken(
-                parsedInput.tokenId
-            );
-
-            return JSON.stringify({
-                status: "success",
-                message: "Token association successful",
-                tokenId: parsedInput.tokenId,
-                txHash: result.txHash
-            });
-        } catch (error: any) {
-            return JSON.stringify({
-                status: "error",
-                message: error.message,
-                code: error.code || "UNKNOWN_ERROR",
-            });
-        }
-    }
-}
-
-export class NonCustodialHederaAssociateTokenTool extends AbstractHederaAssociateTokenTool {
-    constructor(private hederaKit: HederaAgentKit) {
-        super();
-    }
-
-    protected async _call(input: string): Promise<string> {
-        try {
-            console.log('hedera_associate_token (non-custodial) tool has been called');
-
-            const parsedInput = JSON.parse(input);
-
-            const txBytes = await this.hederaKit.associateTokenNonCustodial(
-                parsedInput.tokenId
-            );
-
-            return JSON.stringify({
-                status: "success",
-                message: "Token association transaction bytes created successfully",
-                txBytes: txBytes,
-            });
         } catch (error: any) {
             return JSON.stringify({
                 status: "error",

@@ -15,12 +15,16 @@ export class LangchainAgent {
     return new LangchainAgent(agent, config);
   }
 
-  async sendPrompt(prompt: { text: string }): Promise<StateType<any>> {
+  async sendPrompt(prompt: { text: string }, isCustodial?: boolean): Promise<StateType<any>> {
+    const updatedConfig = isCustodial
+        ? { ...this.config, configurable: { ...this.config.configurable, isCustodial } }
+        : this.config;
+
     const response = await this.agent.invoke(
       {
         messages: [new HumanMessage(prompt.text)],
       },
-      this.config
+      updatedConfig
     );
 
     return response;
