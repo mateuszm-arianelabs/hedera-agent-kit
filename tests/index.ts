@@ -34,8 +34,7 @@ validateEnvironment();
 async function initializeAgent() {
   try {
     const llm = new ChatOpenAI({
-      modelName: "gpt-4",
-      temperature: 0.7,
+      modelName: "o3-mini",
     });
 
     // Initialize HederaAgentKit
