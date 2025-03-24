@@ -33,6 +33,7 @@ describe("reject_token", async () => {
             networkClientWrapper = new NetworkClientWrapper(
                 process.env.HEDERA_ACCOUNT_ID!,
                 process.env.HEDERA_PRIVATE_KEY!,
+                process.env.HEDERA_PUBLIC_KEY!,
                 process.env.HEDERA_KEY_TYPE!,
                 "testnet"
             );
@@ -66,6 +67,7 @@ describe("reject_token", async () => {
             airdropCreatorNetworkClientWrapper = new NetworkClientWrapper(
                 acc1.accountId,
                 acc1.privateKey,
+                acc1.publicKey,
                 "ECDSA",
                 "testnet"
             );

@@ -10,10 +10,42 @@ dotenv.config();
 
 const IS_CUSTODIAL = true;
 
+interface MintTokenLangchainResponse {
+  status: string;
+  message: string;
+  tokenId: string;
+  amount: number;
+  txHash: string;
+}
+
+const extractLangchainResponse = (
+  messages: any[]
+): MintTokenLangchainResponse | null => {
+  const toolMessages = messages.filter(
+    (msg) =>
+      (msg.id && msg.id[2] === "ToolMessage") ||
+      msg.name === "hedera_mint_fungible_token"
+  );
+
+  return toolMessages.reduce((acc, message) => {
+    try {
+      const toolResponse = JSON.parse(message.content);
+      if (toolResponse.status !== "success" || !toolResponse.tokenId) {
+        throw new Error(toolResponse.message ?? "Unknown error");
+      }
+
+      return toolResponse as MintTokenLangchainResponse;
+    } catch (error) {
+      console.error("Error parsing tool message:", error);
+      return acc;
+    }
+  }, null);
+};
+
 describe("hedera_mint_fungible_token", () => {
-    let langchainAgent: LangchainAgent;
-    let hederaApiClient: HederaMirrorNodeClient;
-    let networkClientWrapper: NetworkClientWrapper;
+  let langchainAgent: LangchainAgent;
+  let hederaApiClient: HederaMirrorNodeClient;
+  let networkClientWrapper: NetworkClientWrapper;
 
     beforeAll(async () => {
             hederaApiClient = new HederaMirrorNodeClient("testnet" as NetworkType);
@@ -24,69 +56,98 @@ describe("hedera_mint_fungible_token", () => {
                 process.env.HEDERA_KEY_TYPE!,
                 "testnet"
             );
-        }
+        });
+
+  beforeEach(async () => {
+    dotenv.config();
+    await wait(3000);
+  });
+
+  it("should mint fungible token", async () => {
+    const STARTING_SUPPLY = 0;
+    const TOKENS_TO_MINT = 100;
+
+    const tokenId = await networkClientWrapper.createFT({
+      name: "TokenToMint",
+      symbol: "TTM",
+      maxSupply: 1000,
+      initialSupply: STARTING_SUPPLY,
+      isSupplyKey: true,
+    });
+
+    const prompt = {
+      user: "user",
+      text: `Mint ${TOKENS_TO_MINT} of tokens ${tokenId}`,
+    };
+
+    langchainAgent = await LangchainAgent.create();
+    await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
+
+    await wait(5000);
+
+    const tokenInfo = await hederaApiClient.getTokenDetails(tokenId);
+
+    expect(Number(tokenInfo.total_supply)).toBe(
+      STARTING_SUPPLY + TOKENS_TO_MINT
     );
+  });
 
-    beforeEach(async () => {
-        dotenv.config();
-        await wait(3000);
+  it("should fail minting fungible tokens due to not setting supply key of token", async () => {
+    const STARTING_SUPPLY = 0;
+    const TOKENS_TO_MINT = 100;
+
+    const tokenId = await networkClientWrapper.createFT({
+      name: "TokenToMint",
+      symbol: "TTM",
+      maxSupply: 1000,
+      initialSupply: STARTING_SUPPLY,
     });
 
+    const prompt = {
+      user: "user",
+      text: `Mint ${TOKENS_TO_MINT} of tokens ${tokenId}`,
+    };
 
-    it("should mint fungible token", async () => {
-        const STARTING_SUPPLY = 0;
-        const TOKENS_TO_MINT = 100;
+    langchainAgent = await LangchainAgent.create();
+    const resp = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
-        const tokenId = await networkClientWrapper.createFT({
-            name: "TokenToMint",
-            symbol: "TTM",
-            maxSupply: 1000,
-            initialSupply: STARTING_SUPPLY,
-            isSupplyKey: true,
-        });
+    await wait(5000);
 
-        const prompt = {
-            user: "user",
-            text: `Mint ${TOKENS_TO_MINT} of tokens ${tokenId}`,
-        };
+    const tokenInfo = await hederaApiClient.getTokenDetails(tokenId);
 
-        langchainAgent = await LangchainAgent.create();
-        await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
+    expect(Number(tokenInfo.total_supply)).toBe(STARTING_SUPPLY);
+  });
 
-        await wait(5000);
+  it("should mint fungible token using display units in prompt", async () => {
+    const STARTING_SUPPLY = 0;
+    const TOKENS_TO_MINT_IN_DISPLAY_UNITS = 100;
+    const DECIMALS = 2;
 
-        const tokenInfo =
-            await hederaApiClient.getTokenDetails(tokenId);
-
-
-        expect(Number(tokenInfo.total_supply)).toBe(STARTING_SUPPLY + TOKENS_TO_MINT);
+    const tokenId = await networkClientWrapper.createFT({
+      name: "TokenToMint",
+      symbol: "TTM",
+      maxSupply: 100_000_000, // this is 1_000_000 tokens in display units
+      decimals: DECIMALS,
+      initialSupply: STARTING_SUPPLY,
+      isSupplyKey: true,
     });
 
-    it("should fail minting fungible tokens due to not setting supply key of token", async () => {
-        const STARTING_SUPPLY = 0;
-        const TOKENS_TO_MINT = 100;
+    const prompt = {
+      user: "user",
+      text: `Mint ${TOKENS_TO_MINT_IN_DISPLAY_UNITS} of tokens ${tokenId}`,
+    };
 
-        const tokenId = await networkClientWrapper.createFT({
-            name: "TokenToMint",
-            symbol: "TTM",
-            maxSupply: 1000,
-            initialSupply: STARTING_SUPPLY,
-        });
+    langchainAgent = await LangchainAgent.create();
+    const resp = await langchainAgent.sendPrompt(prompt);
+    const langchainResponse = extractLangchainResponse(resp.messages);
+    const mintedAmountFromResponseInDisplayUnits = langchainResponse?.amount;
 
-        const prompt = {
-            user: "user",
-            text: `Mint ${TOKENS_TO_MINT} of tokens ${tokenId}`,
-        };
+    await wait(5000);
 
-        langchainAgent = await LangchainAgent.create();
-        const resp = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
+    const mirrorNodeTokenInfo = await hederaApiClient.getTokenDetails(tokenId);
 
-        await wait(5000);
-
-        const tokenInfo =
-            await hederaApiClient.getTokenDetails(tokenId);
-
-
-        expect(Number(tokenInfo.total_supply)).toBe(STARTING_SUPPLY);
-    });
+    expect(Number(mirrorNodeTokenInfo.total_supply)).toBe(
+      Number(mintedAmountFromResponseInDisplayUnits) * 10 ** DECIMALS
+    );
+  });
 });

@@ -10,29 +10,25 @@ const IS_CUSTODIAL = true;
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-function extractTokenId(messages: any) {
-    const toolMessages = messages.filter((msg: any) =>
-        (msg.id && msg.id[2] === "ToolMessage") ||
-        msg.name === "hedera_create_non_fungible_token"
-    );
-
-    for (const message of toolMessages) {
+function extractTokenId(messages: any[]): string {
+    const result = messages.reduce<string | null>((acc, message) => {
         try {
             const toolResponse = JSON.parse(message.content);
-
-            if (toolResponse.status !== "success" || !toolResponse.tokenId) {
-                continue;
+            if (toolResponse.status === "success" && toolResponse.tokenId) {
+                return toolResponse.tokenId;
             }
-
-            return toolResponse.tokenId;
-
+            return acc;
         } catch (error) {
-            console.error("Error parsing tool message:", error);
+            return acc;
         }
+    }, null);
+
+    if (!result) {
+        throw new Error("No token id found");
     }
 
-    return null;
-}
+    return result;
+  }
 
 describe("create_nft_token", () => {
     let langchainAgent: LangchainAgent;
@@ -44,6 +40,7 @@ describe("create_nft_token", () => {
         wrapper = new NetworkClientWrapper(
             process.env.HEDERA_ACCOUNT_ID!,
             process.env.HEDERA_PRIVATE_KEY!,
+            process.env.HEDERA_PUBLIC_KEY!,
             process.env.HEDERA_KEY_TYPE!,
             "testnet"
         );

@@ -6,38 +6,41 @@ import { LangchainAgent } from "./utils/langchainAgent";
 
 const IS_CUSTODIAL = true;
 
-function extractTokenId(messages: any) {
-  const toolMessages = messages.filter((msg: any) =>
-      (msg.id && msg.id[2] === "ToolMessage") ||
-      msg.name === "hedera_create_fungible_token"
-  );
+interface TokenDetails {
+  tokenId: string;
+  decimals: number;
+  solidityAddress: string;
+  txHash: string;
+  initialSupply: number;
+}
 
-  for (const message of toolMessages) {
+function extractTokenDetails(messages: any[]): TokenDetails {
+  const result = messages.reduce<TokenDetails | null>((acc, message) => {
     try {
       const toolResponse = JSON.parse(message.content);
-
-      if (toolResponse.status !== "success" || !toolResponse.tokenId) {
-        continue;
+      if (toolResponse.status === "success" && toolResponse.tokenId) {
+        return { tokenId: toolResponse.tokenId, initialSupply: toolResponse.initialSupply } as TokenDetails;
       }
-
-      return toolResponse.tokenId;
-
+      return acc;
     } catch (error) {
-      console.error("Error parsing tool message:", error);
+      return acc;
     }
+  }, null);
+
+  if (!result) {
+    throw new Error("No token id found");
   }
 
-  return null;
+  return result;
 }
 
 dotenv.config();
 describe("create_fungible_token", () => {
-
   it("Create token with all possible parameters", async () => {
     const hederaApiClient = new HederaMirrorNodeClient("testnet");
 
     const promptText =
-      "Create token GameGold with symbol GG, 2 decimal places, and starting supply of 750000. Set memo to 'This is an example memo' and token metadata to 'And that's an example metadata'. Add supply key, admin key. Set metadata key.";
+      "Create token GameGold with symbol GG, 2 decimal places, and starting supply of 7500. Set memo to 'This is an example memo' and token metadata to 'And that's an example metadata'. Add supply key, admin key. Set metadata key.";
     const prompt = {
       user: "user",
       text: promptText,
@@ -45,16 +48,23 @@ describe("create_fungible_token", () => {
     const langchainAgent = await LangchainAgent.create();
 
     const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
-    const tokenId = extractTokenId(response.messages);
+    const tokenDetailsFromToolResponse = extractTokenDetails(response.messages);
+
+    if (!tokenDetailsFromToolResponse) {
+      throw new Error("No token details found");
+    }
 
     await wait(5000);
 
-    const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+    const tokenDetails = await hederaApiClient.getTokenDetails(
+      tokenDetailsFromToolResponse.tokenId
+    );
 
     expect(tokenDetails.symbol).toEqual("GG");
     expect(tokenDetails.name).toEqual("GameGold");
     expect(tokenDetails.decimals).toEqual("2");
-    expect(tokenDetails.initial_supply).toEqual("750000");
+    expect(tokenDetailsFromToolResponse.initialSupply).toEqual(7500); // should be in display units
+    expect(tokenDetails.initial_supply).toEqual("750000"); // response from mirror node is in base units
     expect(tokenDetails.memo).toEqual("This is an example memo");
     expect(atob(tokenDetails.metadata!)).toEqual(
       "And that's an example metadata"
@@ -76,16 +86,23 @@ describe("create_fungible_token", () => {
     const langchainAgent = await LangchainAgent.create();
 
     const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
-    const tokenId = extractTokenId(response.messages);
+    const tokenDetailsFromToolResponse = extractTokenDetails(response.messages);
+
+    if (!tokenDetailsFromToolResponse) {
+      throw new Error("No token details found");
+    }
 
     await wait(5000);
 
-    const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+    const tokenDetails = await hederaApiClient.getTokenDetails(
+      tokenDetailsFromToolResponse.tokenId
+    );
 
     expect(tokenDetails.symbol).toEqual("MT");
     expect(tokenDetails.name).toEqual("Minimal Token");
     expect(tokenDetails.decimals).toEqual("3");
-    expect(tokenDetails.initial_supply).toEqual("333");
+    expect(tokenDetailsFromToolResponse.initialSupply).toEqual(333); // should be in display units
+    expect(tokenDetails.initial_supply).toEqual("333000"); // response from mirror node is in base units
     expect(tokenDetails.memo).toBe("");
     expect(tokenDetails.metadata).toBe("");
     expect(tokenDetails?.supply_key?.key).toBeUndefined();
@@ -105,16 +122,21 @@ describe("create_fungible_token", () => {
     const langchainAgent = await LangchainAgent.create();
 
     const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
-    const tokenId = extractTokenId(response.messages);
+    const tokenDetailsFromToolResponse = extractTokenDetails(response.messages);
+
+    if (!tokenDetailsFromToolResponse) {
+      throw new Error("No token details found");
+    }
 
     await wait(5000);
 
-    const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+    const tokenDetails = await hederaApiClient.getTokenDetails(tokenDetailsFromToolResponse.tokenId);
 
     expect(tokenDetails.symbol).toEqual("MPMT");
     expect(tokenDetails.name).toEqual("Minimal Plus Memo Token");
     expect(tokenDetails.decimals).toEqual("4");
-    expect(tokenDetails.initial_supply).toEqual("444");
+    expect(tokenDetailsFromToolResponse.initialSupply).toEqual(444); // should be in display units
+    expect(tokenDetails.initial_supply).toEqual("4440000"); // response from mirror node is in base units
     expect(tokenDetails.memo).toEqual("Automatic tests memo");
     expect(tokenDetails.metadata).toBe("");
     expect(tokenDetails?.supply_key?.key).toBeUndefined();
@@ -134,16 +156,21 @@ describe("create_fungible_token", () => {
     const langchainAgent = await LangchainAgent.create();
 
     const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
-    const tokenId = extractTokenId(response.messages);
+    const tokenDetailsFromToolResponse = extractTokenDetails(response.messages);
+
+    if (!tokenDetailsFromToolResponse) {
+      throw new Error("No token details found");
+    }
 
     await wait(5000);
 
-    const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+    const tokenDetails = await hederaApiClient.getTokenDetails(tokenDetailsFromToolResponse.tokenId);
 
     expect(tokenDetails.symbol).toEqual("MPMKT");
     expect(tokenDetails.name).toEqual("Minimal Plus Metadata Key Token");
     expect(tokenDetails.decimals).toEqual("5");
-    expect(tokenDetails.initial_supply).toEqual("555");
+    expect(tokenDetailsFromToolResponse.initialSupply).toEqual(555); // should be in display units
+    expect(tokenDetails.initial_supply).toEqual("55500000"); // response from mirror node is in base units
     expect(tokenDetails.memo).toBe("");
     expect(tokenDetails.metadata).toBe("");
     expect(tokenDetails?.supply_key?.key).toBeUndefined();
@@ -163,16 +190,21 @@ describe("create_fungible_token", () => {
     const langchainAgent = await LangchainAgent.create();
 
     const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
-    const tokenId = extractTokenId(response.messages);
+    const tokenDetailsFromToolResponse = extractTokenDetails(response.messages);
+
+    if (!tokenDetailsFromToolResponse) {
+      throw new Error("No token details found");
+    }
 
     await wait(5000);
 
-    const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+    const tokenDetails = await hederaApiClient.getTokenDetails(tokenDetailsFromToolResponse.tokenId);
 
     expect(tokenDetails.symbol).toEqual("MPASKT");
     expect(tokenDetails.name).toEqual("Minimal Plus Admin Supply Keys Token");
     expect(tokenDetails.decimals).toEqual("1");
-    expect(tokenDetails.initial_supply).toEqual("111");
+    expect(tokenDetailsFromToolResponse.initialSupply).toEqual(111); // should be in display units
+    expect(tokenDetails.initial_supply).toEqual("1110"); // response from mirror node is in base units
     expect(tokenDetails.memo).toBe("");
     expect(tokenDetails.memo).toBe("");
     expect(tokenDetails?.supply_key?.key).not.toBeUndefined();
@@ -184,7 +216,7 @@ describe("create_fungible_token", () => {
     const hederaApiClient = new HederaMirrorNodeClient("testnet");
 
     const promptText =
-      "Create token 'Complex Token' with symbol CPLXT, 1 decimal places, and starting supply of 1111. Set admin key and supply keys. Set memo to 'This a complex token'. Set metadata to 'this could be a link to image'";
+      "Create token 'Complex Token' with symbol CPLXT, 1 decimal places, and starting supply of 1111. Set admin key and supply keys. Set memo to 'This a complex token'. Set metadata to 'this could be a link to image'. Don't set metadata key";
     const prompt = {
       user: "user",
       text: promptText,
@@ -192,16 +224,21 @@ describe("create_fungible_token", () => {
     const langchainAgent = await LangchainAgent.create();
 
     const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
-    const tokenId = extractTokenId(response.messages);
+    const tokenDetailsFromToolResponse = extractTokenDetails(response.messages);
+
+    if (!tokenDetailsFromToolResponse) {
+      throw new Error("No token details found");
+    }
 
     await wait(5000);
 
-    const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+    const tokenDetails = await hederaApiClient.getTokenDetails(tokenDetailsFromToolResponse.tokenId);
 
     expect(tokenDetails.symbol).toEqual("CPLXT");
     expect(tokenDetails.name).toEqual("Complex Token");
     expect(tokenDetails.decimals).toEqual("1");
-    expect(tokenDetails.initial_supply).toEqual("1111");
+    expect(tokenDetailsFromToolResponse.initialSupply).toEqual(1111); // should be in display units
+    expect(tokenDetails.initial_supply).toEqual("11110"); // response from mirror node is in base units
     expect(tokenDetails.memo).toBe("This a complex token");
     expect(atob(tokenDetails.metadata!)).toBe("this could be a link to image");
     expect(tokenDetails?.supply_key?.key).not.toBeUndefined();
@@ -209,4 +246,87 @@ describe("create_fungible_token", () => {
     expect(tokenDetails?.metadata_key?.key).toBeUndefined();
   });
 
+  it("Create token with supply in display units using comma", async () => {
+    const hederaApiClient = new HederaMirrorNodeClient("testnet");
+
+    const promptText =
+      "Create token GameGold with symbol GG, 2 decimal places, and starting supply of 75,55";
+    const prompt = {
+      user: "user",
+      text: promptText,
+    };
+    const langchainAgent = await LangchainAgent.create();
+
+    const response = await langchainAgent.sendPrompt(prompt);
+    const tokenDetailsFromToolResponse = extractTokenDetails(response.messages);
+
+    if (!tokenDetailsFromToolResponse) {
+      throw new Error("No token details found");
+    }
+
+    await wait(5000);
+
+    const tokenDetails = await hederaApiClient.getTokenDetails(
+      tokenDetailsFromToolResponse.tokenId
+    );
+
+    expect(tokenDetailsFromToolResponse.initialSupply).toEqual(75.55); // should be in display units
+    expect(tokenDetails.initial_supply).toEqual("7555"); // response from mirror node is in base units
+  });
+
+  it("Create token with supply in display units using dot", async () => {
+    const hederaApiClient = new HederaMirrorNodeClient("testnet");
+
+    const promptText =
+      "Create token GameGold with symbol GG, 2 decimal places, and starting supply of 75.55";
+    const prompt = {
+      user: "user",
+      text: promptText,
+    };
+    const langchainAgent = await LangchainAgent.create();
+
+    const response = await langchainAgent.sendPrompt(prompt);
+    const tokenDetailsFromToolResponse = extractTokenDetails(response.messages);
+
+    if (!tokenDetailsFromToolResponse) {
+      throw new Error("No token details found");
+    }
+
+    await wait(5000);
+
+    const tokenDetails = await hederaApiClient.getTokenDetails(
+      tokenDetailsFromToolResponse.tokenId
+    );
+
+    expect(tokenDetailsFromToolResponse.initialSupply).toEqual(75.55); // should be in display units
+    expect(tokenDetails.initial_supply).toEqual("7555"); // response from mirror node is in base units
+  });
+
+  it("Create token with supply in display units using dot and zero", async () => {
+    const hederaApiClient = new HederaMirrorNodeClient("testnet");
+
+    const promptText =
+      "Create token GameGold with symbol GG, 2 decimal places, and starting supply of 75.0";
+    const prompt = {
+      user: "user",
+      text: promptText,
+    };
+    const langchainAgent = await LangchainAgent.create();
+
+    const response = await langchainAgent.sendPrompt(prompt);
+    const tokenDetailsFromToolResponse = extractTokenDetails(response.messages);
+
+    if (!tokenDetailsFromToolResponse) {
+      throw new Error("No token details found");
+    }
+
+    await wait(5000);
+
+    const tokenDetails = await hederaApiClient.getTokenDetails(
+      tokenDetailsFromToolResponse.tokenId
+    );
+
+    expect(tokenDetailsFromToolResponse.initialSupply).toEqual(75); // should be in display units
+    expect(tokenDetails.initial_supply).toEqual("7500"); // response from mirror node is in base units
+  });
 });

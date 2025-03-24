@@ -69,6 +69,7 @@ export class NetworkClientWrapper {
     return {
       accountId: accountId!.toString(),
       privateKey: accountPrivateKey.toStringRaw(),
+      publicKey: accountPublicKey.toStringRaw(),
     };
   }
 

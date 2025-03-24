@@ -5,31 +5,30 @@ import { NetworkClientWrapper } from "./utils/testnetClient";
 import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { LangchainAgent } from "./utils/langchainAgent";
 import { wait } from "./utils/utils";
+import { HCSMessage } from "../types";
 
 const IS_CUSTODIAL = true;
 
-function extractTopicMessages(messages) {
-    const toolMessages = messages.filter((msg) =>
-        (msg.id && msg.id[2] === "ToolMessage") ||
-        msg.name === "hedera_get_topic_messages"
-    );
-
-    for (const message of toolMessages) {
+function extractTopicMessages(messages: any[]): HCSMessage[] {
+    const result = messages.reduce<HCSMessage[] | null>((acc, message) => {
         try {
             const toolResponse = JSON.parse(message.content);
-
-            if (toolResponse.status !== "success" || !toolResponse.messages) {
-                continue;
+            if (toolResponse.status === "success" && toolResponse.messages) {
+                return toolResponse.messages as HCSMessage[];
             }
 
-            return toolResponse.messages;
+            return acc;
 
         } catch (error) {
-            console.error("Error parsing tool message:", error);
+            return acc;
         }
+    }, null);
+
+    if (!result) {
+        throw new Error("No topic messages found");
     }
 
-    return null;
+    return result;
 }
 
 
@@ -54,6 +53,7 @@ describe("get_topic_messages", () => {
             networkClientWrapper = new NetworkClientWrapper(
                 process.env.HEDERA_ACCOUNT_ID!,
                 process.env.HEDERA_PRIVATE_KEY!,
+                process.env.HEDERA_PUBLIC_KEY!,
                 process.env.HEDERA_KEY_TYPE!,
                 "testnet",
             );
@@ -67,6 +67,8 @@ describe("get_topic_messages", () => {
             });
 
             const timestampBefore: string = new Date().toISOString();
+
+            await wait(1000);
 
             await Promise.all([
                 networkClientWrapper.submitTopicMessage(topic1, "(1) Test message for topic 1."),
@@ -138,8 +140,6 @@ describe("get_topic_messages", () => {
                 };
 
                 const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
-
-                console.log(JSON.stringify(response, null, 2));
                 const messages = extractTopicMessages(response.messages);
 
                 await wait(5000);
@@ -154,8 +154,7 @@ describe("get_topic_messages", () => {
                         const messageText = mirrorNodeMessage.message;
                         const messageFound = messages.some(msg => msg.message === messageText);
 
-                        expect(messageFound).toBe(true,
-                            `Message '${messageText}' not found in the response`);
+                        expect(messageFound).toBe(true);
                     }
                 }
             }

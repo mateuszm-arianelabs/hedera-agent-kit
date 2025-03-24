@@ -46,6 +46,7 @@ describe("submit_topic_message", () => {
       networkClientWrapper = new NetworkClientWrapper(
         process.env.HEDERA_ACCOUNT_ID!,
         process.env.HEDERA_PRIVATE_KEY!,
+        process.env.HEDERA_PUBLIC_KEY!,
         process.env.HEDERA_KEY_TYPE!,
         "testnet"
       );
@@ -85,7 +86,11 @@ describe("submit_topic_message", () => {
 
   describe("submit topic message checks", () => {
     it("should submit message to topic", async () => {
-      for (const { textPrompt, topicId, message } of testCases) {
+      for (const {
+        textPrompt,
+        message,
+        topicId: expectedTopicId,
+      } of testCases) {
         const prompt = {
           user: "user",
           text: textPrompt,
@@ -104,7 +109,7 @@ describe("submit_topic_message", () => {
           return message === _message;
         });
 
-        expect(topicId).toEqual(extractedTopicId);
+        expect(expectedTopicId).toEqual(extractedTopicId);
         expect(receivedMessage).toBeTruthy();
       }
     });

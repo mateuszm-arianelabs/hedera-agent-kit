@@ -13,6 +13,7 @@ export type HederaPrivateKeyResult = {
 export type AccountData = {
     accountId: string;
     privateKey: string;
+    publicKey: string;
 };
 
 export const hederaPrivateKeyFromString = ({
