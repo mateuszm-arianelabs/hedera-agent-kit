@@ -34,7 +34,8 @@ validateEnvironment();
 async function initializeAgent() {
   try {
     const llm = new ChatOpenAI({
-      modelName: "o3-mini", // TODO: rollback
+      modelName: "gpt-4",
+      temperature: 0.7,
     });
 
     // Initialize HederaAgentKit
@@ -159,6 +160,7 @@ async function runChatMode(agent: any, config: any) {
     rl.close();
   }
 }
+
 async function sendPrompt(agent: any, config: any, userInput: string, isCustodial: boolean) {
   return agent.stream(
       { messages: [new HumanMessage(userInput)] },

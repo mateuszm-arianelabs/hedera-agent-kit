@@ -34,7 +34,7 @@ Example usage:
             const parsedInput = JSON.parse(input);
 
             return await this.hederaKit
-                .airdropToken(parsedInput.tokenId, parsedInput.recipients)
+                .airdropToken(parsedInput.tokenId, parsedInput.recipients, isCustodial)
                 .then(response => response.getStringifiedResponse());
 
         } catch (error: any) {

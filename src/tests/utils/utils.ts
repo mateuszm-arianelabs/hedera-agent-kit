@@ -29,7 +29,8 @@ export function fromDisplayToBaseUnit(
 export async function initializeAgent() {
   try {
     const llm = new ChatOpenAI({
-      modelName: "o3-mini", // TODO: rollback
+      modelName: "gpt-4",
+      temperature: 0.7,
     });
 
     // Initialize HederaAgentKit
