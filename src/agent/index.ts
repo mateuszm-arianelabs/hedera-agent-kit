@@ -5,7 +5,8 @@ import {
     PublicKey,
     TokenId,
     TokenType,
-    TopicId
+    TopicId,
+    PrivateKey
 } from "@hashgraph/sdk";
 import {
     Airdrop,
@@ -104,8 +105,8 @@ export default class HederaAgentKit {
     private readonly isCustodial: boolean;
 
     constructor(
-        accountId: string,
-        privateKey?: string | undefined,
+        accountId: AccountId | string,
+        privateKey?: PrivateKey | string,
         publicKey?: string | undefined,
         network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet',
     ) {
@@ -125,6 +126,27 @@ export default class HederaAgentKit {
         this.publicKey = PublicKey.fromString(publicKey!);
         this.network = network;
         this.accountId = accountId;
+    }
+
+    // public client: Client
+    // readonly network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet'
+    //
+    // constructor(
+    //     clientOrAccountId: AccountId | string,
+    //     privateKey: PrivateKey | string,
+    //     network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet'
+    // ) {
+    //     if (this.isClient(clientOrAccountId)) {
+    //         this.client = clientOrAccountId;
+    //     } else {
+    //         network = network || 'mainnet';
+    //         // @ts-ignore
+    //         this.client = Client.forNetwork(network).setOperator(clientOrAccountId, privateKey);
+    //     }
+    // }
+
+    private isClient(x: any): x is Client {
+        return typeof x.setOperator === 'function';
     }
 
     async createTopic(
@@ -210,7 +232,6 @@ export default class HederaAgentKit {
 
         return new NonCustodialSubmitMessageResult(txBytes);
     }
-
 
     async transferHbar(
         toAccountId: string | AccountId,

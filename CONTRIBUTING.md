@@ -10,7 +10,7 @@ We are thrilled that you’re interested in contributing to the **Hedera Agent K
 2. **Clone** your fork:
 
 ```bash
-  git clone https://github.com/jaycoolh/hedera-agent-kit.git
+  git clone https://github.com/hedera-dev/hedera-agent-kit.git
 ```
 
 3. Create a new branch for your work:
