@@ -69,6 +69,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
 }
 
 // Tool for creating non-fungible tokens (nft)
+// FIXME: works well in isolation but normally usually createFT is called instead of createNFT
 export class HederaCreateNonFungibleTokenTool extends Tool {
   name = 'hedera_create_non_fungible_token'
 
@@ -145,9 +146,9 @@ amount: number, the amount of tokens to transfer e.g. 100 in base unit
       console.log('hedera_transfer_token tool has been called')
 
       const parsedInput = JSON.parse(input);
-      const amount = await toBaseUnit( 
+      const amount = await toBaseUnit(
         parsedInput.tokenId,
-        parsedInput.amount, 
+        parsedInput.amount,
         this.hederaKit.network
       );
 
@@ -264,17 +265,17 @@ If no account ID is given, it returns the balance for the connected account.
           this.hederaKit.network,
           parsedInput?.accountId
       )
-      
+
       const details = await this.hederaKit.getHtsTokenDetails(
         parsedInput?.tokenId,
         this.hederaKit.network
       )
-      
+
       const balanceInDisplayUnits = fromBaseToDisplayUnit(balance, Number(details.decimals));
 
       return JSON.stringify({
         status: "success",
-        balance: balanceInDisplayUnits, 
+        balance: balanceInDisplayUnits,
         unit: details.symbol,
         decimals: details.decimals
       });
@@ -328,7 +329,7 @@ Example usage:
           this.hederaKit.network
         )).toString()),
       })));
-      
+
       const result = await this.hederaKit.airdropToken(
         parsedInput.tokenId,
         recipientsWithAmountInBaseUnits // token amounts given in base units
@@ -713,7 +714,7 @@ Example usage:
       const airdrop = await this.hederaKit.getPendingAirdrops(
         parsedInput.accountId,
         process.env.HEDERA_NETWORK as HederaNetworkType
-      ); 
+      );
 
       return JSON.stringify({
         status: "success",
@@ -810,10 +811,10 @@ Example usage:
       console.log('hedera_get_token_holders tool has been called');
 
       const parsedInput = JSON.parse(input);
-      const threshold = parsedInput.threshold ? 
+      const threshold = parsedInput.threshold ?
         Number((await toBaseUnit(
-          parsedInput.tokenId as string, 
-          parsedInput.threshold, 
+          parsedInput.tokenId as string,
+          parsedInput.threshold,
           this.hederaKit.network
         )).toString()) : undefined;
 

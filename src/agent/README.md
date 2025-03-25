@@ -14,12 +14,23 @@ npm install hedera-agent-kit
 
 ```ts
 import HederaAgentKit from "hedera-agent-kit";
-import { TokenId, TopicId, AccountId, PendingAirdropId } from "@hashgraph/sdk";
 
 const accountId = "0.0.123456";
 const privateKey = "your-private-key";
 const network = "testnet";
 const kit = new HederaAgentKit(accountId, privateKey, network);
+```
+
+If you already have a `Client` instance that you would like to use,
+e.g. representing an *operator account*,
+instead of instantiating a new one, you may do so like this:
+
+```ts
+import HederaAgentKit from "hedera-agent-kit";
+import { Client } from "@hashgraph/sdk";
+
+const myClient: Client = /* ... */;
+const kit = new HederaAgentKit(myClient);
 ```
 
 ### Token Operations
@@ -205,4 +216,3 @@ For underlying implementation of provided functions check [tools documentation](
 
 ## License
 This project is licensed under the MIT License.
-
