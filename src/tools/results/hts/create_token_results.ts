@@ -8,14 +8,13 @@ export type CreateTokenResult = {
     tokenId: TokenId,
 }
 
-
 export class CustodialCreateTokenResult implements BaseResult <CreateTokenResult> {
     actionName: AgentKitActionName;
 
     constructor(
         public readonly txHash: string,
         public readonly status: string,
-        public readonly tokenId: TokenId
+        public readonly tokenId: TokenId,
     ) {
         this.actionName = AgentKitActionName.CREATE_TOKEN_CUSTODIAL;
     }

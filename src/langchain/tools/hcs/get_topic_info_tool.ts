@@ -26,7 +26,7 @@ Example usage:
             const parsedInput = JSON.parse(input);
             const topicInfo = await this.hederaKit.getTopicInfo(
                 TopicId.fromString(parsedInput.topicId),
-                process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet"
+                process.env.HEDERA_NETWORK_TYPE as "mainnet" | "testnet" | "previewnet" || "testnet"
             );
             return JSON.stringify({
                 status: "success",

@@ -43,7 +43,7 @@ Example usage:
             const parsedInput = JSON.parse(input);
             const messages = await this.hederaKit.getTopicMessages(
                 TopicId.fromString(parsedInput.topicId),
-                process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet",
+                process.env.HEDERA_NETWORK_TYPE as "mainnet" | "testnet" | "previewnet" || "testnet",
                 parsedInput.lowerThreshold,
                 parsedInput.upperThreshold
             );

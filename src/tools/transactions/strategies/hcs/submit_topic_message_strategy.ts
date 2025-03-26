@@ -24,7 +24,8 @@ export class SubmitTopicMessageStrategy implements TransactionStrategy<SubmitMes
     formatResult(txResponse: TransactionResponse, receipt:  TransactionReceipt): SubmitMessageResult {
         return {
             txHash: txResponse.transactionId.toString(),
-            status: receipt.status.toString()
+            status: receipt.status.toString(),
+            topicId: this.topicId.toString()
         };
     }
 }

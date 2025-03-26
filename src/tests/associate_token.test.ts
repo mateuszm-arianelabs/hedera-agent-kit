@@ -91,11 +91,11 @@ describe("associate_token", () => {
             testCases = [
                 {
                     tokenToAssociateId: token1,
-                    promptText: `Associate token ${token1} to account ${networkClientWrapper.getAccountId()}`,
+                    promptText: `Associate token ${token1} to my account ${networkClientWrapper.getAccountId()}`,
                 },
                 {
                     tokenToAssociateId: token2,
-                    promptText: `Associate token ${token2} to account ${networkClientWrapper.getAccountId()}`,
+                    promptText: `Associate token ${token2} to my account ${networkClientWrapper.getAccountId()}`,
                 },
             ];
         } catch (error) {

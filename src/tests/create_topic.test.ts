@@ -29,7 +29,7 @@ const extractTopicId = (messages: any[]): string => {
 dotenv.config();
 describe("create_topic", () => {
   const hederaMirrorNodeClient = new HederaMirrorNodeClient(
-    process.env.HEDERA_NETWORK as "testnet" | "mainnet" | "previewnet"
+    process.env.HEDERA_NETWORK_TYPE as "testnet" | "mainnet" | "previewnet"
   );
 
   describe("create_topic", () => {

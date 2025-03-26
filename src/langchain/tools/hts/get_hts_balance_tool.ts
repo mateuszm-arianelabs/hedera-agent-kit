@@ -40,13 +40,13 @@ If no account ID is given, it returns the balance for the connected account.
 
             const balance = await this.hederaKit.getHtsBalance(
                 parsedInput.tokenId,
-                process.env.HEDERA_NETWORK as HederaNetworkType,
+                process.env.HEDERA_NETWORK_TYPE as HederaNetworkType,
                 parsedInput?.accountId
             )
 
             const details = await this.hederaKit.getHtsTokenDetails(
                 parsedInput?.tokenId,
-                process.env.HEDERA_NETWORK as HederaNetworkType
+                process.env.HEDERA_NETWORK_TYPE as HederaNetworkType
             )
 
             return JSON.stringify({

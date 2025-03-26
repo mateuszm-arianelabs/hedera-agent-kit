@@ -4,6 +4,7 @@ import { AgentKitActionName } from "../../../types";
 export type SubmitMessageResult = {
     status: string,
     txHash: string,
+    topicId: string,
 }
 
 
@@ -12,7 +13,8 @@ export class CustodialSubmitMessageResult implements BaseResult <SubmitMessageRe
 
     constructor(
         public readonly txHash: string,
-        public readonly status: string
+        public readonly status: string,
+        public readonly topicId: string,
     ) {
         this.actionName = AgentKitActionName.SUBMIT_TOPIC_MESSAGE_CUSTODIAL;
     }
@@ -21,6 +23,7 @@ export class CustodialSubmitMessageResult implements BaseResult <SubmitMessageRe
         return {
             status: this.status.toLowerCase(),
             txHash: this.txHash,
+            topicId: this.topicId,
         };
     }
 
@@ -28,7 +31,8 @@ export class CustodialSubmitMessageResult implements BaseResult <SubmitMessageRe
         return JSON.stringify({
             status: this.status.toLowerCase(),
             message: "Message submitted",
-            txHash: this.txHash
+            txHash: this.txHash,
+            topicId: this.topicId,
         });
     }
 

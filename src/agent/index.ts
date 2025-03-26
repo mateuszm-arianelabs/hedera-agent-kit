@@ -105,8 +105,8 @@ export default class HederaAgentKit {
     private readonly isCustodial: boolean;
 
     constructor(
-        accountId: AccountId | string,
-        privateKey?: PrivateKey | string,
+        accountId: string,
+        privateKey?: string,
         publicKey?: string | undefined,
         network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet',
     ) {
@@ -127,23 +127,6 @@ export default class HederaAgentKit {
         this.network = network;
         this.accountId = accountId;
     }
-
-    // public client: Client
-    // readonly network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet'
-    //
-    // constructor(
-    //     clientOrAccountId: AccountId | string,
-    //     privateKey: PrivateKey | string,
-    //     network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet'
-    // ) {
-    //     if (this.isClient(clientOrAccountId)) {
-    //         this.client = clientOrAccountId;
-    //     } else {
-    //         network = network || 'mainnet';
-    //         // @ts-ignore
-    //         this.client = Client.forNetwork(network).setOperator(clientOrAccountId, privateKey);
-    //     }
-    // }
 
     private isClient(x: any): x is Client {
         return typeof x.setOperator === 'function';
@@ -218,7 +201,7 @@ export default class HederaAgentKit {
             .submitTopicMessage(topicId, message)
             .signAndExecute(this.client);
 
-        return new CustodialSubmitMessageResult(response.txHash, response.status);
+        return new CustodialSubmitMessageResult(response.txHash, response.status, response.topicId);
     }
 
     private async submitTopicMessageNonCustodial(

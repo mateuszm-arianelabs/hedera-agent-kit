@@ -22,9 +22,12 @@ export const get_topic_messages = async (
     let url: string | null = `${baseUrl}/api/v1/topics/${topicId.toString()}/messages?encoding=UTF-8&limit=100&order=desc${lowerThreshold}${upperThreshold}`;
 
     const array = new Array<HCSMessage>();
+    let test = 0;
 
     try {
         while (url) {   // Results are paginated
+
+            test+= 1;
             const response = await fetch(url);
 
             if (!response.ok) {
@@ -43,5 +46,6 @@ export const get_topic_messages = async (
         console.error("Failed to fetch topic messages. Error:", error);
         throw error;
     }
+
     return array;
 }

@@ -27,7 +27,7 @@ Example usage:
 
             const airdrop = await this.hederaKit.getPendingAirdrops(
                 parsedInput.accountId,
-                process.env.HEDERA_NETWORK as HederaNetworkType
+                process.env.HEDERA_NETWORK_TYPE as HederaNetworkType
             );
 
             return JSON.stringify({

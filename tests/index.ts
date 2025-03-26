@@ -45,7 +45,7 @@ async function initializeAgent() {
         process.env.HEDERA_PUBLIC_KEY!,
         // Pass your network of choice. Default is "testnet".
         // You can specify 'testnet', 'previewnet', or 'mainnet'.
-        process.env.HEDERA_NETWORK as "mainnet" | "testnet" | "previewnet" || "testnet"
+        process.env.HEDERA_NETWORK_TYPE as "mainnet" | "testnet" | "previewnet" || "testnet"
     );
 
     // Create the LangChain-compatible tools

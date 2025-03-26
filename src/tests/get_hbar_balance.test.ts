@@ -32,7 +32,7 @@ describe("get_hbar_balance", () => {
 
       langchainAgent = await LangchainAgent.create();
       hederaApiClient = new HederaMirrorNodeClient(
-        process.env.HEDERA_NETWORK as "testnet" | "mainnet" | "previewnet"
+        process.env.HEDERA_NETWORK_TYPE as "testnet" | "mainnet" | "previewnet"
       );
       testCases = [
         [acc1.accountId, `What's HBAR balance for ${acc1.accountId}`],

@@ -2,6 +2,7 @@ import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 
+// FIXME: works well in isolation but normally usually createFT is called instead of createNFT
 export class HederaCreateNonFungibleTokenTool extends Tool {
     name = 'hedera_create_non_fungible_token';
 

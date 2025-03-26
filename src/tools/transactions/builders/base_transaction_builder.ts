@@ -6,7 +6,6 @@ export class BaseTransactionBuilder<T> {
 
     async signAndExecute(client: Client): Promise<T> {
         try {
-
             const tx = this.strategy.build();
             const txResponse = await tx.execute(client);
             const receipt = await txResponse.getReceipt(client);

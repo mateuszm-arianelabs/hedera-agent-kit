@@ -125,10 +125,6 @@ describe("reject_token", async () => {
         }
     });
 
-    it("true", async () => {
-        expect(true);
-    })
-
     it("it should reject token from account", async () => {
         for (const { promptText, tokenId } of testCases) {
             const prompt = {

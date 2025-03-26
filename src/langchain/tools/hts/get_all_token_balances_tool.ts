@@ -30,7 +30,7 @@ Example usage:
 
             // returns both display and base unit balances
             const balances = await this.hederaKit.getAllTokensBalances(
-                process.env.HEDERA_NETWORK as HederaNetworkType,
+                process.env.HEDERA_NETWORK_TYPE as HederaNetworkType,
                 parsedInput.accountId
             );
 

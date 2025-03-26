@@ -21,6 +21,8 @@ interface MintTokenLangchainResponse {
 const extractLangchainResponse = (
   messages: any[]
 ): MintTokenLangchainResponse | null => {
+  console.log(messages)
+
   const toolMessages = messages.filter(
     (msg) =>
       (msg.id && msg.id[2] === "ToolMessage") ||
@@ -30,7 +32,7 @@ const extractLangchainResponse = (
   return toolMessages.reduce((acc, message) => {
     try {
       const toolResponse = JSON.parse(message.content);
-      if (toolResponse.status !== "success" || !toolResponse.tokenId) {
+      if (toolResponse.status !== "success" || !toolResponse.txHash) {
         throw new Error(toolResponse.message ?? "Unknown error");
       }
 
@@ -138,16 +140,12 @@ describe("hedera_mint_fungible_token", () => {
     };
 
     langchainAgent = await LangchainAgent.create();
-    const resp = await langchainAgent.sendPrompt(prompt);
-    const langchainResponse = extractLangchainResponse(resp.messages);
-    const mintedAmountFromResponseInDisplayUnits = langchainResponse?.amount;
+    const resp = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
     await wait(5000);
 
     const mirrorNodeTokenInfo = await hederaApiClient.getTokenDetails(tokenId);
 
-    expect(Number(mirrorNodeTokenInfo.total_supply)).toBe(
-      Number(mintedAmountFromResponseInDisplayUnits) * 10 ** DECIMALS
-    );
+    expect(Number(mirrorNodeTokenInfo.total_supply)).toBe(STARTING_SUPPLY + TOKENS_TO_MINT_IN_DISPLAY_UNITS);
   });
 });
