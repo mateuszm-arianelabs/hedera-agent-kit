@@ -16,6 +16,7 @@ Welcome to the **Hedera Agent Kit**! This project aims to provide a LangChain-co
 
 2. **Token Operations**:
     - **Create Fungible Tokens (FT)**: Easily create and configure new fungible tokens.
+    - **Create Non-fungible Tokens (NFT)**: Easily create and configure new non-fungible tokens.
     - **Transfer Tokens**: Transfer tokens between accounts.
     - **Associate / Dissociate Tokens**: Associate a token to an account or dissociate it as needed.
     - **Reject Tokens**: Reject a token from an account.
@@ -39,10 +40,6 @@ Welcome to the **Hedera Agent Kit**! This project aims to provide a LangChain-co
     - **Submit Topic Messages**: Send messages to a specific topic.
     - **Get Topic Info**: Retrieve information about a specific topic.
     - **Get Topic Messages**: Fetch messages from a specific topic.
-
-7. **Upcoming Features** (Roadmap):
-    - Create NFTs.
-    - Simple token swapping on DEXs.
 
 ### Note
 The methods in the HederaAgentKit class are fully implemented and functional for interacting with the Hedera network (e.g., creating tokens, transferring assets, managing airdrops). However, Langchain tools for most of these methods and operations are not implemented by default.
