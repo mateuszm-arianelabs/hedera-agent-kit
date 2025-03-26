@@ -6,7 +6,7 @@ export type AssociateTokenResult = {
     txHash: string,
 }
 
-export class CustodialAssociateTokenResult implements BaseResult <AssociateTokenResult> {
+export class CustodialAssociateTokenResult implements BaseResult<AssociateTokenResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -36,7 +36,7 @@ export class CustodialAssociateTokenResult implements BaseResult <AssociateToken
     }
 }
 
-export class NonCustodialAssociateTokenResult implements BaseResult <string> {
+export class NonCustodialAssociateTokenResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {

@@ -6,7 +6,7 @@ export type MintTokenResult = {
     txHash: string,
 }
 
-export class CustodialMintTokenResult implements BaseResult <MintTokenResult> {
+export class CustodialMintTokenResult implements BaseResult<MintTokenResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -36,7 +36,7 @@ export class CustodialMintTokenResult implements BaseResult <MintTokenResult> {
     }
 }
 
-export class NonCustodialMintTokenResult implements BaseResult <string> {
+export class NonCustodialMintTokenResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {

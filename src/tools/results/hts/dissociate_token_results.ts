@@ -6,7 +6,7 @@ export type DissociateTokenResult = {
     txHash: string,
 }
 
-export class CustodialDissociateTokenResult implements BaseResult <DissociateTokenResult> {
+export class CustodialDissociateTokenResult implements BaseResult<DissociateTokenResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -36,7 +36,7 @@ export class CustodialDissociateTokenResult implements BaseResult <DissociateTok
     }
 }
 
-export class NonCustodialDissociateTokenResult implements BaseResult <string> {
+export class NonCustodialDissociateTokenResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {

@@ -6,7 +6,7 @@ export type AirdropResult = {
     txHash: string,
 }
 
-export class CustodialAirdropTokenResult implements BaseResult <AirdropResult> {
+export class CustodialAirdropTokenResult implements BaseResult<AirdropResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -36,7 +36,7 @@ export class CustodialAirdropTokenResult implements BaseResult <AirdropResult> {
     }
 }
 
-export class NonCustodialAirdropTokenResult implements BaseResult <string> {
+export class NonCustodialAirdropTokenResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {

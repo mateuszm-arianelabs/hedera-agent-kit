@@ -7,7 +7,7 @@ export type RejectTokenResult = {
 }
 
 
-export class CustodialRejectTokenResult implements BaseResult <RejectTokenResult> {
+export class CustodialRejectTokenResult implements BaseResult<RejectTokenResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -37,7 +37,7 @@ export class CustodialRejectTokenResult implements BaseResult <RejectTokenResult
     }
 }
 
-export class NonCustodialRejectTokenResult implements BaseResult <string> {
+export class NonCustodialRejectTokenResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {

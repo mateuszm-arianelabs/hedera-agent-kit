@@ -7,7 +7,7 @@ export type DeleteTopicResult = {
     txHash: string,
 }
 
-export class CustodialDeleteTopicResult implements BaseResult <DeleteTopicResult> {
+export class CustodialDeleteTopicResult implements BaseResult<DeleteTopicResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -37,7 +37,7 @@ export class CustodialDeleteTopicResult implements BaseResult <DeleteTopicResult
     }
 }
 
-export class NonCustodialDeleteTopicResult implements BaseResult <string> {
+export class NonCustodialDeleteTopicResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {

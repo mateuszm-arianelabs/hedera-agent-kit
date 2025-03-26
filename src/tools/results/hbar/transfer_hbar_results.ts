@@ -6,7 +6,7 @@ export type TransferHBARResult = {
     txHash: string,
 }
 
-export class CustodialTransferHbarResult implements BaseResult <TransferHBARResult> {
+export class CustodialTransferHbarResult implements BaseResult<TransferHBARResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -36,7 +36,7 @@ export class CustodialTransferHbarResult implements BaseResult <TransferHBARResu
     }
 }
 
-export class NonCustodialTransferHbarResult implements BaseResult <string> {
+export class NonCustodialTransferHbarResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {

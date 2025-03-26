@@ -7,7 +7,7 @@ export type CreateTopicResult = {
     topicId: string,
 }
 
-export class CustodialCreateTopicResult implements BaseResult <CreateTopicResult> {
+export class CustodialCreateTopicResult implements BaseResult<CreateTopicResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -40,7 +40,7 @@ export class CustodialCreateTopicResult implements BaseResult <CreateTopicResult
     }
 }
 
-export class NonCustodialCreateTopicResult implements BaseResult <string> {
+export class NonCustodialCreateTopicResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {

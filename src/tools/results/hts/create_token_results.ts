@@ -8,7 +8,7 @@ export type CreateTokenResult = {
     tokenId: TokenId,
 }
 
-export class CustodialCreateTokenResult implements BaseResult <CreateTokenResult> {
+export class CustodialCreateTokenResult implements BaseResult<CreateTokenResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -41,7 +41,7 @@ export class CustodialCreateTokenResult implements BaseResult <CreateTokenResult
     }
 }
 
-export class NonCustodialCreateTokenResult implements BaseResult <string> {
+export class NonCustodialCreateTokenResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {

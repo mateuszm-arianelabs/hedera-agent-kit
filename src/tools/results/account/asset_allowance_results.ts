@@ -6,7 +6,7 @@ export type AssetAllowanceResult = {
     txHash: string,
 }
 
-export class CustodialAssetAllowanceResult implements BaseResult <AssetAllowanceResult> {
+export class CustodialAssetAllowanceResult implements BaseResult<AssetAllowanceResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -36,7 +36,7 @@ export class CustodialAssetAllowanceResult implements BaseResult <AssetAllowance
     }
 }
 
-export class NonCustodialAssetAllowanceResult implements BaseResult <string> {
+export class NonCustodialAssetAllowanceResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {

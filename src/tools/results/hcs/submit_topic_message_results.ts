@@ -8,7 +8,7 @@ export type SubmitMessageResult = {
 }
 
 
-export class CustodialSubmitMessageResult implements BaseResult <SubmitMessageResult> {
+export class CustodialSubmitMessageResult implements BaseResult<SubmitMessageResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -41,7 +41,7 @@ export class CustodialSubmitMessageResult implements BaseResult <SubmitMessageRe
     }
 }
 
-export class NonCustodialSubmitMessageResult implements BaseResult <string> {
+export class NonCustodialSubmitMessageResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {

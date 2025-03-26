@@ -7,7 +7,7 @@ export type TransferTokenResult = {
 }
 
 
-export class CustodialTransferTokenResult implements BaseResult <TransferTokenResult> {
+export class CustodialTransferTokenResult implements BaseResult<TransferTokenResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -37,7 +37,7 @@ export class CustodialTransferTokenResult implements BaseResult <TransferTokenRe
     }
 }
 
-export class NonCustodialTransferTokenResult implements BaseResult <string> {
+export class NonCustodialTransferTokenResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {

@@ -6,7 +6,7 @@ export type MintNFTResult = {
     txHash: string,
 }
 
-export class CustodialMintNFTResult implements BaseResult <MintNFTResult> {
+export class CustodialMintNFTResult implements BaseResult<MintNFTResult> {
     actionName: AgentKitActionName;
 
     constructor(
@@ -36,7 +36,7 @@ export class CustodialMintNFTResult implements BaseResult <MintNFTResult> {
     }
 }
 
-export class NonCustodialMintNFTResult implements BaseResult <string> {
+export class NonCustodialMintNFTResult implements BaseResult<string> {
     actionName: AgentKitActionName;
 
     constructor(public readonly txBytes: string) {
