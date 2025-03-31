@@ -28,6 +28,8 @@ describe("claim_pending_airdrops", () => {
     beforeAll(async () => {
         dotenv.config()
         try {
+            langchainAgent = await LangchainAgent.create();
+
             hederaMirrorNodeClient = new HederaMirrorNodeClient("testnet" as NetworkType);
 
             networkClientWrapper = new NetworkClientWrapper(

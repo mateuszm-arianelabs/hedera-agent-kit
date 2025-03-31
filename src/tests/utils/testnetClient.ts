@@ -4,11 +4,13 @@ import {
   AccountUpdateTransaction,
   Client,
   Hbar,
-  PrivateKey, PublicKey,
+  PrivateKey,
+  PublicKey,
   TokenId,
   TopicId,
 } from "@hashgraph/sdk";
 import { AccountData, hederaPrivateKeyFromString } from "./testnetUtils";
+
 import HederaAgentKit from "../../agent";
 import { CreateFTOptions, CreateNFTOptions, HederaNetworkType } from "../../types";
 import { AirdropRecipient } from "../../tools/transactions/strategies";
@@ -156,4 +158,5 @@ export class NetworkClientWrapper {
       .submitTopicMessage(TopicId.fromString(topicId), message, isCustodial)
       .then(response => response.getRawResponse() as SubmitMessageResult);
   }
+
 }

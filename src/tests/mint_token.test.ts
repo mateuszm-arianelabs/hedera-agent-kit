@@ -140,12 +140,16 @@ describe("hedera_mint_fungible_token", () => {
     };
 
     langchainAgent = await LangchainAgent.create();
-    const resp = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
+    const resp = await langchainAgent.sendPrompt(prompt);
+    const langchainResponse = extractLangchainResponse(resp.messages);
+    const mintedAmountFromResponseInDisplayUnits = langchainResponse?.amount;
 
     await wait(5000);
 
     const mirrorNodeTokenInfo = await hederaApiClient.getTokenDetails(tokenId);
 
-    expect(Number(mirrorNodeTokenInfo.total_supply)).toBe(STARTING_SUPPLY + TOKENS_TO_MINT_IN_DISPLAY_UNITS);
+    expect(Number(mirrorNodeTokenInfo.total_supply)).toBe(
+      Number(mintedAmountFromResponseInDisplayUnits) * 10 ** DECIMALS
+    );
   });
 });

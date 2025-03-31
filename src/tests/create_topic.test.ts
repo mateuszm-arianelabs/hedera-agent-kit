@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, beforeAll, expect } from "vitest";
 import * as dotenv from "dotenv";
 import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
 import { LangchainAgent } from "./utils/langchainAgent";

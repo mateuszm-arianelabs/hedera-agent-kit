@@ -114,8 +114,6 @@ describe("associate_token", () => {
 
     describe("associate token checks", () => {
         it("should associate token", async () => {
-            console.log({testCases})
-
             for (const { promptText, tokenToAssociateId } of testCases || []) {
                 const prompt = {
                     user: "user",
@@ -123,8 +121,6 @@ describe("associate_token", () => {
                 };
 
                 const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
-
-                console.log(response)
 
                 await wait(5000);
 
