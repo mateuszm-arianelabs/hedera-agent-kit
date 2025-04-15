@@ -1,5 +1,5 @@
 import HederaAgentKit from "../src/agent";
-import { createHederaTools } from "../src";
+import { createHederaTools, ExecutorAccountDetails } from "../src";
 import { ChatOpenAI } from "@langchain/openai";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
@@ -138,9 +138,15 @@ async function runChatMode(agent: any, config: any) {
         break;
       }
 
-      // for now, isCustodial is based on env, but later it can be changed and passed with a prompt text coming from FE
+      // NOTE: In this example, `isCustodial`, `executorAccountId`, and `executorPublicKey` are sourced from environment variables
+      // for simplicity and demonstration purposes. In a real-world scenario, these values can (and should) be passed dynamically
+      // from the frontend as part of the user request payload
       const isCustodial = process.env.CUSTODIAL_MODE === "true";
-      const stream = await sendPrompt(agent, config, userInput, isCustodial);
+      const executorAccountDetails: ExecutorAccountDetails = {
+        executorPublicKey: process.env.EXECUTOR_PUBLIC_KEY || undefined,
+        executorAccountId: process.env.EXECUTOR_ACCOUNT_ID || undefined,
+      }
+      const stream = await sendPrompt(agent, config, userInput, isCustodial, executorAccountDetails);
       for await (const chunk of stream) {
         if ("agent" in chunk) {
           console.log(chunk.agent.messages[0].content);
@@ -160,10 +166,16 @@ async function runChatMode(agent: any, config: any) {
   }
 }
 
-async function sendPrompt(agent: any, config: any, userInput: string, isCustodial: boolean) {
+async function sendPrompt(
+  agent: any,
+  config: any,
+  userInput: string,
+  isCustodial: boolean,
+  executorAccountDetails: ExecutorAccountDetails,
+) {
   return agent.stream(
-      { messages: [new HumanMessage(userInput)] },
-      {...config, configurable: {...config.configurable, isCustodial: isCustodial}}
+    { messages: [new HumanMessage(userInput)] },
+    {...config, configurable: {...config.configurable, isCustodial, executorAccountDetails}}
   );
 }
 
