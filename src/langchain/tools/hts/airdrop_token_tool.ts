@@ -1,6 +1,7 @@
 import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
+import { ExecutorAccountDetails } from "../../../types";
 
 export class HederaAirdropTokenTool extends Tool {
     name = 'hedera_airdrop_token';
@@ -29,13 +30,19 @@ Example usage:
     protected override async _call(input: any, _runManager?: CallbackManagerForToolRun, config?: ToolRunnableConfig): Promise<string> {
         try {
             const isCustodial = config?.configurable?.isCustodial === true;
+            const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
+
             console.log(`hedera_airdrop_token tool has been called (${isCustodial ? 'custodial' : 'non-custodial'})`);
 
             const parsedInput = JSON.parse(input);
 
             return await this.hederaKit
-                .airdropToken(parsedInput.tokenId, parsedInput.recipients, isCustodial)
-                .then(response => response.getStringifiedResponse());
+                .airdropToken(
+                  parsedInput.tokenId,
+                  parsedInput.recipients,
+                  isCustodial,
+                  executorAccountDetails
+                ).then(response => response.getStringifiedResponse());
 
         } catch (error: any) {
             return JSON.stringify({

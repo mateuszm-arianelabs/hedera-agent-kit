@@ -27,12 +27,18 @@ If no input is given (empty JSON '{}'), it returns the balance of the connected 
 
     protected override async _call(input: any, _runManager?: CallbackManagerForToolRun, config?: ToolRunnableConfig): Promise<string> {
         try {
+            const isCustodial = config?.configurable?.isCustodial === true;
             const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
+
             console.log('hedera_get_hbar_balance tool has been called')
 
             const parsedInput = JSON.parse(input);
 
-            const balance = await this.hederaKit.getHbarBalance(parsedInput?.accountId || executorAccountDetails.executorAccountId);
+            const balance = await this.hederaKit.getHbarBalance(
+              parsedInput?.accountId,
+              isCustodial,
+              executorAccountDetails,
+            );
 
             return JSON.stringify({
                 status: "success",

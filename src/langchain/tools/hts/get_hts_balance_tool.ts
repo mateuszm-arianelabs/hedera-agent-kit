@@ -1,6 +1,7 @@
-import { Tool } from "@langchain/core/tools";
+import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
-import { HederaNetworkType } from "../../../types";
+import { ExecutorAccountDetails, HederaNetworkType } from "../../../types";
+import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 
 export class HederaGetHtsBalanceTool extends Tool {
     name = 'hedera_get_hts_balance'
@@ -26,8 +27,11 @@ If no account ID is given, it returns the balance for the connected account.
         super()
     }
 
-    protected async _call(input: string): Promise<string> {
+    protected override async _call(input: any, _runManager?: CallbackManagerForToolRun, config?: ToolRunnableConfig): Promise<string> {
         try {
+            const isCustodial = config?.configurable?.isCustodial === true;
+            const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
+
             console.log('hedera_get_hts_balance tool has been called')
 
             const parsedInput = JSON.parse(input);
@@ -41,12 +45,14 @@ If no account ID is given, it returns the balance for the connected account.
             const balance = await this.hederaKit.getHtsBalance(
                 parsedInput.tokenId,
                 process.env.HEDERA_NETWORK_TYPE as HederaNetworkType,
-                parsedInput?.accountId
+                parsedInput?.accountId,
+                isCustodial,
+                executorAccountDetails
             )
 
             const details = await this.hederaKit.getHtsTokenDetails(
                 parsedInput?.tokenId,
-                process.env.HEDERA_NETWORK_TYPE as HederaNetworkType
+                process.env.HEDERA_NETWORK_TYPE as HederaNetworkType,
             )
 
             return JSON.stringify({

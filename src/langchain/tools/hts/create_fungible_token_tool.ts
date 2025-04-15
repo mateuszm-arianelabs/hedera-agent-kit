@@ -1,6 +1,7 @@
 import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
+import { ExecutorAccountDetails } from "../../../types";
 
 export class HederaCreateFungibleTokenTool extends Tool {
     name = 'hedera_create_fungible_token';
@@ -24,6 +25,8 @@ tokenMetadata: string, containing metadata associated with this token, empty str
     protected override async _call(input: any, _runManager?: CallbackManagerForToolRun, config?: ToolRunnableConfig): Promise<string> {
         try {
            const isCustodial = config?.configurable?.isCustodial === true;
+           const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
+
            console.log(`hedera_create_fungible_token tool has been called (${isCustodial ? 'custodial' : 'non-custodial'})`);
 
            const parsedInput = JSON.parse(input);
@@ -39,7 +42,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
                tokenMetadata: new TextEncoder().encode(parsedInput.tokenMetadata), // encoding to Uint8Array
            }
            return await this.hederaKit
-               .createFT(options, isCustodial)
+               .createFT(options, isCustodial, executorAccountDetails)
                .then(response => response.getStringifiedResponse());
 
 
