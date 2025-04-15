@@ -6,12 +6,12 @@ import {
     TokenId,
     TokenType,
     TopicId,
-    PrivateKey
 } from "@hashgraph/sdk";
 import {
     Airdrop,
     CreateFTOptions,
     CreateNFTOptions,
+    ExecutorAccountDetails,
     HCSMessage,
     HederaNetworkType,
     HtsTokenDetails,
@@ -134,6 +134,7 @@ export class HederaAgentKit {
         topicMemo: string,
         isSubmitKey: boolean,
         custodial?: boolean,
+        executorAccountDetails?: ExecutorAccountDetails
     ): Promise<BaseResult<string> | BaseResult<CreateTopicResult>> {
         const useCustodial = custodial ?? this.isCustodial;
 
@@ -144,7 +145,7 @@ export class HederaAgentKit {
             return this.createTopicCustodial(topicMemo, isSubmitKey);
         }
 
-        return this.createTopicNonCustodial(topicMemo, isSubmitKey);
+        return this.createTopicNonCustodial(topicMemo, isSubmitKey, executorAccountDetails?.executorPublicKey, executorAccountDetails?.executorAccountId);
     }
 
     private async createTopicCustodial(
@@ -154,7 +155,7 @@ export class HederaAgentKit {
         if(!this.privateKey) throw new Error("Custodial actions require privateKey!");
 
         const response: CreateTopicResult =  await HcsTransactionBuilder
-            .createTopic(topicMemo, this.client.operatorPublicKey, isSubmitKey)
+            .createTopic(topicMemo, this.client.operatorPublicKey!, isSubmitKey)
             .signAndExecute(this.client);
 
         return new CustodialCreateTopicResult(response.topicId, response.txHash, response.status)
@@ -163,10 +164,16 @@ export class HederaAgentKit {
     private async createTopicNonCustodial(
         topicMemo: string,
         isSubmitKey: boolean,
+        executorPublicKey?: string | undefined,
+        executorAccountId?: string | undefined,
     ) : Promise<NonCustodialCreateTopicResult> {
+        if(executorPublicKey === undefined) throw new Error("Executor public key is missing in non custodial action call!");
+        if(executorAccountId === undefined) throw new Error("Executor account id is missing in non custodial action call!");
+
+        console.log("Executor public key: " + executorPublicKey);
         const txBytes =  await HcsTransactionBuilder
-            .createTopic(topicMemo, this.client.operatorPublicKey, isSubmitKey)
-            .getTxBytesString(this.client, this.accountId);
+            .createTopic(topicMemo, PublicKey.fromString(executorPublicKey as string), isSubmitKey)
+            .getTxBytesString(this.client, executorAccountId);
 
         return new NonCustodialCreateTopicResult(txBytes);
     }
@@ -176,6 +183,7 @@ export class HederaAgentKit {
         topicId: TopicId,
         message: string,
         custodial?: boolean,
+        executorAccountDetails?: ExecutorAccountDetails
     ): Promise<BaseResult<string> | BaseResult<SubmitMessageResult>> {
         const useCustodial = custodial ?? this.isCustodial;
 
@@ -186,7 +194,7 @@ export class HederaAgentKit {
             return this.submitTopicMessageCustodial(topicId, message);
         }
 
-        return this.submitTopicMessageNonCustodial(topicId, message);
+        return this.submitTopicMessageNonCustodial(topicId, message, executorAccountDetails?.executorAccountId);
     }
 
     private async submitTopicMessageCustodial(
@@ -205,11 +213,13 @@ export class HederaAgentKit {
     private async submitTopicMessageNonCustodial(
         topicId: TopicId,
         message: string,
+        executorAccountId?: string | undefined,
     ): Promise<NonCustodialSubmitMessageResult> {
+        if(executorAccountId === undefined) throw new Error("Executor account id is missing in non custodial action call!");
 
         const txBytes = await HcsTransactionBuilder
             .submitTopicMessage(topicId, message)
-            .getTxBytesString(this.client, this.accountId);
+            .getTxBytesString(this.client, executorAccountId);
 
         return new NonCustodialSubmitMessageResult(txBytes);
     }
@@ -739,6 +749,7 @@ export class HederaAgentKit {
     async deleteTopic(
         topicId: TopicId,
         custodial?: boolean,
+        executorAccountDetails?: ExecutorAccountDetails
     ): Promise<BaseResult<string> | BaseResult<DeleteTopicResult>> {
         const useCustodial = custodial ?? this.isCustodial;
 
@@ -749,7 +760,7 @@ export class HederaAgentKit {
             return this.deleteTopicCustodial(topicId);
         }
 
-        return this.deleteTopicNonCustodial(topicId);
+        return this.deleteTopicNonCustodial(topicId, executorAccountDetails?.executorAccountId);
     }
 
     private async deleteTopicCustodial(
@@ -763,11 +774,13 @@ export class HederaAgentKit {
     }
 
     private async deleteTopicNonCustodial(
-        topicId: TopicId
+        topicId: TopicId,
+        executorAccountId: string | undefined,
     ): Promise<NonCustodialDeleteTopicResult> {
+        if(executorAccountId === undefined) throw new Error("Executor account id is missing in non custodial action call!");
         const txBytes =  await HcsTransactionBuilder.deleteTopic(
             topicId
-        ).getTxBytesString(this.client, this.accountId);
+        ).getTxBytesString(this.client, executorAccountId);
 
         return new NonCustodialDeleteTopicResult(txBytes);
     }
