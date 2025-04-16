@@ -1,6 +1,7 @@
 import { Tool } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
 import { TopicId } from "@hashgraph/sdk";
+import { convertStringToTimestamp } from "../../../utils/date-format-utils";
 
 export class HederaGetTopicMessagesTool extends Tool {
     name = 'hedera_get_topic_messages'
@@ -41,11 +42,14 @@ Example usage:
             console.log('hedera_get_topic_messages tool has been called');
 
             const parsedInput = JSON.parse(input);
+            const unixLowerTimestamp = parsedInput.lowerThreshold !== undefined ? convertStringToTimestamp(parsedInput.lowerThreshold) : undefined;
+            const unixUpperTimestamp = parsedInput.upperThreshold !== undefined ? convertStringToTimestamp(parsedInput.upperThreshold) : undefined;
+
             const messages = await this.hederaKit.getTopicMessages(
                 TopicId.fromString(parsedInput.topicId),
                 process.env.HEDERA_NETWORK_TYPE as "mainnet" | "testnet" | "previewnet" || "testnet",
-                parsedInput.lowerThreshold,
-                parsedInput.upperThreshold
+                unixLowerTimestamp,
+                unixUpperTimestamp
             );
             return JSON.stringify({
                 status: "success",

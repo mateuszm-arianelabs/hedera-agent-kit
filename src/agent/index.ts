@@ -484,8 +484,10 @@ export class HederaAgentKit {
         let defaultAccountId; // operator or executor account id will be used if no specific account id is passed
 
         if(!custodial) {
-            if(executorAccountDetails === undefined
-              || executorAccountDetails.executorAccountId === undefined) {
+            if(
+              executorAccountDetails === undefined ||
+              executorAccountDetails.executorAccountId === undefined
+            ) {
                 throw new Error("Executor account id is missing in non custodial action call!");
             }
             defaultAccountId = executorAccountDetails.executorAccountId;

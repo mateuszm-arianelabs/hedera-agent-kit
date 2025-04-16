@@ -138,7 +138,7 @@ describe("get_topic_messages", () => {
                     user: "user",
                     text: textPrompt,
                 };
-
+                console.log(`sending prompt`);
                 const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
                 const messages = extractTopicMessages(response.messages);
 
