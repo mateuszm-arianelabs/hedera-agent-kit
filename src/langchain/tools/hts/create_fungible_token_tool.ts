@@ -11,7 +11,7 @@ Inputs (input is a JSON string):
 name: string, the name of the token e.g. My Token,
 symbol: string, the symbol of the token e.g. MT,
 decimals: number, the amount of decimals of the token,
-initialSupply: number, optional, the initial supply of the token, given in base unit, if not passed set to undefined
+initialSupply: number, optional, the initial supply of the token, given in display unit, if not passed set to undefined
 isSupplyKey: boolean, decides whether supply key should be set, false if not passed
 isMetadataKey: boolean, decides whether metadata key should be set, false if not passed
 isAdminKey: boolean, decides whether admin key should be set, false if not passed
@@ -34,7 +34,7 @@ tokenMetadata: string, containing metadata associated with this token, empty str
                name: parsedInput.name,
                symbol: parsedInput.symbol,
                decimals: parsedInput.decimals,
-               initialSupply: parsedInput.initialSupply, // given in base unit
+               initialSupply: parsedInput.initialSupply ? (parsedInput.initialSupply * Math.pow(10, parsedInput.decimals)) : undefined, // parsed to base unit
                isSupplyKey: parsedInput.isSupplyKey,
                isAdminKey: parsedInput.isAdminKey,
                isMetadataKey: parsedInput.isMetadataKey,

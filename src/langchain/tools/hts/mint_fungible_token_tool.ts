@@ -1,7 +1,8 @@
 import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
-import { ExecutorAccountDetails } from "../../../types";
+import { ExecutorAccountDetails, HederaNetworkType } from "../../../types";
+import { toDisplayUnit } from "../../../utils/hts-format-utils";
 
 export class HederaMintFungibleTokenTool extends Tool {
     name = 'hedera_mint_fungible_token';
@@ -31,8 +32,15 @@ Example usage:
 
             const parsedInput = JSON.parse(input);
 
+            const details = await this.hederaKit.getHtsTokenDetails(
+              parsedInput?.tokenId,
+              process.env.HEDERA_NETWORK_TYPE as HederaNetworkType,
+            )
+
+            const displayUnitAmount = await toDisplayUnit(details.token_id, parsedInput.amount, this.hederaKit.network);
+
             return await this.hederaKit
-                .mintToken(parsedInput.tokenId, parsedInput.amount, isCustodial, executorAccountDetails)
+                .mintToken(parsedInput.tokenId, displayUnitAmount.toNumber(), isCustodial, executorAccountDetails)
                 .then(response => response.getStringifiedResponse());
         } catch (error: any) {
             return JSON.stringify({

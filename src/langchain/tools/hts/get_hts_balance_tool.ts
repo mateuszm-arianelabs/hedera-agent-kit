@@ -2,11 +2,12 @@ import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
 import { ExecutorAccountDetails, HederaNetworkType } from "../../../types";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
+import { toDisplayUnit } from "../../../utils/hts-format-utils";
 
 export class HederaGetHtsBalanceTool extends Tool {
     name = 'hedera_get_hts_balance'
 
-    description = `Retrieves the balance of a specified Hedera Token Service (HTS) token for a given account in base unit.  
+    description = `Retrieves the balance of a specified Hedera Token Service (HTS) token for a given account in display unit.  
 If an account ID is provided, it returns the balance of that account.  
 If no account ID is given, it returns the balance for the connected account.
 
@@ -38,8 +39,8 @@ If no account ID is given, it returns the balance for the connected account.
             if (!parsedInput.tokenId) {
                 throw new Error("tokenId is required");
             }
-            if(!process.env.HEDERA_NETWORK) {
-                throw new Error("HEDERA_NETWORK environment variable is required");
+            if(!process.env.HEDERA_NETWORK_TYPE) {
+                throw new Error("HEDERA_NETWORK_TYPE environment variable is required");
             }
 
             const balance = await this.hederaKit.getHtsBalance(
@@ -55,11 +56,12 @@ If no account ID is given, it returns the balance for the connected account.
                 process.env.HEDERA_NETWORK_TYPE as HederaNetworkType,
             )
 
+            const displayUnitBalance = await toDisplayUnit(details.token_id, balance, this.hederaKit.network);
+
             return JSON.stringify({
                 status: "success",
-                balance: balance, // in base unit
-                unit: details.symbol,
-                decimals: details.decimals
+                balance: displayUnitBalance.toNumber(), // in display unit
+                unit: details.symbol
             });
         } catch (error: any) {
             return JSON.stringify({

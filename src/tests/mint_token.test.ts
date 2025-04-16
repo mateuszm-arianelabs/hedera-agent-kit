@@ -140,7 +140,7 @@ describe("hedera_mint_fungible_token", () => {
     };
 
     langchainAgent = await LangchainAgent.create();
-    const resp = await langchainAgent.sendPrompt(prompt);
+    const resp = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
     const langchainResponse = extractLangchainResponse(resp.messages);
     const mintedAmountFromResponseInDisplayUnits = langchainResponse?.amount;
 

@@ -13,7 +13,7 @@ export interface CreateTokenOptions {
     name: string;
     symbol: string;
     decimals?: number;
-    initialSupply?: number;
+    initialSupply?: number | undefined;
     isSupplyKey?: boolean;
     tokenType: TokenType;
     client: Client;
