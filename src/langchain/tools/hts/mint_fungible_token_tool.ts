@@ -2,7 +2,7 @@ import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 import { ExecutorAccountDetails, HederaNetworkType } from "../../../types";
-import { toDisplayUnit } from "../../../utils/hts-format-utils";
+import { toBaseUnit } from "../../../utils/hts-format-utils";
 
 export class HederaMintFungibleTokenTool extends Tool {
     name = 'hedera_mint_fungible_token';
@@ -37,7 +37,7 @@ Example usage:
               process.env.HEDERA_NETWORK_TYPE as HederaNetworkType,
             )
 
-            const displayUnitAmount = await toDisplayUnit(details.token_id, parsedInput.amount, this.hederaKit.network);
+            const displayUnitAmount = await toBaseUnit(details.token_id, parsedInput.amount, this.hederaKit.network);
 
             return await this.hederaKit
                 .mintToken(parsedInput.tokenId, displayUnitAmount.toNumber(), isCustodial, executorAccountDetails)
