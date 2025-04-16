@@ -60,7 +60,7 @@ describe("reject_token", async () => {
             }
 
             // Create test account
-            const startingHbars = 10;
+            const startingHbars = 20;
             const autoAssociation = -1; // unlimited
             acc1 = await networkClientWrapper.createAccount(startingHbars, autoAssociation);
 
