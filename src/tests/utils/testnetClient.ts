@@ -43,7 +43,6 @@ export class NetworkClientWrapper {
     this.agentKit = new HederaAgentKit(
       this.accountId.toString(),
       this.privateKey.toString(),
-      this.publicKey.toStringDer(),
       networkType
     );
   }
