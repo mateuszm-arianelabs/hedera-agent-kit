@@ -50,11 +50,10 @@ describe("hedera_mint_fungible_token", () => {
     beforeAll(async () => {
             hederaApiClient = new HederaMirrorNodeClient("testnet" as NetworkType);
             networkClientWrapper = new NetworkClientWrapper(
-                process.env.HEDERA_ACCOUNT_ID!,
-                process.env.HEDERA_PRIVATE_KEY!,
-                process.env.HEDERA_PUBLIC_KEY!,
-                process.env.HEDERA_KEY_TYPE!,
-                "testnet"
+              process.env.HEDERA_ACCOUNT_ID!,
+              process.env.HEDERA_PRIVATE_KEY!,
+              process.env.HEDERA_KEY_TYPE!,
+              "testnet"
             );
         });
 
