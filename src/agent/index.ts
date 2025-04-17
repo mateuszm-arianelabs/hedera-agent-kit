@@ -97,7 +97,6 @@ import {
 export class HederaAgentKit {
     public client: Client
     readonly network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet'
-    readonly publicKey: PublicKey | undefined;
     private readonly privateKey: string | undefined;
     readonly accountId: string;
     private readonly isCustodial: boolean;
@@ -105,7 +104,6 @@ export class HederaAgentKit {
     constructor(
         accountId: string,
         privateKey?: string,
-        publicKey?: string | undefined,
         network: 'mainnet' | 'testnet' | 'previewnet' = 'mainnet',
     ) {
         if(privateKey){
@@ -116,9 +114,6 @@ export class HederaAgentKit {
         } else {
             // @ts-ignore
             this.client = Client.forNetwork(network);
-            if(!publicKey) {
-                throw new Error("Public key is missing. To perform non custodial action you should pass public key!");
-            }
             this.isCustodial = false;
         }
         this.network = network;
