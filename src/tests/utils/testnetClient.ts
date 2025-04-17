@@ -148,7 +148,7 @@ export class NetworkClientWrapper {
       networkType: string,
       accountId: string
   ): Promise<number> {
-    return this.agentKit.getHtsBalance(tokenId, networkType as HederaNetworkType, accountId);
+    return this.agentKit.getHtsBalance(tokenId, networkType as HederaNetworkType, accountId, true);
   }
 
   async submitTopicMessage(topicId: string, message: string): Promise<SubmitMessageResult> {

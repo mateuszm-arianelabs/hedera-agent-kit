@@ -17,6 +17,8 @@ interface AirdropLangchainResponse {
   txHash: string;
 }
 
+const IS_CUSTODIAL = true;
+
 function extractLangchainResponse(
   messages: any[]
 ): AirdropLangchainResponse | null {
@@ -30,7 +32,7 @@ function extractLangchainResponse(
     try {
       const toolResponse = JSON.parse(message.content);
 
-      if (toolResponse.status !== "success" || !toolResponse.tokenId) {
+      if (toolResponse.status !== "success" || !toolResponse.txHash) {
         throw new Error(toolResponse.message ?? "Unknown error");
       }
 
@@ -51,22 +53,6 @@ const formatTxHash = (txHash: string) => {
   }
 
   return `${txId}-${txTimestamp?.replace(".", "-")}`;
-};
-
-const extractTxHash = (messages: any[]) => {
-  return messages.reduce((acc, { content }) => {
-    try {
-      const response = JSON.parse(content);
-
-      if (response.status === "error") {
-        throw new Error(response.message);
-      }
-
-      return String(response.txHash);
-    } catch {
-      return acc;
-    }
-  }, "");
 };
 
 describe("Test Token Airdrop", async () => {
@@ -188,9 +174,11 @@ describe("Test Token Airdrop", async () => {
           receiversAccountsIds.find((id) => id === agentsAccountId)
         ) {
           throw new Error(
-            "Env file must be defined and matching the env of running ElizaOs instance! Note that airdrops cannot be done to the operator account address."
+            "Note that airdrops cannot be done to the operator account address."
           );
         }
+
+        console.log(`Fetching balances before test`)
 
         // Get balances before
         const balanceAgentBefore = await hederaApiClient.getTokenBalance(
@@ -208,12 +196,15 @@ describe("Test Token Airdrop", async () => {
           user: "user",
           text: promptText,
         };
-        const response = await langchainAgent.sendPrompt(prompt);
+
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
         const airdropResponse = extractLangchainResponse(response.messages);
         const txHash = formatTxHash(airdropResponse?.txHash ?? '');
 
         // Get balances after transaction being successfully processed by mirror node
         await wait(5000);
+
+        console.log(`Fetching balances after test`)
 
         const balanceAgentAfter = await hederaApiClient.getTokenBalance(
           agentsAccountId,

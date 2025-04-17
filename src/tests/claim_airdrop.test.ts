@@ -42,7 +42,7 @@ describe("claim_pending_airdrops", () => {
 
 
             // Create test account
-            const startingHbars = 10;
+            const startingHbars = 20;
             const autoAssociation = 0; // no auto association
             airdropCreatorAccount = await networkClientWrapper.createAccount(
                 startingHbars,
