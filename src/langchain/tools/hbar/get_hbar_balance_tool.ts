@@ -37,7 +37,7 @@ If no input is given (empty JSON '{}'), it returns the balance of the connected 
             const balance = await this.hederaKit.getHbarBalance(
               parsedInput?.accountId,
               isCustodial,
-              executorAccountDetails,
+              executorAccountDetails
             );
 
             return JSON.stringify({

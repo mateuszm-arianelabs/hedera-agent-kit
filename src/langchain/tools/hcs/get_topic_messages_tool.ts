@@ -1,7 +1,8 @@
-import { Tool } from "@langchain/core/tools";
+import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
 import { TopicId } from "@hashgraph/sdk";
 import { convertStringToTimestamp } from "../../../utils/date-format-utils";
+import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 
 export class HederaGetTopicMessagesTool extends Tool {
     name = 'hedera_get_topic_messages'
@@ -37,19 +38,20 @@ Example usage:
         super()
     }
 
-    protected async _call(input: string): Promise<string> {
+    protected override async _call(input: any, _runManager?: CallbackManagerForToolRun, config?: ToolRunnableConfig): Promise<string> {
         try {
             console.log('hedera_get_topic_messages tool has been called');
 
             const parsedInput = JSON.parse(input);
-            const unixLowerTimestamp = parsedInput.lowerThreshold !== undefined ? convertStringToTimestamp(parsedInput.lowerThreshold) : undefined;
-            const unixUpperTimestamp = parsedInput.upperThreshold !== undefined ? convertStringToTimestamp(parsedInput.upperThreshold) : undefined;
+
+            const unixLowerThreshold = parsedInput.lowerThreshold ? convertStringToTimestamp(parsedInput.lowerThreshold) : undefined;
+            const unixUpperThreshold = parsedInput.upperThreshold ? convertStringToTimestamp(parsedInput.upperThreshold) : undefined;
 
             const messages = await this.hederaKit.getTopicMessages(
                 TopicId.fromString(parsedInput.topicId),
                 process.env.HEDERA_NETWORK_TYPE as "mainnet" | "testnet" | "previewnet" || "testnet",
-                unixLowerTimestamp,
-                unixUpperTimestamp
+                unixLowerThreshold,
+                unixUpperThreshold
             );
             return JSON.stringify({
                 status: "success",
