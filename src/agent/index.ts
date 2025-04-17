@@ -121,7 +121,6 @@ export class HederaAgentKit {
             }
             this.isCustodial = false;
         }
-        this.publicKey = PublicKey.fromString(publicKey!);
         this.network = network;
         this.accountId = accountId;
     }
@@ -454,9 +453,10 @@ export class HederaAgentKit {
       custodial?: boolean,
       executorAccountDetails?: ExecutorAccountDetails,
     ): Promise<number> {
+        const useCustodial = custodial ?? this.isCustodial;
         let defaultAccountId; // operator or executor account id will be used if no specific account id is passed
 
-        if (!custodial) {
+        if (!useCustodial) {
             if (
               executorAccountDetails === undefined ||
               executorAccountDetails.executorAccountId === undefined
@@ -481,9 +481,10 @@ export class HederaAgentKit {
         custodial?: boolean,
         executorAccountDetails?: ExecutorAccountDetails,
     ): Promise<number> {
+        const useCustodial = custodial ?? this.isCustodial;
         let defaultAccountId; // operator or executor account id will be used if no specific account id is passed
 
-        if(!custodial) {
+        if(!useCustodial) {
             if(
               executorAccountDetails === undefined ||
               executorAccountDetails.executorAccountId === undefined
@@ -506,9 +507,10 @@ export class HederaAgentKit {
       custodial?: boolean,
       executorAccountDetails?: ExecutorAccountDetails,
     ) {
+        const useCustodial = custodial ?? this.isCustodial;
         let defaultAccountId; // operator or executor account id will be used if no specific account id is passed
 
-        if (!custodial) {
+        if (!useCustodial) {
             if (
               executorAccountDetails === undefined ||
               executorAccountDetails.executorAccountId === undefined
