@@ -575,7 +575,7 @@ export class HederaAgentKit {
         if(executorAccountId === undefined) throw new Error("Executor account id is missing in non custodial action call!");
 
         const txBytes = await HtsTransactionBuilder.associateToken(
-            tokenId,
+          tokenId,
           executorAccountId
         ).getTxBytesString(this.client, executorAccountId);
 

@@ -4,6 +4,9 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import * as dotenv from "dotenv";
 import HederaAgentKit from "../../agent";
 import { createHederaTools } from "../../langchain";
+import { AccountId, Client, PrivateKey, Transaction } from "@hashgraph/sdk";
+import { Buffer } from "buffer";
+import { TxExecutionResult } from "../../types";
 
 dotenv.config();
 
@@ -76,3 +79,43 @@ export async function initializeAgent() {
 
 export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+export const extractTxBytes = (messages: any[]): string => {
+  return messages.reduce((acc, {content}) => {
+    try {
+      const response = JSON.parse(content);
+
+      return response.txBytes as string;
+    } catch {
+      return acc;
+    }
+  }, "");
+};
+
+export const signAndExecuteTx = async (
+  base64TxString: string,
+  privateKey: string,
+  accountId: string
+): Promise<TxExecutionResult> => {
+  try {
+    const client = Client.forTestnet();
+    const operatorKey = PrivateKey.fromStringECDSA(privateKey);
+    const operatorId = AccountId.fromString(accountId);
+    client.setOperator(operatorId, operatorKey);
+    const txBytes = Buffer.from(base64TxString, "base64");
+    const transaction = Transaction.fromBytes(txBytes);
+    const signedTx = await transaction.sign(operatorKey);
+    const txResponse = await signedTx.execute(client);
+    const receipt = await txResponse.getReceipt(client);
+
+    console.log(`Transaction executed with ID: ${txResponse.transactionId.toString()}\nStatus: ${receipt.status.toString()}`);
+
+    return {
+      txHash: txResponse.transactionId.toString(),
+      status: receipt.status.toString()
+    };
+  } catch (error) {
+    console.error("Error signing transaction:", JSON.stringify(error));
+    throw error;
+  }
+
+}
