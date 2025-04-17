@@ -120,8 +120,8 @@ export class HederaAgentKit {
                 throw new Error("Public key is missing. To perform non custodial action you should pass public key!");
             }
             this.isCustodial = false;
+            this.publicKey = PublicKey.fromString(publicKey!);
         }
-        this.publicKey = PublicKey.fromString(publicKey!);
         this.network = network;
         this.accountId = accountId;
     }
