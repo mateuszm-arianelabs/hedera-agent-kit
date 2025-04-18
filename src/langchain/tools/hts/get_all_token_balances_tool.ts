@@ -30,6 +30,7 @@ Example usage:
             const isCustodial = config?.configurable?.isCustodial === true;
             const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
 
+            console.log(`hedera_get_all_token_balances tool has been called (${isCustodial ? 'custodial' : 'non-custodial'})`);
 
             const parsedInput = input ? JSON.parse(input) : {};
 

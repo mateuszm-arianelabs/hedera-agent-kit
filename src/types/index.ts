@@ -189,3 +189,8 @@ export type ExecutorAccountDetails = {
     executorPublicKey?: string | undefined,
     executorAccountId?: string | undefined,
 }
+
+export type TxExecutionResult = {
+    status: string;
+    txHash: string;
+}

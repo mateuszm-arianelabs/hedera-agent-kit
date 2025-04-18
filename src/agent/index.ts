@@ -449,21 +449,19 @@ export class HederaAgentKit {
       executorAccountDetails?: ExecutorAccountDetails,
     ): Promise<number> {
         const useCustodial = custodial ?? this.isCustodial;
-        let defaultAccountId; // operator or executor account id will be used if no specific account id is passed
-
-        if (!useCustodial) {
-            if (
-              executorAccountDetails === undefined ||
-              executorAccountDetails.executorAccountId === undefined
-            ) {
-                throw new Error("Executor account id is missing in non custodial action call!");
-            }
-            defaultAccountId = executorAccountDetails.executorAccountId;
-        } else {
-            defaultAccountId = this.client.operatorAccountId!.toString();
+        if (!useCustodial && !executorAccountDetails?.executorAccountId) {
+            throw new Error(
+              "Executor account id is required for non-custodial actions"
+            );
         }
 
-        const targetAccountId = accountId || defaultAccountId;
+        // Pick the right fallback based on custodial vs non‑custodial
+        // fallback accountId will be used if no specific account id is passed
+        const fallbackAccountId = useCustodial
+          ? this.client.operatorAccountId!.toString()
+          : executorAccountDetails!.executorAccountId!;
+
+        const targetAccountId = accountId ?? fallbackAccountId;
         return get_hbar_balance(this.client, targetAccountId);
     }
 
@@ -477,21 +475,19 @@ export class HederaAgentKit {
         executorAccountDetails?: ExecutorAccountDetails,
     ): Promise<number> {
         const useCustodial = custodial ?? this.isCustodial;
-        let defaultAccountId; // operator or executor account id will be used if no specific account id is passed
-
-        if(!useCustodial) {
-            if(
-              executorAccountDetails === undefined ||
-              executorAccountDetails.executorAccountId === undefined
-            ) {
-                throw new Error("Executor account id is missing in non custodial action call!");
-            }
-            defaultAccountId = executorAccountDetails.executorAccountId;
-        } else {
-            defaultAccountId = this.client.operatorAccountId!.toString();
+        if (!useCustodial && !executorAccountDetails?.executorAccountId) {
+            throw new Error(
+              "Executor account id is required for non-custodial actions"
+            );
         }
 
-        const targetAccountId = accountId || defaultAccountId;
+        // Pick the right fallback based on custodial vs non‑custodial
+        // fallback accountId will be used if no specific account id is passed
+        const fallbackAccountId = useCustodial
+          ? this.client.operatorAccountId!.toString()
+          : executorAccountDetails!.executorAccountId!;
+
+        const targetAccountId = accountId ?? fallbackAccountId;
         return get_hts_balance(tokenId, networkType, targetAccountId);
     }
 
@@ -503,21 +499,19 @@ export class HederaAgentKit {
       executorAccountDetails?: ExecutorAccountDetails,
     ) {
         const useCustodial = custodial ?? this.isCustodial;
-        let defaultAccountId; // operator or executor account id will be used if no specific account id is passed
-
-        if (!useCustodial) {
-            if (
-              executorAccountDetails === undefined ||
-              executorAccountDetails.executorAccountId === undefined
-            ) {
-                throw new Error("Executor account id is missing in non custodial action call!");
-            }
-            defaultAccountId = executorAccountDetails.executorAccountId;
-        } else {
-            defaultAccountId = this.client.operatorAccountId!.toString();
+        if (!useCustodial && !executorAccountDetails?.executorAccountId) {
+            throw new Error(
+              "Executor account id is required for non-custodial actions"
+            );
         }
 
-        const targetAccountId = accountId || defaultAccountId;
+        // Pick the right fallback based on custodial vs non‑custodial
+        // fallback accountId will be used if no specific account id is passed
+        const fallbackAccountId = useCustodial
+          ? this.client.operatorAccountId!.toString()
+          : executorAccountDetails!.executorAccountId!;
+
+        const targetAccountId = accountId ?? fallbackAccountId;
         return get_all_tokens_balances(networkType, targetAccountId);
     }
 
@@ -575,7 +569,7 @@ export class HederaAgentKit {
         if(executorAccountId === undefined) throw new Error("Executor account id is missing in non custodial action call!");
 
         const txBytes = await HtsTransactionBuilder.associateToken(
-            tokenId,
+          tokenId,
           executorAccountId
         ).getTxBytesString(this.client, executorAccountId);
 
@@ -849,12 +843,28 @@ export class HederaAgentKit {
         return new NonCustodialClaimAirdropResult(txBytes);
     }
 
-
     async getPendingAirdrops(
-        accountId: string,
-        networkType: HederaNetworkType
+      networkType: HederaNetworkType,
+      accountId?: string,
+      custodial?: boolean,
+      executorAccountDetails?: ExecutorAccountDetails,
     ): Promise<Airdrop[]> {
-        return get_pending_airdrops(networkType, accountId)
+        const useCustodial = custodial ?? this.isCustodial;
+
+        if (!useCustodial && !executorAccountDetails?.executorAccountId) {
+            throw new Error(
+              "Executor account id is required for non-custodial actions"
+            );
+        }
+
+        // Pick the right fallback based on custodial vs non‑custodial
+        // fallback accountId will be used if no specific account id is passed
+        const fallbackAccountId = useCustodial
+          ? this.client.operatorAccountId!.toString()
+          : executorAccountDetails!.executorAccountId!;
+
+        const targetAccountId = accountId ?? fallbackAccountId;
+        return get_pending_airdrops(networkType, targetAccountId)
     }
 
 

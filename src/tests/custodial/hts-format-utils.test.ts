@@ -1,10 +1,10 @@
 import { describe, expect, it, beforeAll } from "vitest";
-import { NetworkClientWrapper } from "./utils/testnetClient";
+import { NetworkClientWrapper } from "../utils/testnetClient";
 import * as dotenv from "dotenv";
 import BigNumber from "bignumber.js";
-import { HederaNetworkType } from "../types";
-import {getHTSDecimals, toBaseUnit, toDisplayUnit} from "../utils/hts-format-utils";
-import { wait } from "./utils/utils";
+import { HederaNetworkType } from "../../types";
+import {getHTSDecimals, toBaseUnit, toDisplayUnit} from "../../utils/hts-format-utils";
+import { wait } from "../utils/utils";
 
 
 describe("Token Unit Conversion Functions", () => {
