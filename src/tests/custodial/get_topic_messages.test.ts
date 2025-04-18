@@ -1,11 +1,11 @@
 import { describe, expect, it, beforeAll } from "vitest";
-import { NetworkType } from "./types";
+import { NetworkType } from "../types";
 import * as dotenv from "dotenv";
-import { NetworkClientWrapper } from "./utils/testnetClient";
-import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
-import { LangchainAgent } from "./utils/langchainAgent";
-import { wait } from "./utils/utils";
-import { HCSMessage } from "../types";
+import { NetworkClientWrapper } from "../utils/testnetClient";
+import { HederaMirrorNodeClient } from "../utils/hederaMirrorNodeClient";
+import { LangchainAgent } from "../utils/langchainAgent";
+import { wait } from "../utils/utils";
+import { HCSMessage } from "../../types";
 
 const IS_CUSTODIAL = true;
 

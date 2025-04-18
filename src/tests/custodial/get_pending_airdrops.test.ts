@@ -1,10 +1,10 @@
 import { describe, beforeAll, expect, it } from "vitest";
-import { AccountData } from "./utils/testnetUtils";
-import { LangchainAgent } from "./utils/langchainAgent";
-import { NetworkClientWrapper } from "./utils/testnetClient";
+import { AccountData } from "../utils/testnetUtils";
+import { LangchainAgent } from "../utils/langchainAgent";
+import { NetworkClientWrapper } from "../utils/testnetClient";
 import * as dotenv from "dotenv";
-import { Airdrop } from "../types";
-import { wait } from "./utils/utils";
+import { Airdrop } from "../../types";
+import { wait } from "../utils/utils";
 
 const IS_CUSTODIAL = true;
 

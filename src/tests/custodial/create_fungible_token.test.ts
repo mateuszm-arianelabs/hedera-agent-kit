@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { HederaMirrorNodeClient } from "./utils/hederaMirrorNodeClient";
+import { HederaMirrorNodeClient } from "../utils/hederaMirrorNodeClient";
 import * as dotenv from "dotenv";
-import { wait } from "./utils/utils";
-import { LangchainAgent } from "./utils/langchainAgent";
+import { wait } from "../utils/utils";
+import { LangchainAgent } from "../utils/langchainAgent";
 
 const IS_CUSTODIAL = true;
 
