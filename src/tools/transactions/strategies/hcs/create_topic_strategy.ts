@@ -18,7 +18,8 @@ export class CreateTopicStrategy implements TransactionStrategy<CreateTopicResul
     build(): Transaction {
         let tx = new TopicCreateTransaction()
             .setTopicMemo(this.memo)
-            .setAdminKey(this.publicKey);
+            .setAdminKey(this.publicKey)
+            .setTransactionValidDuration(180);
 
         if (this.isSubmitKey) {
             tx.setSubmitKey(this.publicKey);
