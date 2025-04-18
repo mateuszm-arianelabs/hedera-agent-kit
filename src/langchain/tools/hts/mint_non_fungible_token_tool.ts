@@ -32,7 +32,7 @@ Example usage:
             const parsedInput = JSON.parse(input);
             return await this.hederaKit.mintNFTToken(
                   parsedInput.tokenId,
-                  parsedInput.tokenMetadata, //FIXME:shouldn't the metadata be passed encoded?
+                  new TextEncoder().encode(parsedInput.tokenMetadata),
                   isCustodial,
                   executorAccountDetails,
                 ).then(response => response.getStringifiedResponse());
