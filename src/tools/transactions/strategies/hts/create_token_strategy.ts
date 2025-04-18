@@ -38,7 +38,8 @@ export class CreateTokenStrategy implements TransactionStrategy<CreateTokenResul
             .setTokenType(this.options.tokenType)
             .setDecimals(this.options?.decimals || 0)
             .setInitialSupply(this.options?.initialSupply || 0)
-            .setTreasuryAccountId(this.issuerAccountId);
+            .setTreasuryAccountId(this.issuerAccountId)
+            .setTransactionValidDuration(180);
 
         // Optional and conditional parameters
         if (this.options.maxSupply) {
