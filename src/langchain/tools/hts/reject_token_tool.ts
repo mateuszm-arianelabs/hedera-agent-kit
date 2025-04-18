@@ -3,6 +3,7 @@ import HederaAgentKit from "../../../agent";
 import { TokenId } from "@hashgraph/sdk";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 import { ExecutorAccountDetails } from "../../../types";
+import { getPublicKeyByAccountId } from "../../../utils/api-utils";
 
 export class HederaRejectTokenTool extends Tool {
     name = 'hedera_reject_token';
@@ -25,6 +26,16 @@ Example usage:
         try {
             const isCustodial = config?.configurable?.isCustodial === true;
             const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
+
+            if (!isCustodial && !executorAccountDetails.executorPublicKey) {
+                if (!executorAccountDetails.executorAccountId)
+                    throw new Error("Executor account ID is required for non-custodial mode");
+
+                executorAccountDetails.executorPublicKey = await getPublicKeyByAccountId(
+                  this.hederaKit.network,
+                  executorAccountDetails.executorAccountId
+                );
+            }
 
             console.log(`hedera_reject_token tool has been called (${isCustodial ? 'custodial' : 'non-custodial'})`);
 
