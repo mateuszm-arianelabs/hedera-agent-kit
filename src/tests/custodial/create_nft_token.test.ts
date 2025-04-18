@@ -5,10 +5,9 @@ import * as dotenv from "dotenv";
 import { LangchainAgent } from "../utils/langchainAgent";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import {TokenType} from "@hashgraph/sdk";
+import { wait } from "../utils/utils";
 
 const IS_CUSTODIAL = true;
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function extractTokenId(messages: any[]): string {
     const result = messages.reduce<string | null>((acc, message) => {
@@ -45,8 +44,7 @@ describe("create_nft_token", () => {
         );
         hederaApiClient = new HederaMirrorNodeClient("testnet" as NetworkType);
 
-        }
-    );
+    });
 
     beforeEach(async () => {
         dotenv.config();

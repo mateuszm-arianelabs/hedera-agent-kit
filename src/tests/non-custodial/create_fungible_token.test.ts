@@ -25,7 +25,7 @@ describe("create_fungible_token (non-custodial)", () => {
       "testnet"
     );
 
-    // Create test account
+    // Create a test account
     const startingHbars = 60;
     const autoAssociation = -1; // unlimited auto association
     txExecutorAccount = await networkClientWrapper.createAccount(
