@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import { AccountData } from "../utils/testnetUtils";
 import { LangchainAgent } from "../utils/langchainAgent";
-import { wait } from "../utils/utils";
+import { formatTxHash, wait } from "../utils/utils";
 
 const IS_CUSTODIAL = true;
 
@@ -36,15 +36,6 @@ const extractTransferDetails = (
   }, null);
 };
 
-const formatTxHash = (txHash: string) => {
-  const [txId, txTimestamp] = txHash.split("@");
-
-  if (!txId || !txTimestamp) {
-    throw new Error("Invalid tx hash");
-  }
-
-  return `${txId}-${txTimestamp?.replace(".", "-")}`;
-};
 
 describe("Test Token transfer", async () => {
   let acc1: AccountData;

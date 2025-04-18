@@ -4,7 +4,7 @@ import { HederaMirrorNodeClient } from "../utils/hederaMirrorNodeClient";
 import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import { AccountData } from "../utils/testnetUtils";
-import { wait } from "../utils/utils";
+import { formatTxHash, wait } from "../utils/utils";
 
 const IS_CUSTODIAL = true;
 
@@ -24,15 +24,6 @@ const extractTxHash = (messages: any[]) => {
   }, "");
 };
 
-const formatTxHash = (txHash: string) => {
-  const [txId, txTimestamp] = txHash.split("@");
-
-  if (!txId || !txTimestamp) {
-    throw new Error("Invalid tx hash");
-  }
-
-  return `${txId}-${txTimestamp?.replace(".", "-")}`;
-};
 
 describe("Test HBAR transfer", async () => {
   let acc1: AccountData;

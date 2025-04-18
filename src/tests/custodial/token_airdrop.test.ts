@@ -1,10 +1,10 @@
 import { describe, expect, it, beforeAll } from "vitest";
-
 import { HederaMirrorNodeClient } from "../utils/hederaMirrorNodeClient";
 import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import { AccountData } from "../utils/testnetUtils";
 import { LangchainAgent } from "../utils/langchainAgent";
+import { formatTxHash } from "../utils/utils";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -44,16 +44,6 @@ function extractLangchainResponse(
 
   return null;
 }
-
-const formatTxHash = (txHash: string) => {
-  const [txId, txTimestamp] = txHash.split("@");
-
-  if (!txId || !txTimestamp) {
-    throw new Error("Invalid tx hash");
-  }
-
-  return `${txId}-${txTimestamp?.replace(".", "-")}`;
-};
 
 describe("Test Token Airdrop", async () => {
   let acc1: AccountData;

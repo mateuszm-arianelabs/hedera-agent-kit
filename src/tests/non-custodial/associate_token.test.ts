@@ -11,7 +11,7 @@ import { ExecutorAccountDetails } from "../../types";
 const IS_CUSTODIAL = false;
 
 dotenv.config();
-describe("associate_token non-custodial", () => {
+describe("associate_token (non-custodial)", () => {
   let tokenCreatorAccount: AccountData;
   let txExecutorAccount: AccountData;
   let token1: string;
