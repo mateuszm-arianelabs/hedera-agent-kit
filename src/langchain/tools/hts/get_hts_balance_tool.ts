@@ -3,6 +3,7 @@ import HederaAgentKit from "../../../agent";
 import { ExecutorAccountDetails, HederaNetworkType } from "../../../types";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 import { toDisplayUnit } from "../../../utils/hts-format-utils";
+import { getPublicKeyByAccountId } from "../../../utils/api-utils";
 
 export class HederaGetHtsBalanceTool extends Tool {
     name = 'hedera_get_hts_balance'
@@ -32,6 +33,16 @@ If no account ID is given, it returns the balance for the connected account.
         try {
             const isCustodial = config?.configurable?.isCustodial === true;
             const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
+
+            if (!isCustodial && !executorAccountDetails.executorPublicKey) {
+                if (!executorAccountDetails.executorAccountId)
+                    throw new Error("Executor account ID is required for non-custodial mode");
+
+                executorAccountDetails.executorPublicKey = await getPublicKeyByAccountId(
+                  this.hederaKit.network,
+                  executorAccountDetails.executorAccountId
+                );
+            }
 
             console.log('hedera_get_hts_balance tool has been called')
 

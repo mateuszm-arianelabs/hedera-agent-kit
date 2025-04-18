@@ -2,6 +2,7 @@ import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
 import { ExecutorAccountDetails, HederaNetworkType } from "../../../types";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
+import { getPublicKeyByAccountId } from "../../../utils/api-utils";
 
 export class HederaGetAllTokenBalancesTool extends Tool {
     name = 'hedera_get_all_token_balances'
@@ -29,6 +30,16 @@ Example usage:
         try {
             const isCustodial = config?.configurable?.isCustodial === true;
             const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
+
+            if (!isCustodial && !executorAccountDetails.executorPublicKey) {
+                if (!executorAccountDetails.executorAccountId)
+                    throw new Error("Executor account ID is required for non-custodial mode");
+
+                executorAccountDetails.executorPublicKey = await getPublicKeyByAccountId(
+                  this.hederaKit.network,
+                  executorAccountDetails.executorAccountId
+                );
+            }
 
             console.log(`hedera_get_all_token_balances tool has been called (${isCustodial ? 'custodial' : 'non-custodial'})`);
 
