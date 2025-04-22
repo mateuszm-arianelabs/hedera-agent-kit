@@ -46,7 +46,7 @@ For further details check [HederaAgentKit Readme](./src/agent/README.md).
 
 ## Langchain Tools
 This library implements langchain tools for most of HederaAgentKit functionalities. 
-Consider checking the [Langchain Readme](.src/langchain/README.md) for additional information.
+Consider checking the [Langchain Readme](./src/langchain/README.md) for additional information.
 
 ## Getting Started
 
