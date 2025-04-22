@@ -2,7 +2,7 @@ import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 import { ExecutorAccountDetails } from "../../../types";
-import { getPublicKeyByAccountId } from "../../../utils/api-utils";
+import { optionalFetchPublicKey } from "../../../utils/langchain-tools-utils";
 
 export class HederaGetBalanceTool extends Tool {
     name = 'hedera_get_hbar_balance'
@@ -31,15 +31,11 @@ If no input is given (empty JSON '{}'), it returns the balance of the connected 
             const isCustodial = config?.configurable?.isCustodial === true;
             const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
 
-            if (!isCustodial && !executorAccountDetails.executorPublicKey) {
-                if (!executorAccountDetails.executorAccountId)
-                    throw new Error("Executor account ID is required for non-custodial mode");
-
-                executorAccountDetails.executorPublicKey = await getPublicKeyByAccountId(
-                  this.hederaKit.network,
-                  executorAccountDetails.executorAccountId
-                );
-            }
+            executorAccountDetails.executorPublicKey = await optionalFetchPublicKey(
+              isCustodial,
+              executorAccountDetails,
+              this.hederaKit.network
+            );
 
             console.log('hedera_get_hbar_balance tool has been called')
 

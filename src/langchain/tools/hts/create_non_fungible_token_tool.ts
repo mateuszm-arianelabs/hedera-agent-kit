@@ -2,7 +2,7 @@ import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 import { ExecutorAccountDetails } from "../../../types";
-import { getPublicKeyByAccountId } from "../../../utils/api-utils";
+import { optionalFetchPublicKey } from "../../../utils/langchain-tools-utils";
 
 // FIXME: works well in isolation but normally usually createFT is called instead of createNFT
 export class HederaCreateNonFungibleTokenTool extends Tool {
@@ -29,15 +29,11 @@ Inputs (input is a JSON string):
             const isCustodial = config?.configurable?.isCustodial === true;
             const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
 
-            if (!isCustodial && !executorAccountDetails.executorPublicKey) {
-                if (!executorAccountDetails.executorAccountId)
-                    throw new Error("Executor account ID is required for non-custodial mode");
-
-                executorAccountDetails.executorPublicKey = await getPublicKeyByAccountId(
-                  this.hederaKit.network,
-                  executorAccountDetails.executorAccountId
-                );
-            }
+            executorAccountDetails.executorPublicKey = await optionalFetchPublicKey(
+              isCustodial,
+              executorAccountDetails,
+              this.hederaKit.network
+            );
 
             console.log(`hedera_create_non_fungible_token tool has been called (${isCustodial ? 'custodial' : 'non-custodial'})`);
 
