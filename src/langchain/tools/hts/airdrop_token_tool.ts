@@ -1,10 +1,9 @@
 import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
-import { ExecutorAccountDetails } from "../../../types";
 import { toBaseUnit } from "../../../utils/hts-format-utils";
 import { AirdropRecipient } from "../../../tools";
-import { optionalFetchPublicKey } from "../../../utils/langchain-tools-utils";
+import { prepareExecutorAccountDetails } from "../../../utils/langchain-tools-utils";
 
 export class HederaAirdropTokenTool extends Tool {
     name = 'hedera_airdrop_token';
@@ -36,19 +35,11 @@ Example usage:
     ): Promise<string> {
         try {
             const isCustodial = config?.configurable?.isCustodial === true;
-            const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
-
-            if (!isCustodial && !executorAccountDetails) {
-                throw new Error("Executor account details are required for non-custodial mode.");
-            }
-
-            if (executorAccountDetails) {
-                executorAccountDetails.executorPublicKey = await optionalFetchPublicKey(
-                  isCustodial,
-                  executorAccountDetails,
-                  this.hederaKit.network
-                );
-            }
+            const executorAccountDetails = await prepareExecutorAccountDetails(
+              isCustodial,
+              config?.configurable?.executorAccountDetails,
+              this.hederaKit.network
+            );
 
             console.log(`hedera_airdrop_token tool has been called (${isCustodial ? 'custodial' : 'non-custodial'})`);
 
