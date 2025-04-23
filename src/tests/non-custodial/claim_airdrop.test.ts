@@ -155,8 +155,7 @@ describe("claim_pending_airdrops (non-custodial)", () => {
                     executorPublicKey: txExecutorAccount.publicKey,
                 }
 
-                console.log('Transaction will be performed for: ' + JSON.stringify(executorAccountDetails, null, 2));
-
+                // FIXME: fails in non-custodial mode
                 // STEP 1: send non-custodial prompt
                 const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL, executorAccountDetails);
 

@@ -90,7 +90,6 @@ describe("reject_token", async () => {
             });
 
             // Define test cases using created accounts and tokens
-            //FIXME: failing
             await Promise.all([
                 airdropCreatorNetworkClientWrapper.airdropToken(token1, [
                     {
