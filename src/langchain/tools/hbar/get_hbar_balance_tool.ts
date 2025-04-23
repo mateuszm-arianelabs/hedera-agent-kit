@@ -31,11 +31,17 @@ If no input is given (empty JSON '{}'), it returns the balance of the connected 
             const isCustodial = config?.configurable?.isCustodial === true;
             const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
 
-            executorAccountDetails.executorPublicKey = await optionalFetchPublicKey(
-              isCustodial,
-              executorAccountDetails,
-              this.hederaKit.network
-            );
+            if (!isCustodial && !executorAccountDetails) {
+                throw new Error("Executor account details are required for non-custodial mode.");
+            }
+
+            if (executorAccountDetails) {
+                executorAccountDetails.executorPublicKey = await optionalFetchPublicKey(
+                  isCustodial,
+                  executorAccountDetails,
+                  this.hederaKit.network
+                );
+            }
 
             console.log('hedera_get_hbar_balance tool has been called')
 

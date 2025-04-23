@@ -24,11 +24,17 @@ amount: number, the amount of tokens to transfer e.g. 100 in base unit
             const isCustodial = config?.configurable?.isCustodial === true;
             const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
 
-            executorAccountDetails.executorPublicKey = await optionalFetchPublicKey(
-              isCustodial,
-              executorAccountDetails,
-              this.hederaKit.network
-            );
+            if (!isCustodial && !executorAccountDetails) {
+                throw new Error("Executor account details are required for non-custodial mode.");
+            }
+
+            if (executorAccountDetails) {
+                executorAccountDetails.executorPublicKey = await optionalFetchPublicKey(
+                  isCustodial,
+                  executorAccountDetails,
+                  this.hederaKit.network
+                );
+            }
 
             console.log(`hedera_transfer_token tool has been called (${isCustodial ? 'custodial' : 'non-custodial'})`);
 

@@ -34,11 +34,17 @@ If no account ID is given, it returns the balance for the connected account.
             const isCustodial = config?.configurable?.isCustodial === true;
             const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
 
-            executorAccountDetails.executorPublicKey = await optionalFetchPublicKey(
-              isCustodial,
-              executorAccountDetails,
-              this.hederaKit.network
-            );
+            if (!isCustodial && !executorAccountDetails) {
+                throw new Error("Executor account details are required for non-custodial mode.");
+            }
+
+            if (executorAccountDetails) {
+                executorAccountDetails.executorPublicKey = await optionalFetchPublicKey(
+                  isCustodial,
+                  executorAccountDetails,
+                  this.hederaKit.network
+                );
+            }
 
             console.log('hedera_get_hts_balance tool has been called')
 
