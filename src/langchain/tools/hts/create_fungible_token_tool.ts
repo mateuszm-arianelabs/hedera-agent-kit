@@ -15,7 +15,7 @@ initialSupply: number, optional, the initial supply of the token, given in displ
 isSupplyKey: boolean, decides whether supply key should be set, false if not passed
 isMetadataKey: boolean, decides whether metadata key should be set, false if not passed
 isAdminKey: boolean, decides whether admin key should be set, false if not passed
-memo: string, containing memo associated with this token, empty string if not passed
+memo: string, containing token's memo. Do not create it yourself if not passed but set it to empty string. Do not set it to token name.
 tokenMetadata: string, containing metadata associated with this token, empty string if not passed`;
 
     constructor(private hederaKit: HederaAgentKit) {
