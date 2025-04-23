@@ -203,7 +203,6 @@ describe("create_fungible_token", () => {
     expect(tokenDetails.decimals).toEqual("1");
     expect(Number(tokenDetails.initial_supply) / Math.pow(10, Number(tokenDetails.decimals))).toEqual(111);
     expect(tokenDetails.memo).toBe("");
-    expect(tokenDetails.memo).toBe("");
     expect(tokenDetails?.supply_key?.key).not.toBeUndefined();
     expect(tokenDetails?.admin_key?.key).not.toBeUndefined();
     expect(tokenDetails?.metadata_key?.key).toBeUndefined();
