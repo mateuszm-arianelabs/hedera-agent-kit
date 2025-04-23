@@ -1,8 +1,9 @@
 import { Tool, ToolRunnableConfig } from "@langchain/core/tools";
 import HederaAgentKit from "../../../agent";
-import { ExecutorAccountDetails, HederaNetworkType } from "../../../types";
+import { HederaNetworkType } from "../../../types";
 import { CallbackManagerForToolRun } from "@langchain/core/callbacks/manager";
 import { toDisplayUnit } from "../../../utils/hts-format-utils";
+import { prepareExecutorAccountDetails } from "../../../utils/langchain-tools-utils";
 
 export class HederaGetHtsBalanceTool extends Tool {
     name = 'hedera_get_hts_balance'
@@ -31,7 +32,11 @@ If no account ID is given, it returns the balance for the connected account.
     protected override async _call(input: any, _runManager?: CallbackManagerForToolRun, config?: ToolRunnableConfig): Promise<string> {
         try {
             const isCustodial = config?.configurable?.isCustodial === true;
-            const executorAccountDetails: ExecutorAccountDetails = config?.configurable?.executorAccountDetails;
+            const executorAccountDetails = await prepareExecutorAccountDetails(
+              isCustodial,
+              config?.configurable?.executorAccountDetails,
+              this.hederaKit.network
+            );
 
             console.log('hedera_get_hts_balance tool has been called')
 
