@@ -125,12 +125,9 @@ describe("submit_topic_message (non-custodial)", () => {
         });
 
         expect(receivedMessage).toBeTruthy();
+
+        console.log('\n\n');
       }
     });
   });
-
-  afterEach(() => {
-    console.log("\n\n");
-  })
-
 });

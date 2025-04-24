@@ -14,7 +14,6 @@ describe("claim_pending_airdrops (non-custodial)", () => {
     let airdropCreatorAccount: AccountData;
     let token1: string;
     let token2: string;
-    let claimerInitialMaxAutoAssociation: number;
     let testCases: {
         receiverAccountId: string;
         senderAccountId: string;
@@ -42,7 +41,7 @@ describe("claim_pending_airdrops (non-custodial)", () => {
 
             // Create test accounts
             airdropCreatorAccount = await networkClientWrapper.createAccount(
-                20, // starting HBARs
+              20, // starting HBARs
               0 // no auto association
             );
 
@@ -177,6 +176,8 @@ describe("claim_pending_airdrops (non-custodial)", () => {
                 );
 
                 expect(tokenBalance ?? 0).toBe(expectedClaimedAmount);
+
+                console.log('\n\n');
             }
         });
     })

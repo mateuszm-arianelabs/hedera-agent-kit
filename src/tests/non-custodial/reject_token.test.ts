@@ -143,6 +143,8 @@ describe("reject_token (non-custodial)", async () => {
             );
 
             expect(tokenInfo?.balance ?? 0).toBe(0);
+
+            console.log('\n\n');
         }
     });
 });

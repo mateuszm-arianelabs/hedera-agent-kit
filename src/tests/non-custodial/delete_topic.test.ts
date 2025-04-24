@@ -114,11 +114,9 @@ describe("delete_topic", () => {
         const topicInfo = await hederaApiClient.getTopic(topicId);
 
         expect(topicInfo.deleted).toBe(true);
+
+        console.log("\n\n");
       }
     });
   });
-
-  afterEach(() => {
-    console.log("\n\n");
-  })
 });

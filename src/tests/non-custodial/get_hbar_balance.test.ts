@@ -102,12 +102,8 @@ describe("get_hbar_balance", () => {
         expect(hederaActionBalance * 10 ** HBAR_DECIMALS).toEqual(accountBalanceInBaseUnits);
 
         await wait(1000);
+        console.log('\n\n');
       }
     });
-
-    afterEach(() => {
-      console.log('\n\n');
-    })
-
   });
 });
