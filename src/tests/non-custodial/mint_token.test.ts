@@ -59,6 +59,8 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
       isSupplyKey: true,
     });
 
+    await wait(3000); // make sure the token is created
+
     const prompt = {
       user: "user",
       text: `Mint ${TOKENS_TO_MINT} of tokens ${tokenId}`,
@@ -76,6 +78,8 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
 
     // STEP 1: send non-custodial prompt
     const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL, executorAccountDetails);
+
+    console.log(JSON.stringify(response, null, 2));
 
     // STEP 2: extract tx bytes
     const txBytesString = extractTxBytes(response.messages)
@@ -108,6 +112,8 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
       initialSupply: STARTING_SUPPLY,
     });
 
+    await wait(3000); // make sure the token is created
+
     const prompt = {
       user: "user",
       text: `Mint ${TOKENS_TO_MINT} of tokens ${tokenId}`,
@@ -125,6 +131,8 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
 
     // STEP 1: send non-custodial prompt
     const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL, executorAccountDetails);
+
+    console.log(JSON.stringify(response, null, 2));
 
     // STEP 2: extract tx bytes
     const txBytesString = extractTxBytes(response.messages)
@@ -161,6 +169,8 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
       isSupplyKey: true,
     });
 
+    await wait(3000); // make sure the token is created
+
     const prompt = {
       user: "user",
       text: `Mint ${TOKENS_TO_MINT_IN_DISPLAY_UNITS} of tokens ${tokenId}`,
@@ -178,6 +188,8 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
 
     // STEP 1: send non-custodial prompt
     const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL, executorAccountDetails);
+
+    console.log(JSON.stringify(response, null, 2));
 
     // STEP 2: extract tx bytes
     const txBytesString = extractTxBytes(response.messages)

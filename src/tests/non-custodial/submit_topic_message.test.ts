@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, afterEach } from "vitest";
+import { describe, expect, it, beforeAll } from "vitest";
 import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import { HederaMirrorNodeClient } from "../utils/hederaMirrorNodeClient";

@@ -21,7 +21,6 @@ describe("claim_pending_airdrops (non-custodial)", () => {
         expectedClaimedAmount: number;
     }[];
     let networkClientWrapper: NetworkClientWrapper;
-    let executorCustodialClientWrapper: NetworkClientWrapper;
     let txExecutorAccount: AccountData;
     let hederaApiClient: HederaMirrorNodeClient;
 
@@ -50,14 +49,6 @@ describe("claim_pending_airdrops (non-custodial)", () => {
             );
 
             await wait(3000);
-
-            // a custodial client wrapper for the tx executor account is required for creating topics before the test
-            executorCustodialClientWrapper = new NetworkClientWrapper(
-              txExecutorAccount.accountId,
-              txExecutorAccount.privateKey,
-              'ECDSA', // .createAccount() creates account with ECDSA key
-              "testnet"
-            );
 
             const airdropCreatorAccountNetworkClientWrapper =
               new NetworkClientWrapper(
