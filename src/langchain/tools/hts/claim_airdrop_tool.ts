@@ -38,7 +38,7 @@ Example usage:
             const airdropId = new PendingAirdropId({
                 tokenId: TokenId.fromString(parsedInput.tokenId),
                 senderId: AccountId.fromString(parsedInput.senderAccountId),
-                receiverId: this.hederaKit.client.operatorAccountId!
+                receiverId: isCustodial ? this.hederaKit.client.operatorAccountId! : AccountId.fromString(executorAccountDetails?.executorAccountId!)
             });
 
             return await this.hederaKit

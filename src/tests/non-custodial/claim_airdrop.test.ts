@@ -109,14 +109,14 @@ describe("claim_pending_airdrops (non-custodial)", () => {
 
             testCases = [
                 {
-                    receiverAccountId: networkClientWrapper.getAccountId(),
+                    receiverAccountId: txExecutorAccount.accountId,
                     senderAccountId: airdropCreatorAccount.accountId,
                     tokenId: token1,
                     promptText: `Claim airdrop for token ${token1} from sender ${airdropCreatorAccount.accountId}`,
                     expectedClaimedAmount: 10,
                 },
                 {
-                    receiverAccountId: networkClientWrapper.getAccountId(),
+                    receiverAccountId: txExecutorAccount.accountId,
                     senderAccountId: airdropCreatorAccount.accountId,
                     tokenId: token2,
                     promptText: `Claim airdrop for token ${token2} from sender ${airdropCreatorAccount.accountId}`,
@@ -153,7 +153,6 @@ describe("claim_pending_airdrops (non-custodial)", () => {
                     executorPublicKey: txExecutorAccount.publicKey,
                 }
 
-                // FIXME: fails in non-custodial mode
                 // STEP 1: send non-custodial prompt
                 const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL, executorAccountDetails);
 
