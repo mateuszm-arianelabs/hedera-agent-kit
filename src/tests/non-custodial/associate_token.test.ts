@@ -143,7 +143,7 @@ describe("associate_token (non-custodial)", () => {
         expect(token).toBeDefined();
 
         console.log('\n\n');
-        await wait(2000);
+        await wait(5000);
       }
     });
   });

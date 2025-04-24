@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { HederaMirrorNodeClient } from "../utils/hederaMirrorNodeClient";
 import * as dotenv from "dotenv";
 import { extractTxBytes, formatTxHash, signAndExecuteTx, wait } from "../utils/utils";
@@ -472,4 +472,8 @@ describe("create_fungible_token (non-custodial)", () => {
 
     expect(Number(tokenDetails.initial_supply) / Math.pow(10, Number(tokenDetails.decimals))).toEqual(75.0);
   });
+
+  afterEach(() => {
+    console.log("\n\n");
+  })
 });

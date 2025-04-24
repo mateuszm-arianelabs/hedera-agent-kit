@@ -152,7 +152,6 @@ describe("get_hts_balance (non-custodial)", () => {
 
         // STEP 1: send non-custodial prompt
         const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL, executorAccountDetails);
-        console.log(JSON.stringify(response, null, 2));
 
         await wait(3000);
 

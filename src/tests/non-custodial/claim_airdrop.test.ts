@@ -1,4 +1,4 @@
-import { describe, beforeAll, expect, it, afterAll } from "vitest";
+import { describe, beforeAll, expect, it } from "vitest";
 import { AccountData } from "../utils/testnetUtils";
 import { LangchainAgent } from "../utils/langchainAgent";
 import { NetworkClientWrapper } from "../utils/testnetClient";
@@ -6,7 +6,6 @@ import * as dotenv from "dotenv";
 import { HederaMirrorNodeClient } from "../utils/hederaMirrorNodeClient";
 import { extractTxBytes, signAndExecuteTx, wait } from "../utils/utils";
 import { ExecutorAccountDetails } from "../../types";
-import { PrivateKey } from "@hashgraph/sdk";
 
 const IS_CUSTODIAL = false;
 

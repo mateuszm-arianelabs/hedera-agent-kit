@@ -123,12 +123,12 @@ describe("get_pending_airdrops (non-custodial)", () => {
                     `Display pending airdrops for account ${acc3.accountId}`,
                     7,
                 ],
-                // [ // FIXME: this requires changes in default subject of the action
-                //     txExecutorAccount.accountId,
-                //     token1,
-                //     `Show my pending airdrops`,
-                //     17,
-                // ],
+                [
+                    txExecutorAccount.accountId,
+                    token1,
+                    `Show my pending airdrops`,
+                    17,
+                ],
             ];
 
         } catch (error) {
@@ -137,6 +137,12 @@ describe("get_pending_airdrops (non-custodial)", () => {
         }
     });
 
+
+    /*
+    This action is not a typical non-custodial action. It does not require creation of any transaction, therefore, no txBytes are returned.
+    This action fetches data from the hedera mirror node and returns pending airdrops for the given account.
+    If no account is provided, the Executor account is used by default in non-custodial flow, whereas in custodial flow, the operator account is used.
+    */
     describe("pending airdrops checks", () => {
         it("should test dynamic token airdrops", async () => {
             for (const [
