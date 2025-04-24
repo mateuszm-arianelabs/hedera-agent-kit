@@ -4,46 +4,10 @@ import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import { AccountData } from "../utils/testnetUtils";
 import { LangchainAgent } from "../utils/langchainAgent";
-import { formatTxHash } from "../utils/utils";
-import { wait } from "../utils/utils";
+import { extractTxBytes, formatTxHash, signAndExecuteTx, wait } from "../utils/utils";
+import { ExecutorAccountDetails } from "../../types";
 
-
-interface AirdropLangchainResponse {
-  status: string;
-  message: string;
-  tokenId: string;
-  recipientCount: number;
-  totalAmount: number;
-  txHash: string;
-}
-
-const IS_CUSTODIAL = true;
-
-function extractLangchainResponse(
-  messages: any[]
-): AirdropLangchainResponse | null {
-  const toolMessages = messages.filter(
-    (msg) =>
-      (msg.id && msg.id[2] === "ToolMessage") ||
-      msg.name === "hedera_airdrop_token"
-  );
-
-  for (const message of toolMessages) {
-    try {
-      const toolResponse = JSON.parse(message.content);
-
-      if (toolResponse.status !== "success" || !toolResponse.txHash) {
-        throw new Error(toolResponse.message ?? "Unknown error");
-      }
-
-      return toolResponse as AirdropLangchainResponse;
-    } catch (error) {
-      console.error("Error parsing tool message:", error);
-    }
-  }
-
-  return null;
-}
+const IS_CUSTODIAL = false;
 
 describe("Test Token Airdrop", async () => {
   let acc1: AccountData;
@@ -51,18 +15,18 @@ describe("Test Token Airdrop", async () => {
   let acc3: AccountData;
   let acc4: AccountData;
   let acc5: AccountData;
+  let txExecutorAccount: AccountData;
   let token1: string;
   let token2: string;
   let token3: string;
-  let langchainAgent: LangchainAgent;
   let hederaApiClient: HederaMirrorNodeClient;
   let networkClientWrapper: NetworkClientWrapper;
+  let executorCustodialClientWrapper: NetworkClientWrapper;
   let testCases: [string[], number, string, string][];
 
   beforeAll(async () => {
     dotenv.config();
     try {
-      langchainAgent = await LangchainAgent.create();
       hederaApiClient = new HederaMirrorNodeClient("testnet");
 
       networkClientWrapper = new NetworkClientWrapper(
@@ -79,29 +43,40 @@ describe("Test Token Airdrop", async () => {
         networkClientWrapper.createAccount(0, -1),
         networkClientWrapper.createAccount(0, -1),
         networkClientWrapper.createAccount(0, -1),
-      ]).then(([_acc1, _acc2, _acc3, _acc4, _acc5]) => {
+        networkClientWrapper.createAccount(30, -1),
+      ]).then(([_acc1, _acc2, _acc3, _acc4, _acc5, _acc6]) => {
         acc1 = _acc1;
         acc2 = _acc2;
         acc3 = _acc3;
         acc4 = _acc4;
         acc5 = _acc5;
+        txExecutorAccount = _acc6;
       });
+
+      await wait(5000);
+
+      executorCustodialClientWrapper = new NetworkClientWrapper(
+        txExecutorAccount.accountId,
+        txExecutorAccount.privateKey,
+        'ECDSA', // .createAccount() creates account with ECDSA key
+        "testnet"
+      );
 
       // Create test tokens
       await Promise.all([
-        networkClientWrapper.createFT({
+        executorCustodialClientWrapper.createFT({
           name: "AirdropToken",
           symbol: "ADT",
           initialSupply: 10000000,
           decimals: 2,
         }),
-        networkClientWrapper.createFT({
+        executorCustodialClientWrapper.createFT({
           name: "AirdropToken2",
           symbol: "ADT2",
           initialSupply: 10000,
           decimals: 0,
         }),
-        networkClientWrapper.createFT({
+        executorCustodialClientWrapper.createFT({
           name: "AirdropToken3",
           symbol: "ADT3",
           initialSupply: 10000000,
@@ -156,22 +131,24 @@ describe("Test Token Airdrop", async () => {
         tokenId,
         promptText,
       ] of testCases) {
-        const agentsAccountId = process.env.HEDERA_ACCOUNT_ID;
+        const prompt = {
+          user: "user",
+          text: promptText,
+        };
 
-        if (
-          !agentsAccountId ||
-          receiversAccountsIds.find((id) => id === agentsAccountId)
-        ) {
-          throw new Error(
-            "Note that airdrops cannot be done to the operator account address."
-          );
+        const langchainAgent = await LangchainAgent.create();
+
+        console.log(`Prompt: ${promptText}`);
+        console.log(JSON.stringify(txExecutorAccount, null, 2));
+
+        const executorAccountDetails: ExecutorAccountDetails = {
+          executorAccountId: txExecutorAccount.accountId,
+          executorPublicKey: txExecutorAccount.publicKey,
         }
 
-        console.log(`Fetching balances before test`)
-
-        // Get balances before
-        const balanceAgentBefore = await hederaApiClient.getTokenBalance(
-          agentsAccountId,
+        // STEP 0: get state before action call
+        const balanceExecutorBefore = await hederaApiClient.getTokenBalance(
+          executorAccountDetails.executorAccountId!,
           tokenId
         );
 
@@ -181,22 +158,23 @@ describe("Test Token Airdrop", async () => {
           balancesOfReceiversBefore.set(id, balance);
         }
 
-        const prompt = {
-          user: "user",
-          text: promptText,
-        };
+        // STEP 1: send non-custodial prompt
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL, executorAccountDetails);
 
-        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
-        const airdropResponse = extractLangchainResponse(response.messages);
-        const txHash = formatTxHash(airdropResponse?.txHash ?? '');
+        // STEP 2: extract tx bytes
+        const txBytesString = extractTxBytes(response.messages)
 
-        // Get balances after transaction being successfully processed by mirror node
-        await wait(5000);
+        // STEP 3: verify correctness by signing and executing the tx
+        const executedTx = await signAndExecuteTx(
+          txBytesString,
+          txExecutorAccount.privateKey,
+          txExecutorAccount.accountId
+        )
 
-        console.log(`Fetching balances after test`)
+        await wait(5000); // wait for tx to be executed
 
-        const balanceAgentAfter = await hederaApiClient.getTokenBalance(
-          agentsAccountId,
+        const balanceExecutorAfter = await hederaApiClient.getTokenBalance(
+          executorAccountDetails.executorAccountId!,
           tokenId
         );
 
@@ -213,15 +191,15 @@ describe("Test Token Airdrop", async () => {
         );
 
         const txReport = await hederaApiClient.getTransactionReport(
-          txHash,
-          agentsAccountId,
+          formatTxHash(executedTx.txHash),
+          executorAccountDetails.executorAccountId!,
           receiversAccountsIds
         );
 
         // Compare before and after including the difference due to paid fees
         expect(txReport.status).toEqual("SUCCESS");
-        expect(balanceAgentBefore).toEqual(
-          balanceAgentAfter + transferAmount * receiversAccountsIds.length
+        expect(balanceExecutorBefore).toEqual(
+          balanceExecutorAfter + transferAmount * receiversAccountsIds.length
         );
         receiversAccountsIds.forEach((id) =>
           expect(balancesOfReceiversBefore.get(id)).toEqual(
@@ -230,6 +208,7 @@ describe("Test Token Airdrop", async () => {
         );
 
         await wait(1000);
+        console.log('\n\n');
       }
     });
   });
