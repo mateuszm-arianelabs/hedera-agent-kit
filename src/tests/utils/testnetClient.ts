@@ -9,11 +9,16 @@ import {
   TopicId,
 } from "@hashgraph/sdk";
 import { AccountData, hederaPrivateKeyFromString } from "./testnetUtils";
-
 import HederaAgentKit from "../../agent";
 import { CreateFTOptions, CreateNFTOptions, HederaNetworkType } from "../../types";
-import { AirdropRecipient } from "../../tools/transactions/strategies";
-import { AirdropResult, CreateTokenResult, CreateTopicResult, SubmitMessageResult } from "../../tools";
+import {
+  AirdropResult,
+  AssociateTokenResult,
+  CreateTokenResult,
+  CreateTopicResult,
+  SubmitMessageResult,
+  AirdropRecipient
+} from "../../tools";
 
 export class NetworkClientWrapper {
   private readonly accountId: AccountId;
@@ -152,6 +157,19 @@ export class NetworkClientWrapper {
     return this.agentKit
       .submitTopicMessage(TopicId.fromString(topicId), message, isCustodial)
       .then(response => response.getRawResponse() as SubmitMessageResult);
+  }
+
+  /*
+  Associates token to the operator account.
+  @param tokenId - token id to associate
+  @returns AssociateTokenResult - response from the transaction
+   */
+  async associateToken(
+    tokenId: string,
+  ) : Promise<AssociateTokenResult> {
+    return this.agentKit
+      .associateToken(TokenId.fromString(tokenId), true)
+      .then(response => response.getRawResponse() as AssociateTokenResult);
   }
 
 }
