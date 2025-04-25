@@ -33,8 +33,6 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
         0 // no auto association
       );
 
-      await wait(3000); // wait for the account to be created
-
       executorCustodialClientWrapper = new NetworkClientWrapper(
         txExecutorAccount.accountId,
         txExecutorAccount.privateKey,
@@ -55,8 +53,6 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
       initialSupply: STARTING_SUPPLY,
       isSupplyKey: true,
     });
-
-    await wait(3000); // make sure the token is created
 
     const prompt = {
       user: "user",
@@ -88,7 +84,7 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
       txExecutorAccount.accountId
     )
 
-    await wait(5000); // wait for tx to be executed
+    await wait(5000); // wait for the mirror node to update
 
     // STEP 4: verify that minting the token was successful
     const tokenInfo = await hederaApiClient.getTokenDetails(tokenId);
@@ -108,8 +104,6 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
       maxSupply: 1000,
       initialSupply: STARTING_SUPPLY,
     });
-
-    await wait(3000); // make sure the token is created
 
     const prompt = {
       user: "user",
@@ -143,7 +137,7 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
       )
     ).rejects.toThrow("TOKEN_HAS_NO_SUPPLY_KEY");
 
-    await wait(5000); // wait for tx to be executed
+    await wait(5000); // wait for the mirror node to update
 
     // STEP 4: verify that minting the token was successful
     const tokenInfo = await hederaApiClient.getTokenDetails(tokenId);
@@ -165,8 +159,6 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
       initialSupply: STARTING_SUPPLY, // given in base units
       isSupplyKey: true,
     });
-
-    await wait(3000); // make sure the token is created
 
     const prompt = {
       user: "user",
@@ -197,8 +189,7 @@ describe("hedera_mint_fungible_token (non-custodial)", () => {
       txExecutorAccount.privateKey,
       txExecutorAccount.accountId
     )
-
-    await wait(5000); // wait for tx to be executed
+    await wait(5000); // wait for the mirror node to update
 
     // STEP 4: verify that minting the token was successful
     const tokenInfo = await hederaApiClient.getTokenDetails(tokenId);

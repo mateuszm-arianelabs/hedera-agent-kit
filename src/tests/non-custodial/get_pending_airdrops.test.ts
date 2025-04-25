@@ -4,7 +4,6 @@ import { LangchainAgent } from "../utils/langchainAgent";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import * as dotenv from "dotenv";
 import { Airdrop, ExecutorAccountDetails } from "../../types";
-import { wait } from "../utils/utils";
 
 const IS_CUSTODIAL = false;
 
@@ -65,8 +64,6 @@ describe("get_pending_airdrops (non-custodial)", () => {
                 airdropCreatorAccount = _acc5;
             });
 
-            await wait(3000); // wait for accounts to be created
-
             const airdropCreatorAccountNetworkClientWrapper =
               new NetworkClientWrapper(
                 airdropCreatorAccount.accountId,
@@ -82,8 +79,6 @@ describe("get_pending_airdrops (non-custodial)", () => {
                 initialSupply: 1000,
                 decimals: 2,
             });
-
-            await wait(3000); // wait for the token to be created
 
             // airdrop token
             await airdropCreatorAccountNetworkClientWrapper.airdropToken(token1, [
@@ -104,9 +99,6 @@ describe("get_pending_airdrops (non-custodial)", () => {
                     amount: 17,
                 },
             ]);
-
-            await wait(5000); // wait for the airdrop to be completed
-
 
             testCases = [
                 [

@@ -39,8 +39,6 @@ describe("delete_topic", () => {
         autoAssociation
       );
 
-      await wait(3000); // wait for the account to be created
-
       // a custodial client wrapper for the tx executor account is required for creating topics before the test
       executorCustodialClientWrapper = new NetworkClientWrapper(
         txExecutorAccount.accountId,
@@ -58,8 +56,6 @@ describe("delete_topic", () => {
         topic2 = _topic2.topicId;
         topic3 = _topic3.topicId;
       });
-
-      await wait(3000); // wait for the topics to be created
 
       testCases = [
         {
@@ -112,7 +108,7 @@ describe("delete_topic", () => {
           txExecutorAccount.accountId
         )
 
-        await wait(5000); // wait for tx to be executed
+        await wait(5000); // wait for the mirror node to update
 
         // STEP 4: verify that the topic was deleted correctly
         const topicInfo = await hederaApiClient.getTopic(topicId);

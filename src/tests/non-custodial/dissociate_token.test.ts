@@ -45,8 +45,6 @@ describe("dissociate_token (non-custodial)", () => {
         0 // no auto association
       );
 
-      await wait(3000); // wait for accounts to be created
-
       const tokenCreatorAccountNetworkClientWrapper =
         new NetworkClientWrapper(
           tokenCreatorAccount.accountId,
@@ -83,13 +81,9 @@ describe("dissociate_token (non-custodial)", () => {
         token2 = _token2;
       });
 
-      await wait(3000); // wait for tokens to be created
-
       // associate with those tokens
       await executorCustodialAccountNetworkClientWrapper.associateToken(token1);
       await executorCustodialAccountNetworkClientWrapper.associateToken(token2);
-
-      await wait(3000); // wait for tokens to be associated
 
       testCases = [
         {
@@ -138,7 +132,7 @@ describe("dissociate_token (non-custodial)", () => {
           txExecutorAccount.accountId
         )
 
-        await wait(3000); // wait for tx to be executed
+        await wait(5000); // wait for the mirror node to update
 
         // STEP 2: verify correctness by checking that token was dissociated
         const token = await hederaApiClient.getAccountToken(

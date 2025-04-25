@@ -32,8 +32,6 @@ describe("create_topic", () => {
       startingHbars,
       autoAssociation
     );
-
-    await wait(3000); // wait for the account to be created
   })
 
   describe("create_topic", () => {
@@ -67,7 +65,7 @@ describe("create_topic", () => {
         txExecutorAccount.accountId
       )
 
-      await wait(5000); // wait for tx to be executed
+      await wait(5000); // wait for the mirror node to update
 
       // STEP 4: verify that the topic was created correctly
       const topicId = await hederaApiClient.getTransactionDetails(
@@ -110,7 +108,7 @@ describe("create_topic", () => {
         txExecutorAccount.accountId
       )
 
-      await wait(5000); // wait for tx to be executed
+      await wait(5000); // wait for the mirror node to update
 
       // STEP 4: verify that the topic was created correctly
       const topicId = await hederaApiClient.getTransactionDetails(
@@ -153,7 +151,7 @@ describe("create_topic", () => {
         txExecutorAccount.accountId
       )
 
-      await wait(5000); // wait for tx to be executed
+      await wait(5000); // wait for the mirror node to update
 
       // STEP 4: verify that the topic was created correctly
       const topicId = await hederaApiClient.getTransactionDetails(

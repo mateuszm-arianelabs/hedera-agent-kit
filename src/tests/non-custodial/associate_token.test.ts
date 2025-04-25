@@ -49,15 +49,6 @@ describe("associate_token (non-custodial)", () => {
         autoAssociation
       );
 
-      const maxAutoAssociationForTest =
-        await hederaMirrorNodeClient.getAutomaticAssociationsCount(
-          networkClientWrapper.getAccountId()
-        );
-
-      await networkClientWrapper.setMaxAutoAssociation(
-        maxAutoAssociationForTest
-      );
-
       const tokenCreatorAccountNetworkClientWrapper =
         new NetworkClientWrapper(
           tokenCreatorAccount.accountId,
@@ -89,7 +80,7 @@ describe("associate_token (non-custodial)", () => {
       testCases = [
         {
           tokenToAssociateId: token1,
-          promptText: `Associate token ${token1} to my account}`,
+          promptText: `Associate token ${token1} to my account`,
         },
         {
           tokenToAssociateId: token2,

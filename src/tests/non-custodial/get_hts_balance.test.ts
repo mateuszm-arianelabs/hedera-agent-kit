@@ -4,7 +4,6 @@ import { HederaMirrorNodeClient } from "../utils/hederaMirrorNodeClient";
 import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import { AccountData } from "../utils/testnetUtils";
-import { wait } from "../utils/utils";
 import { ExecutorAccountDetails } from "../../types";
 
 const IS_CUSTODIAL = false;
@@ -58,8 +57,6 @@ describe("get_hts_balance (non-custodial)", () => {
         txExecutorAccount = _acc4;
       });
 
-      await wait(3000); // wait for accounts to be created
-
       // Create tokens
       token1 = await networkClientWrapper.createFT({
         name: "MyToken",
@@ -74,8 +71,6 @@ describe("get_hts_balance (non-custodial)", () => {
         decimals: 0,
       });
 
-      await wait(3000); // wait for tokens to be created
-
       // Transfer tokens to accounts
       await Promise.all([
         networkClientWrapper.transferToken(acc1.accountId, token1, 100),
@@ -84,8 +79,6 @@ describe("get_hts_balance (non-custodial)", () => {
         networkClientWrapper.transferToken(acc3.accountId, token1, 7),
         networkClientWrapper.transferToken(txExecutorAccount.accountId, token2, 17),
       ]);
-
-      await wait(3000); // wait for transfers to be completed
 
       hederaApiClient = new HederaMirrorNodeClient("testnet");
 

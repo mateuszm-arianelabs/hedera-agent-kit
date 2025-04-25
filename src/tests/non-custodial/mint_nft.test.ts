@@ -34,8 +34,6 @@ describe("hedera_mint_nft (non-custodial)", () => {
           0 // no auto association
         );
 
-        await wait(3000); // wait for accounts to be created
-
         executorCustodialClientWrapper = new NetworkClientWrapper(
           txExecutorAccount.accountId,
           txExecutorAccount.privateKey,
@@ -53,8 +51,6 @@ describe("hedera_mint_nft (non-custodial)", () => {
             symbol: "TTM",
             maxSupply: 1000,
         });
-
-        await wait(3000); // wait for the nft to be created
 
         const prompt = {
             user: "user",
@@ -84,7 +80,7 @@ describe("hedera_mint_nft (non-custodial)", () => {
           txExecutorAccount.accountId
         )
 
-        await wait(5000); // wait for tx to be executed
+        await wait(5000); // wait for the mirror node to update
 
         const tokenInfo =
             await hederaApiClient.getTokenDetails(tokenId);

@@ -33,7 +33,6 @@ describe("create_fungible_token (non-custodial)", () => {
       autoAssociation
     );
 
-    await wait(3000); // wait for the account to be created
   })
 
   it("Create token with all possible parameters", async () => {
@@ -67,7 +66,7 @@ describe("create_fungible_token (non-custodial)", () => {
       txExecutorAccount.accountId
     )
 
-    await wait(5000); // wait for tx to be executed
+    await wait(5000); // wait for the mirror node to be updated
 
     // STEP 4: verify that the token was created correctly
     const tokenId = await hederaApiClient.getTransactionDetails(
@@ -121,7 +120,7 @@ describe("create_fungible_token (non-custodial)", () => {
       txExecutorAccount.accountId
     )
 
-    await wait(5000); // wait for tx to be executed
+    await wait(5000); // wait for the mirror node to be updated
 
     // STEP 4: verify that token was created correctly
     const tokenId = await hederaApiClient.getTransactionDetails(
@@ -173,7 +172,7 @@ describe("create_fungible_token (non-custodial)", () => {
       txExecutorAccount.accountId
     )
 
-    await wait(5000); // wait for tx to be executed
+    await wait(5000); // wait for the mirror node to be updated
 
     // STEP 4: verify that the token was created correctly
     const tokenId = await hederaApiClient.getTransactionDetails(
@@ -223,7 +222,7 @@ describe("create_fungible_token (non-custodial)", () => {
       txExecutorAccount.accountId
     )
 
-    await wait(5000); // wait for tx to be executed
+    await wait(5000); // wait for the mirror node to be updated
 
     // STEP 4: verify that the token was created correctly
     const tokenId = await hederaApiClient.getTransactionDetails(
@@ -273,7 +272,7 @@ describe("create_fungible_token (non-custodial)", () => {
       txExecutorAccount.accountId
     )
 
-    await wait(5000); // wait for tx to be executed
+    await wait(5000); // wait for the mirror node to be updated
 
     // STEP 4: verify that the token was created correctly
     const tokenId = await hederaApiClient.getTransactionDetails(
@@ -322,7 +321,7 @@ describe("create_fungible_token (non-custodial)", () => {
       txExecutorAccount.accountId
     )
 
-    await wait(5000); // wait for tx to be executed
+    await wait(5000); // wait for the mirror node to be updated
 
     // STEP 4: verify that token was created correctly
     const tokenId = await hederaApiClient.getTransactionDetails(
@@ -372,7 +371,7 @@ describe("create_fungible_token (non-custodial)", () => {
       txExecutorAccount.accountId
     )
 
-    await wait(5000); // wait for tx to be executed
+    await wait(5000); // wait for the mirror node to be updated
 
     // STEP 4: verify that the token was created correctly
     const tokenId = await hederaApiClient.getTransactionDetails(
@@ -416,7 +415,7 @@ describe("create_fungible_token (non-custodial)", () => {
       txExecutorAccount.accountId
     )
 
-    await wait(5000); // wait for tx to be executed
+    await wait(5000); // wait for the mirror node to be updated
 
     // STEP 4: verify that the token was created correctly
     const tokenId = await hederaApiClient.getTransactionDetails(
@@ -460,7 +459,7 @@ describe("create_fungible_token (non-custodial)", () => {
       txExecutorAccount.accountId
     )
 
-    await wait(5000); // wait for tx to be executed
+    await wait(5000); // wait for the mirror node to update
 
     // STEP 4: verify that the token was created correctly
     const tokenId = await hederaApiClient.getTransactionDetails(

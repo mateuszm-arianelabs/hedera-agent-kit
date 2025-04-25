@@ -44,8 +44,6 @@ describe("transfer_token_tool (non-custodial)", async () => {
         txExecutorAccount = _acc4;
       });
 
-      await wait(3000); // wait for accounts to be created
-
       // a custodial client wrapper for the tx executor account is required for creating tokens before the test
       executorCustodialClientWrapper = new NetworkClientWrapper(
         txExecutorAccount.accountId,
@@ -73,8 +71,6 @@ describe("transfer_token_tool (non-custodial)", async () => {
         token2 = _token2;
       });
 
-      await wait(3000); // wait for tokens to be created
-
       hederaApiClient = new HederaMirrorNodeClient("testnet");
 
       // Define test cases using created accounts and tokens
@@ -99,6 +95,8 @@ describe("transfer_token_tool (non-custodial)", async () => {
           `Transfer exactly 3 of token ${token1} to ${acc3.accountId}.`,
         ],
       ];
+
+      await wait(5000); // wait for the mirror node to be updated with new accounts and tokens
     } catch (error) {
       console.error("Error in setup:", error);
       throw error;
@@ -158,7 +156,7 @@ describe("transfer_token_tool (non-custodial)", async () => {
           txExecutorAccount.accountId
         )
 
-        await wait(5000); // wait for tx to be executed
+        await wait(5000); // wait for the mirror node to update
 
         // STEP 4: verify that the transfer was executed correctly
         const balanceExecutorAfterInDisplayUnits =

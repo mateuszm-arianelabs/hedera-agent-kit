@@ -60,8 +60,6 @@ describe("submit_topic_message (non-custodial)", () => {
         topic3 = _topic3.topicId;
       });
 
-      await wait(3000); // wait for accounts to be created
-
       testCases = [
         {
           textPrompt: `Submit message ${MESSAGE1} to topic ${topic1}`,
@@ -116,7 +114,7 @@ describe("submit_topic_message (non-custodial)", () => {
           txExecutorAccount.accountId
         )
 
-        await wait(5000); // wait for tx to be executed
+        await wait(5000); // wait for the mirror node to update
 
         // STEP 4: verify that the topic was deleted correctly
         const topicMessages =

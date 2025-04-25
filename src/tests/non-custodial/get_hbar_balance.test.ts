@@ -4,7 +4,6 @@ import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import { AccountData } from "../utils/testnetUtils";
 import { LangchainAgent } from "../utils/langchainAgent";
-import { wait } from "../utils/utils";
 import { ExecutorAccountDetails } from "../../types";
 
 const IS_CUSTODIAL = false;
@@ -38,8 +37,6 @@ describe("get_hbar_balance", () => {
         startingHbars,
         autoAssociation
       );
-
-      await wait(3000); // wait for accounts to be created
 
       hederaApiClient = new HederaMirrorNodeClient(
         process.env.HEDERA_NETWORK_TYPE as "testnet" | "mainnet" | "previewnet"

@@ -32,8 +32,6 @@ describe("Test HBAR transfer (non-custodial)", async () => {
       acc3 = await networkClientWrapper.createAccount(0);
       txExecutorAccount = await networkClientWrapper.createAccount(15); // set up with 15 HBARs
 
-      await wait(3000); // wait for accounts to be created
-
       hederaApiClient = new HederaMirrorNodeClient("testnet");
 
       testCases = [
@@ -41,6 +39,8 @@ describe("Test HBAR transfer (non-custodial)", async () => {
         [acc2.accountId, 0.5, `Send 0.5 HBAR to account ${acc2.accountId}.`],
         [acc3.accountId, 3, `Transfer exactly 3 HBAR to ${acc3.accountId}.`],
       ];
+
+      await wait(5000); // wait for the mirror node to be updated with new accounts
     } catch (error) {
       console.error("Error in setup:", error);
       throw error;
@@ -88,7 +88,7 @@ describe("Test HBAR transfer (non-custodial)", async () => {
           txExecutorAccount.accountId
         )
 
-        await wait(5000); // wait for tx to be executed
+        await wait(5000); // wait for the mirror node to update
 
         // STEP 4: verify that the transfer was executed correctly
         const balanceAgentAfter =
