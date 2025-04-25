@@ -39,6 +39,8 @@ describe("delete_topic", () => {
         autoAssociation
       );
 
+      await wait(3000); // wait for the account to be created
+
       // a custodial client wrapper for the tx executor account is required for creating topics before the test
       executorCustodialClientWrapper = new NetworkClientWrapper(
         txExecutorAccount.accountId,
@@ -56,6 +58,8 @@ describe("delete_topic", () => {
         topic2 = _topic2.topicId;
         topic3 = _topic3.topicId;
       });
+
+      await wait(3000); // wait for the topics to be created
 
       testCases = [
         {

@@ -4,6 +4,7 @@ import { NetworkClientWrapper } from "../utils/testnetClient";
 import { AccountData } from "../utils/testnetUtils";
 import { LangchainAgent } from "../utils/langchainAgent";
 import { ExecutorAccountDetails } from "../../types";
+import { wait } from "../utils/utils";
 
 interface TestCase {
   promptText: string;
@@ -72,6 +73,8 @@ describe("get_list_of_token_holders (non-custodial)", () => {
         tokenCreatorAccount = account5;
       });
 
+      await wait(3000); // wait for accounts to be created
+
       const tokenCreatorAccountNetworkClientWrapper =
         new NetworkClientWrapper(
           tokenCreatorAccount.accountId,
@@ -98,6 +101,8 @@ describe("get_list_of_token_holders (non-custodial)", () => {
         token2 = t2;
       });
 
+      await wait(3000); // wait for tokens to be created
+
       await Promise.all([
         tokenCreatorAccountNetworkClientWrapper.transferToken(acc1.accountId, token1, 10), // base unit
         tokenCreatorAccountNetworkClientWrapper.transferToken(acc2.accountId, token1, 20),
@@ -107,6 +112,8 @@ describe("get_list_of_token_holders (non-custodial)", () => {
         tokenCreatorAccountNetworkClientWrapper.transferToken(acc3.accountId, token2, 60),
         tokenCreatorAccountNetworkClientWrapper.transferToken(txExecutorAccount.accountId, token2, 60),
       ]);
+
+      await wait(3000); // wait for tokens to be transferred
 
       testCases = [
         {

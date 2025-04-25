@@ -39,9 +39,12 @@ describe("get_hbar_balance", () => {
         autoAssociation
       );
 
+      await wait(3000); // wait for accounts to be created
+
       hederaApiClient = new HederaMirrorNodeClient(
         process.env.HEDERA_NETWORK_TYPE as "testnet" | "mainnet" | "previewnet"
       );
+
       testCases = [
         [acc1.accountId, `What's HBAR balance for ${acc1.accountId}`],
         [acc2.accountId, `How much HBARs has ${acc2.accountId}`],
@@ -101,7 +104,6 @@ describe("get_hbar_balance", () => {
         // compare balance in base units
         expect(hederaActionBalance * 10 ** HBAR_DECIMALS).toEqual(accountBalanceInBaseUnits);
 
-        await wait(1000);
         console.log('\n\n');
       }
     });

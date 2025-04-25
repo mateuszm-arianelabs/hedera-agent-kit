@@ -58,6 +58,8 @@ describe("get_hts_balance (non-custodial)", () => {
         txExecutorAccount = _acc4;
       });
 
+      await wait(3000); // wait for accounts to be created
+
       // Create tokens
       token1 = await networkClientWrapper.createFT({
         name: "MyToken",
@@ -72,6 +74,8 @@ describe("get_hts_balance (non-custodial)", () => {
         decimals: 0,
       });
 
+      await wait(3000); // wait for tokens to be created
+
       // Transfer tokens to accounts
       await Promise.all([
         networkClientWrapper.transferToken(acc1.accountId, token1, 100),
@@ -80,7 +84,9 @@ describe("get_hts_balance (non-custodial)", () => {
         networkClientWrapper.transferToken(acc3.accountId, token1, 7),
         networkClientWrapper.transferToken(txExecutorAccount.accountId, token2, 17),
       ]);
-      await wait(5000);
+
+      await wait(3000); // wait for transfers to be completed
+
       hederaApiClient = new HederaMirrorNodeClient("testnet");
 
       testCases = [
@@ -153,8 +159,6 @@ describe("get_hts_balance (non-custodial)", () => {
         // STEP 1: send non-custodial prompt
         const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL, executorAccountDetails);
 
-        await wait(3000);
-
         // STEP 2: extract balance
         const hederaActionBalanceInDisplayUnits = extractTokenBalance(response.messages);
 
@@ -175,7 +179,6 @@ describe("get_hts_balance (non-custodial)", () => {
         expect(String(hederaActionBalanceInDisplayUnits)).toEqual(String(mirrorNodeBalanceInDisplayUnits));
         expect(hederaActionBalanceInBaseUnits).toEqual(String(mirrorNodeBalanceInBaseUnits));
 
-        await wait(3000);
         console.log('\n\n');
       }
     });

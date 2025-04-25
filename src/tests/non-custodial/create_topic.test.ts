@@ -25,7 +25,7 @@ describe("create_topic", () => {
       "testnet"
     );
 
-    // Create test account
+    // Create a test account
     const startingHbars = 5;
     const autoAssociation = -1; // unlimited auto association
     txExecutorAccount = await networkClientWrapper.createAccount(
@@ -33,6 +33,7 @@ describe("create_topic", () => {
       autoAssociation
     );
 
+    await wait(3000); // wait for the account to be created
   })
 
   describe("create_topic", () => {

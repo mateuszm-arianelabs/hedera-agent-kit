@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll, beforeEach } from "vitest";
+import { describe, expect, it, beforeAll } from "vitest";
 import { NetworkType} from "../types";
 import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
@@ -34,6 +34,8 @@ describe("hedera_mint_nft (non-custodial)", () => {
           0 // no auto association
         );
 
+        await wait(3000); // wait for accounts to be created
+
         executorCustodialClientWrapper = new NetworkClientWrapper(
           txExecutorAccount.accountId,
           txExecutorAccount.privateKey,
@@ -41,12 +43,6 @@ describe("hedera_mint_nft (non-custodial)", () => {
           "testnet"
         );
     });
-
-    beforeEach(async () => {
-        dotenv.config();
-        await wait(3000);
-    });
-
 
     it("should mint non-fungible token", async () => {
         const STARTING_SUPPLY = 0;
@@ -57,6 +53,8 @@ describe("hedera_mint_nft (non-custodial)", () => {
             symbol: "TTM",
             maxSupply: 1000,
         });
+
+        await wait(3000); // wait for the nft to be created
 
         const prompt = {
             user: "user",

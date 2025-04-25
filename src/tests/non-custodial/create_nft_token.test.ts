@@ -35,6 +35,8 @@ describe("create_nft_token", () => {
           startingHbars,
           autoAssociation
         );
+
+        await wait(3000); // wait for the account to be created
     });
 
     it("Create NFT token with all possible parameters", async () => {

@@ -60,6 +60,8 @@ describe("submit_topic_message (non-custodial)", () => {
         topic3 = _topic3.topicId;
       });
 
+      await wait(3000); // wait for accounts to be created
+
       testCases = [
         {
           textPrompt: `Submit message ${MESSAGE1} to topic ${topic1}`,

@@ -48,7 +48,7 @@ describe("claim_pending_airdrops (non-custodial)", () => {
               0 // no auto association
             );
 
-            await wait(3000);
+            await wait(3000); // waiting for the account to be created on the network.
 
             const airdropCreatorAccountNetworkClientWrapper =
               new NetworkClientWrapper(
@@ -77,7 +77,7 @@ describe("claim_pending_airdrops (non-custodial)", () => {
                 token2 = _token2;
             });
 
-            await wait(3000);
+            await wait(3000); // waiting for the tokens to be created on the network.
 
             // airdrop tokens
             await Promise.all([
@@ -95,7 +95,7 @@ describe("claim_pending_airdrops (non-custodial)", () => {
                 ]),
             ]);
 
-            await wait(5000);
+            await wait(3000); // waiting for the airdrop to be executed on the network.
 
 
             testCases = [

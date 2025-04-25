@@ -44,6 +44,8 @@ describe("transfer_token_tool (non-custodial)", async () => {
         txExecutorAccount = _acc4;
       });
 
+      await wait(3000); // wait for accounts to be created
+
       // a custodial client wrapper for the tx executor account is required for creating tokens before the test
       executorCustodialClientWrapper = new NetworkClientWrapper(
         txExecutorAccount.accountId,
@@ -71,7 +73,7 @@ describe("transfer_token_tool (non-custodial)", async () => {
         token2 = _token2;
       });
 
-      await wait(5000);
+      await wait(3000); // wait for tokens to be created
 
       hederaApiClient = new HederaMirrorNodeClient("testnet");
 
@@ -198,7 +200,6 @@ describe("transfer_token_tool (non-custodial)", async () => {
             transferAmountInDisplayUnits * 10 ** Number(tokenDetails.decimals)
         );
 
-        await wait(1000);
         console.log("\n\n");
       }
     });

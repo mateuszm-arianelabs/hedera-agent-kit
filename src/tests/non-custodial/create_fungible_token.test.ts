@@ -33,6 +33,7 @@ describe("create_fungible_token (non-custodial)", () => {
       autoAssociation
     );
 
+    await wait(3000); // wait for the account to be created
   })
 
   it("Create token with all possible parameters", async () => {

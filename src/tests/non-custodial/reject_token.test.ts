@@ -46,6 +46,8 @@ describe("reject_token (non-custodial)", async () => {
               -1 // unlimited auto association. To reject tokens, the airdrop must be first claimed.
             );
 
+            await wait(3000); // wait for accounts to be created
+
             airdropCreatorAccountNetworkClientWrapper = new NetworkClientWrapper(
                 airdropCreatorAccount.accountId,
                 airdropCreatorAccount.privateKey,
@@ -72,6 +74,8 @@ describe("reject_token (non-custodial)", async () => {
                 token2 = _token2;
             });
 
+            await wait(3000); // wait for tokens to be created
+
             // Define test cases using created accounts and tokens
             await Promise.all([
                 airdropCreatorAccountNetworkClientWrapper.airdropToken(token1, [
@@ -87,6 +91,8 @@ describe("reject_token (non-custodial)", async () => {
                     },
                 ]),
             ]);
+
+            await wait(3000); // wait for the airdrops to be completed
 
             testCases = [
                 {

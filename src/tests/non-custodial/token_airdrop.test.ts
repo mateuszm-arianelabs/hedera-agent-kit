@@ -53,7 +53,7 @@ describe("Test Token Airdrop", async () => {
         txExecutorAccount = _acc6;
       });
 
-      await wait(5000);
+      await wait(3000); // wait for accounts to be created
 
       executorCustodialClientWrapper = new NetworkClientWrapper(
         txExecutorAccount.accountId,
@@ -87,6 +87,8 @@ describe("Test Token Airdrop", async () => {
         token2 = _token2;
         token3 = _token3;
       });
+
+      await wait(3000); // wait for tokens to be created
 
       // Define test cases using created accounts and tokens
       testCases = [
@@ -207,7 +209,6 @@ describe("Test Token Airdrop", async () => {
           )
         );
 
-        await wait(1000);
         console.log('\n\n');
       }
     });

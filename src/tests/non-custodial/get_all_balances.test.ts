@@ -67,7 +67,8 @@ describe("get_all_balances (non-custodial)", () => {
         acc3 = _acc3;
         txExecutorAccount = _acc4;
       });
-      
+
+      await wait(3000); // wait for accounts to be created
 
       // Create tokens
       await Promise.all([
@@ -88,6 +89,8 @@ describe("get_all_balances (non-custodial)", () => {
         token2 = _token2;
       });
 
+      await wait(3000); // wait for tokens to be created
+
       // Transfer tokens to accounts
       await Promise.all([ 
         networkClientWrapper.transferToken(acc1.accountId, token1, 100),
@@ -97,7 +100,8 @@ describe("get_all_balances (non-custodial)", () => {
         networkClientWrapper.transferToken(txExecutorAccount.accountId, token1, 17),
       ]);
 
-      await wait(5000);
+      await wait(3000); // wait for tokens to be created and transferred to accounts
+
       hederaApiClient = new HederaMirrorNodeClient("testnet");
 
       testCases = [

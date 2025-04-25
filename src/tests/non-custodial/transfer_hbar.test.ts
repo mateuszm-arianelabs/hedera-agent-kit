@@ -32,7 +32,7 @@ describe("Test HBAR transfer (non-custodial)", async () => {
       acc3 = await networkClientWrapper.createAccount(0);
       txExecutorAccount = await networkClientWrapper.createAccount(15); // set up with 15 HBARs
 
-      await wait(5000);
+      await wait(3000); // wait for accounts to be created
 
       hederaApiClient = new HederaMirrorNodeClient("testnet");
 
@@ -117,7 +117,6 @@ describe("Test HBAR transfer (non-custodial)", async () => {
           )
         ).toBeLessThanOrEqual(margin);
 
-        await wait(1000);
         console.log("\n\n");
       }
     });
