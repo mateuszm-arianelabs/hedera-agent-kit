@@ -6,7 +6,8 @@ import HederaAgentKit from "../../agent";
 import { createHederaTools } from "../../langchain";
 import { AccountId, Client, PrivateKey, Transaction } from "@hashgraph/sdk";
 import { Buffer } from "buffer";
-import { TxExecutionResult } from "../../types";
+import { HederaNetworkType, TxExecutionResult } from "../../types";
+import { AccountData } from "./testnetUtils";
 
 dotenv.config();
 
@@ -28,8 +29,22 @@ export function fromDisplayToBaseUnit(
     return displayBalance * 10 ** decimals;
 }
 
-
-export async function initializeAgent() {
+/**
+ * Initializes an agent configured to interact on-chain using the Hedera Agent Kit and other tools.
+ * This is an initialization for a client for automatic tests of hedera-agent-tools,
+ * and it should be used with hedera testnet accounts.
+ *
+ * **NOTE: With no `operatorAccountData` the method defaults to an account from `.env` file.**
+ *
+ * @param {AccountData} [operatorAccountData] - Optional object
+ * containing the operator account details such as accountId,
+ * privateKey,
+ * and optionally used to set the network type.
+ * @return {Promise<{ agent: Object, config: Object }>} A promise
+ * that resolves to an object containing the created agent and its configuration settings.
+ * @throws Will throw an error if the initialization process fails.
+ */
+export async function initializeAgent(operatorAccountData?: AccountData) {
   try {
     const llm = new ChatOpenAI({
       modelName: "o3-mini",
@@ -37,11 +52,9 @@ export async function initializeAgent() {
 
     // Initialize HederaAgentKit
     const hederaKit = new HederaAgentKit(
-        process.env.HEDERA_ACCOUNT_ID!,
-        process.env.HEDERA_PRIVATE_KEY!,
-        // Pass your network of choice. Default is "mainnet".
-        // You can specify 'testnet', 'previewnet', or 'mainnet'.
-        process.env.HEDERA_NETWORK_TYPE as "mainnet" | "testnet" | "previewnet" || "testnet"
+      operatorAccountData?.accountId || process.env.HEDERA_ACCOUNT_ID!,
+      operatorAccountData ?  PrivateKey.fromStringECDSA(operatorAccountData.privateKey).toStringDer() : process.env.HEDERA_PRIVATE_KEY!,
+      operatorAccountData ? 'testnet' : process.env.HEDERA_NETWORK_TYPE as HederaNetworkType
     );
 
     // Create the LangChain-compatible tools

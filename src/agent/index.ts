@@ -536,7 +536,7 @@ export class HederaAgentKit {
     private async associateTokenCustodial(
         tokenId: TokenId
     ): Promise<CustodialAssociateTokenResult> {
-        const response: AirdropResult = await HtsTransactionBuilder.associateToken(
+        const response: AssociateTokenResult = await HtsTransactionBuilder.associateToken(
             tokenId,
             this.accountId
         ).signAndExecute(this.client);

@@ -124,7 +124,7 @@ describe("associate_token (non-custodial)", () => {
 
         await wait(5000); // wait for the mirror node to update the account info
 
-        // STEP 4: verify that token was associated
+        // STEP 4: verify that the token has been associated
         const token = await hederaMirrorNodeClient.getAccountToken(
           txExecutorAccount.accountId,
           tokenToAssociateId
