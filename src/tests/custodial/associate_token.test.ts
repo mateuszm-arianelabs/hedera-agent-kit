@@ -1,22 +1,21 @@
-import { describe, expect, it, beforeAll, afterAll } from "vitest";
+import { describe, expect, it, beforeAll } from "vitest";
 import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import { AccountData } from "../utils/testnetUtils";
 import { HederaMirrorNodeClient } from "../utils/hederaMirrorNodeClient";
-import { LangchainAgent } from "../utils/langchainAgent";
 import { NetworkType } from "../types";
 import { wait } from "../utils/utils";
+import { LangchainAgent } from "../utils/langchainAgent";
 
 const IS_CUSTODIAL = true;
 
 dotenv.config();
 describe("associate_token", () => {
     let tokenCreatorAccount: AccountData;
+    let operatorAccount: AccountData;
     let token1: string;
     let token2: string;
     let networkClientWrapper: NetworkClientWrapper;
-    let claimerInitialMaxAutoAssociation: number;
-    let langchainAgent: LangchainAgent;
     let testCases: {
         tokenToAssociateId: string;
         promptText: string;
@@ -25,7 +24,6 @@ describe("associate_token", () => {
 
     beforeAll(async () => {
         try {
-            langchainAgent = await LangchainAgent.create();
             hederaMirrorNodeClient = new HederaMirrorNodeClient("testnet" as NetworkType);
 
             networkClientWrapper = new NetworkClientWrapper(
@@ -35,28 +33,14 @@ describe("associate_token", () => {
                 "testnet"
             );
 
-            // Create test account
-            const startingHbars = 20;
-            const autoAssociation = 0; // no auto association
-            tokenCreatorAccount = await networkClientWrapper.createAccount(
-                startingHbars,
-                autoAssociation
-            );
-
-            claimerInitialMaxAutoAssociation = (
-                await hederaMirrorNodeClient.getAccountInfo(
-                    networkClientWrapper.getAccountId()
-                )
-            ).max_automatic_token_associations;
-
-            const maxAutoAssociationForTest =
-                await hederaMirrorNodeClient.getAutomaticAssociationsCount(
-                    networkClientWrapper.getAccountId()
-                );
-
-            await networkClientWrapper.setMaxAutoAssociation(
-                maxAutoAssociationForTest
-            );
+            // Create test accounts
+            await Promise.all([
+                networkClientWrapper.createAccount(20, -1), // 20 initial HBAR required for token creations, -1 sets the maximum autoassociation to unlimited
+                networkClientWrapper.createAccount(10, -1), // 10 initial HBAR required for token association, -1 sets the maximum autoassociation to unlimited
+            ]).then(([_acc1, _acc2]) => {
+                tokenCreatorAccount = _acc1; // account creating token
+                operatorAccount = _acc2; // operator account that will call and execute the `associate token` action
+            });
 
             const tokenCreatorAccountNetworkClientWrapper =
                 new NetworkClientWrapper(
@@ -89,24 +73,16 @@ describe("associate_token", () => {
             testCases = [
                 {
                     tokenToAssociateId: token1,
-                    promptText: `Associate token ${token1} to my account ${networkClientWrapper.getAccountId()}`,
+                    promptText: `Associate token ${token1} to my account`,
                 },
                 {
                     tokenToAssociateId: token2,
-                    promptText: `Associate token ${token2} to my account ${networkClientWrapper.getAccountId()}`,
+                    promptText: `Associate token ${token2} to my account`,
                 },
             ];
         } catch (error) {
             console.error("Error in setup:", error);
             throw error;
-        }
-    });
-
-    afterAll(async () => {
-        if (claimerInitialMaxAutoAssociation === -1) {
-            await networkClientWrapper.setMaxAutoAssociation(
-                claimerInitialMaxAutoAssociation
-            );
         }
     });
 
@@ -118,21 +94,26 @@ describe("associate_token", () => {
                     text: promptText,
                 };
 
+                // STEP 0: create an instance of agent with the created operator account
+                const langchainAgent = await LangchainAgent.create(operatorAccount);
+
+                console.log(`Prompt: ${promptText}`);
+                console.log(JSON.stringify(operatorAccount, null, 2)); // operator and executor of the called action
+
+                // STEP 1: send custodial prompt
                 const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
-                await wait(5000);
+                await wait(5000); // wait for the mirror node to update the account info
 
-                console.log({
-                    client: networkClientWrapper.getAccountId(),
-                    tokenToAssociateId
-                })
-
+                // STEP 2: verify that the token has been associated
                 const token = await hederaMirrorNodeClient.getAccountToken(
-                    networkClientWrapper.getAccountId(),
-                    tokenToAssociateId
+                  operatorAccount.accountId,
+                  tokenToAssociateId
                 );
 
                 expect(token).toBeDefined();
+
+                console.log('\n\n');
             }
         });
     });

@@ -218,6 +218,8 @@ export class HederaMirrorNodeClient {
     ): Promise<AccountToken | undefined> {
         const url = `${this.baseUrl}/accounts/${accountId}/tokens?token.id=${tokenId}&limit=1&order=desc`;
 
+        console.log(`getAccountToken URL: ${url}`);
+
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
