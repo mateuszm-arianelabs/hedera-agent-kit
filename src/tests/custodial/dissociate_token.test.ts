@@ -1,25 +1,23 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it, beforeAll } from "vitest";
 import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import { AccountData } from "../utils/testnetUtils";
 import { HederaMirrorNodeClient } from "../utils/hederaMirrorNodeClient";
 import { LangchainAgent } from "../utils/langchainAgent";
 import { NetworkType } from "../types";
-import { extractTxBytes, signAndExecuteTx, wait } from "../utils/utils";
-import { ExecutorAccountDetails } from "../../types";
+import { wait } from "../utils/utils";
 
-const IS_CUSTODIAL = false;
+const IS_CUSTODIAL = true;
 
 dotenv.config();
-describe("associate_token (non-custodial)", () => {
+describe("dissociate_token", () => {
   let tokenCreatorAccount: AccountData;
-  let txExecutorAccount: AccountData;
   let token1: string;
   let token2: string;
   let networkClientWrapper: NetworkClientWrapper;
   let langchainAgent: LangchainAgent;
   let testCases: {
-    tokenToAssociateId: string;
+    tokenToDissociateId: string;
     promptText: string;
   }[];
   let hederaMirrorNodeClient: HederaMirrorNodeClient;
@@ -36,15 +34,10 @@ describe("associate_token (non-custodial)", () => {
         "testnet"
       );
 
-      // Create test accounts
+      // Create a test account
       const startingHbars = 20;
-      const autoAssociation = -1; // unlimited auto association
+      const autoAssociation = 0; // no auto association
       tokenCreatorAccount = await networkClientWrapper.createAccount(
-        startingHbars,
-        autoAssociation
-      );
-
-      txExecutorAccount = await networkClientWrapper.createAccount(
         startingHbars,
         autoAssociation
       );
@@ -60,14 +53,14 @@ describe("associate_token (non-custodial)", () => {
       // create tokens
       await Promise.all([
         tokenCreatorAccountNetworkClientWrapper.createFT({
-          name: "TokenToAssociate1",
-          symbol: "TTA1",
+          name: "TokenToDissociate1",
+          symbol: "TTD1",
           initialSupply: 1000,
           decimals: 2,
         }),
         tokenCreatorAccountNetworkClientWrapper.createFT({
-          name: "TokenToAssociate2",
-          symbol: "TTA2",
+          name: "TokenToDissociate2",
+          symbol: "TTD2",
           initialSupply: 1000,
           decimals: 2,
         }),
@@ -76,15 +69,18 @@ describe("associate_token (non-custodial)", () => {
         token2 = _token2;
       });
 
+      // associate with those tokens
+      await networkClientWrapper.associateToken(token1);
+      await networkClientWrapper.associateToken(token2);
 
       testCases = [
         {
-          tokenToAssociateId: token1,
-          promptText: `Associate token ${token1} to my account`,
+          tokenToDissociateId: token1,
+          promptText: `Dissociate token ${token1} from my account`,
         },
         {
-          tokenToAssociateId: token2,
-          promptText: `Associate token ${token2} to my account ${txExecutorAccount.accountId}`,
+          tokenToDissociateId: token2,
+          promptText: `Dissociate token ${token2} from my account`,
         },
       ];
     } catch (error) {
@@ -93,45 +89,28 @@ describe("associate_token (non-custodial)", () => {
     }
   });
 
-  describe("associate token checks", () => {
-    it("should associate token", async () => {
-      for (const { promptText, tokenToAssociateId } of testCases || []) {
+  describe("dissociate token checks", () => {
+    it("should dissociate token", async () => {
+      for (const { promptText, tokenToDissociateId } of testCases || []) {
         const prompt = {
           user: "user",
           text: promptText,
         };
 
         console.log(`Prompt: ${promptText}`);
-        console.log(JSON.stringify(txExecutorAccount, null, 2));
 
-        const executorAccountDetails: ExecutorAccountDetails = {
-          executorAccountId: txExecutorAccount.accountId,
-          executorPublicKey: txExecutorAccount.publicKey,
-        }
+        // STEP 1: send custodial prompt
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
-        // STEP 1: send non-custodial prompt
-        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL, executorAccountDetails);
+        await wait(5000); // wait for the mirror node to update
 
-        // STEP 2: extract tx bytes
-        const txBytesString = extractTxBytes(response.messages)
-
-        // STEP 3: verify correctness by signing and executing the tx
-        const executedTx = await signAndExecuteTx(
-          txBytesString,
-          txExecutorAccount.privateKey,
-          txExecutorAccount.accountId
-        )
-
-        await wait(5000); // wait for the mirror node to update the account info
-
-        // STEP 4: verify that token was associated
+        // STEP 2: verify correctness by checking that token was dissociated
         const token = await hederaMirrorNodeClient.getAccountToken(
-          txExecutorAccount.accountId,
-          tokenToAssociateId
+          networkClientWrapper.getAccountId(),
+          tokenToDissociateId
         );
 
-        expect(executedTx.status).toBe("SUCCESS");
-        expect(token).toBeDefined();
+        expect(token).toBeUndefined();
 
         console.log('\n\n');
       }

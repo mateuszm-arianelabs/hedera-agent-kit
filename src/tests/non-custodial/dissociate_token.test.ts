@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it, beforeAll } from "vitest";
 import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import { AccountData } from "../utils/testnetUtils";
@@ -11,23 +11,21 @@ import { ExecutorAccountDetails } from "../../types";
 const IS_CUSTODIAL = false;
 
 dotenv.config();
-describe("associate_token (non-custodial)", () => {
+describe("dissociate_token (non-custodial)", () => {
   let tokenCreatorAccount: AccountData;
-  let txExecutorAccount: AccountData;
   let token1: string;
   let token2: string;
   let networkClientWrapper: NetworkClientWrapper;
-  let langchainAgent: LangchainAgent;
   let testCases: {
-    tokenToAssociateId: string;
+    tokenToDissociateId: string;
     promptText: string;
   }[];
-  let hederaMirrorNodeClient: HederaMirrorNodeClient;
+  let txExecutorAccount: AccountData;
+  let hederaApiClient: HederaMirrorNodeClient;
 
   beforeAll(async () => {
     try {
-      langchainAgent = await LangchainAgent.create();
-      hederaMirrorNodeClient = new HederaMirrorNodeClient("testnet" as NetworkType);
+      hederaApiClient = new HederaMirrorNodeClient("testnet" as NetworkType);
 
       networkClientWrapper = new NetworkClientWrapper(
         process.env.HEDERA_ACCOUNT_ID!,
@@ -37,16 +35,14 @@ describe("associate_token (non-custodial)", () => {
       );
 
       // Create test accounts
-      const startingHbars = 20;
-      const autoAssociation = -1; // unlimited auto association
       tokenCreatorAccount = await networkClientWrapper.createAccount(
-        startingHbars,
-        autoAssociation
+        20, // starting HBARs
+        0 // no auto association
       );
 
       txExecutorAccount = await networkClientWrapper.createAccount(
-        startingHbars,
-        autoAssociation
+        5, // starting HBARs
+        0 // no auto association
       );
 
       const tokenCreatorAccountNetworkClientWrapper =
@@ -57,17 +53,26 @@ describe("associate_token (non-custodial)", () => {
           "testnet"
         );
 
+      // custodial executor network client wrapper is required for associating tokens that will be dissociated in non-custodial flow
+      const executorCustodialAccountNetworkClientWrapper =
+        new NetworkClientWrapper(
+          txExecutorAccount.accountId,
+          txExecutorAccount.privateKey,
+          "ECDSA",
+          "testnet"
+        );
+
       // create tokens
       await Promise.all([
         tokenCreatorAccountNetworkClientWrapper.createFT({
-          name: "TokenToAssociate1",
-          symbol: "TTA1",
+          name: "TokenToDissociate1",
+          symbol: "TTD1",
           initialSupply: 1000,
           decimals: 2,
         }),
         tokenCreatorAccountNetworkClientWrapper.createFT({
-          name: "TokenToAssociate2",
-          symbol: "TTA2",
+          name: "TokenToDissociate2",
+          symbol: "TTD2",
           initialSupply: 1000,
           decimals: 2,
         }),
@@ -76,15 +81,18 @@ describe("associate_token (non-custodial)", () => {
         token2 = _token2;
       });
 
+      // associate with those tokens
+      await executorCustodialAccountNetworkClientWrapper.associateToken(token1);
+      await executorCustodialAccountNetworkClientWrapper.associateToken(token2);
 
       testCases = [
         {
-          tokenToAssociateId: token1,
-          promptText: `Associate token ${token1} to my account`,
+          tokenToDissociateId: token1,
+          promptText: `Dissociate token ${token1} from my account`,
         },
         {
-          tokenToAssociateId: token2,
-          promptText: `Associate token ${token2} to my account ${txExecutorAccount.accountId}`,
+          tokenToDissociateId: token2,
+          promptText: `Dissociate token ${token2} from my account`,
         },
       ];
     } catch (error) {
@@ -93,13 +101,15 @@ describe("associate_token (non-custodial)", () => {
     }
   });
 
-  describe("associate token checks", () => {
-    it("should associate token", async () => {
-      for (const { promptText, tokenToAssociateId } of testCases || []) {
+  describe("dissociate token checks", () => {
+    it("should dissociate token", async () => {
+      for (const { promptText, tokenToDissociateId } of testCases || []) {
         const prompt = {
           user: "user",
           text: promptText,
         };
+
+        const langchainAgent = await LangchainAgent.create();
 
         console.log(`Prompt: ${promptText}`);
         console.log(JSON.stringify(txExecutorAccount, null, 2));
@@ -122,16 +132,15 @@ describe("associate_token (non-custodial)", () => {
           txExecutorAccount.accountId
         )
 
-        await wait(5000); // wait for the mirror node to update the account info
+        await wait(5000); // wait for the mirror node to update
 
-        // STEP 4: verify that token was associated
-        const token = await hederaMirrorNodeClient.getAccountToken(
-          txExecutorAccount.accountId,
-          tokenToAssociateId
+        // STEP 2: verify correctness by checking that token was dissociated
+        const token = await hederaApiClient.getAccountToken(
+          networkClientWrapper.getAccountId(),
+          tokenToDissociateId
         );
 
-        expect(executedTx.status).toBe("SUCCESS");
-        expect(token).toBeDefined();
+        expect(token).toBeUndefined();
 
         console.log('\n\n');
       }

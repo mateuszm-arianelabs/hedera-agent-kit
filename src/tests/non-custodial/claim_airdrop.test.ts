@@ -1,20 +1,18 @@
-import { describe, beforeAll, expect, it, afterAll } from "vitest";
+import { describe, beforeAll, expect, it } from "vitest";
 import { AccountData } from "../utils/testnetUtils";
 import { LangchainAgent } from "../utils/langchainAgent";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import * as dotenv from "dotenv";
 import { HederaMirrorNodeClient } from "../utils/hederaMirrorNodeClient";
-import { NetworkType } from "../types";
-import { wait } from "../utils/utils";
+import { extractTxBytes, signAndExecuteTx, wait } from "../utils/utils";
+import { ExecutorAccountDetails } from "../../types";
 
-const IS_CUSTODIAL = true;
+const IS_CUSTODIAL = false;
 
-describe("claim_pending_airdrops", () => {
+describe("claim_pending_airdrops (non-custodial)", () => {
     let airdropCreatorAccount: AccountData;
     let token1: string;
     let token2: string;
-    let langchainAgent: LangchainAgent;
-    let claimerInitialMaxAutoAssociation: number;
     let testCases: {
         receiverAccountId: string;
         senderAccountId: string;
@@ -23,14 +21,13 @@ describe("claim_pending_airdrops", () => {
         expectedClaimedAmount: number;
     }[];
     let networkClientWrapper: NetworkClientWrapper;
-    let hederaMirrorNodeClient: HederaMirrorNodeClient;
+    let txExecutorAccount: AccountData;
+    let hederaApiClient: HederaMirrorNodeClient;
 
     beforeAll(async () => {
         dotenv.config()
         try {
-            langchainAgent = await LangchainAgent.create();
-
-            hederaMirrorNodeClient = new HederaMirrorNodeClient("testnet" as NetworkType);
+            hederaApiClient = new HederaMirrorNodeClient("testnet");
 
             networkClientWrapper = new NetworkClientWrapper(
               process.env.HEDERA_ACCOUNT_ID!,
@@ -40,37 +37,24 @@ describe("claim_pending_airdrops", () => {
             );
 
 
-            // Create test account
-            const startingHbars = 20;
-            const autoAssociation = 0; // no auto association
+            // Create test accounts
             airdropCreatorAccount = await networkClientWrapper.createAccount(
-                startingHbars,
-                autoAssociation
+              20, // starting HBARs
+              0 // no auto association
             );
 
-
-            claimerInitialMaxAutoAssociation = (
-                await hederaMirrorNodeClient.getAccountInfo(
-                    networkClientWrapper.getAccountId()
-                )
-            ).max_automatic_token_associations;
-
-            const maxAutoAssociationForTest =
-                await hederaMirrorNodeClient.getAutomaticAssociationsCount(
-                    networkClientWrapper.getAccountId()
-                );
-
-            await networkClientWrapper.setMaxAutoAssociation(
-                maxAutoAssociationForTest
+            txExecutorAccount = await networkClientWrapper.createAccount(
+              5, // starting HBARs
+              0 // no auto association
             );
 
             const airdropCreatorAccountNetworkClientWrapper =
-                new NetworkClientWrapper(
-                    airdropCreatorAccount.accountId,
-                    airdropCreatorAccount.privateKey,
-                    "ECDSA",
-                    "testnet"
-                );
+              new NetworkClientWrapper(
+                airdropCreatorAccount.accountId,
+                airdropCreatorAccount.privateKey,
+                "ECDSA",
+                "testnet"
+              );
 
             // create tokens
             await Promise.all([
@@ -95,31 +79,28 @@ describe("claim_pending_airdrops", () => {
             await Promise.all([
                 airdropCreatorAccountNetworkClientWrapper.airdropToken(token1, [
                     {
-                        accountId: process.env.HEDERA_ACCOUNT_ID!,
+                        accountId: txExecutorAccount.accountId,
                         amount: 10,
                     },
                 ]),
                 airdropCreatorAccountNetworkClientWrapper.airdropToken(token2, [
                     {
-                        accountId: process.env.HEDERA_ACCOUNT_ID!,
+                        accountId: txExecutorAccount.accountId,
                         amount: 40,
                     },
                 ]),
             ]);
 
-            await wait(5000);
-
-
             testCases = [
                 {
-                    receiverAccountId: networkClientWrapper.getAccountId(),
+                    receiverAccountId: txExecutorAccount.accountId,
                     senderAccountId: airdropCreatorAccount.accountId,
                     tokenId: token1,
                     promptText: `Claim airdrop for token ${token1} from sender ${airdropCreatorAccount.accountId}`,
                     expectedClaimedAmount: 10,
                 },
                 {
-                    receiverAccountId: networkClientWrapper.getAccountId(),
+                    receiverAccountId: txExecutorAccount.accountId,
                     senderAccountId: airdropCreatorAccount.accountId,
                     tokenId: token2,
                     promptText: `Claim airdrop for token ${token2} from sender ${airdropCreatorAccount.accountId}`,
@@ -131,12 +112,6 @@ describe("claim_pending_airdrops", () => {
             console.error("Error in setup:", error);
             throw error;
         }
-    });
-
-    afterAll(async () => {
-        await networkClientWrapper.setMaxAutoAssociation(
-            claimerInitialMaxAutoAssociation
-        );
     });
 
     describe("pending airdrops checks", () => {
@@ -151,15 +126,40 @@ describe("claim_pending_airdrops", () => {
                     user: "user",
                     text: promptText,
                 };
-                langchainAgent = await LangchainAgent.create();
-                const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
-                const tokenBalance = await hederaMirrorNodeClient.getTokenBalance(
+                const langchainAgent = await LangchainAgent.create();
+
+                console.log(`Prompt: ${promptText}`);
+                console.log(JSON.stringify(txExecutorAccount, null, 2));
+
+                const executorAccountDetails: ExecutorAccountDetails = {
+                    executorAccountId: txExecutorAccount.accountId,
+                    executorPublicKey: txExecutorAccount.publicKey,
+                }
+
+                // STEP 1: send non-custodial prompt
+                const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL, executorAccountDetails);
+
+                // STEP 2: extract tx bytes
+                const txBytesString = extractTxBytes(response.messages)
+
+                // STEP 3: verify correctness by signing and executing the tx
+                const executedTx = await signAndExecuteTx(
+                  txBytesString,
+                  txExecutorAccount.privateKey,
+                  txExecutorAccount.accountId
+                )
+
+                await wait(5000); // wait for the mirror node to update
+
+                const tokenBalance = await hederaApiClient.getTokenBalance(
                   receiverAccountId,
                   tokenId,
                 );
 
                 expect(tokenBalance ?? 0).toBe(expectedClaimedAmount);
+
+                console.log('\n\n');
             }
         });
     })

@@ -127,5 +127,14 @@ export const signAndExecuteTx = async (
     console.error("Error signing transaction:", JSON.stringify(error));
     throw error;
   }
-
 }
+
+export const formatTxHash = (txHash: string) => {
+  const [txId, txTimestamp] = txHash.split("@");
+
+  if (!txId || !txTimestamp) {
+    throw new Error("Invalid tx hash");
+  }
+
+  return `${txId}-${txTimestamp?.replace(".", "-")}`;
+};

@@ -4,47 +4,21 @@ import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import { AccountData } from "../utils/testnetUtils";
 import { LangchainAgent } from "../utils/langchainAgent";
-import { formatTxHash, wait } from "../utils/utils";
+import { extractTxBytes, formatTxHash, signAndExecuteTx, wait } from "../utils/utils";
+import { ExecutorAccountDetails } from "../../types";
 
-const IS_CUSTODIAL = true;
+const IS_CUSTODIAL = false;
 
-interface TransferDetailsFromToolResponse {
-  status: string;
-  message: string;
-  tokenId: string;
-  toAccountId: string;
-  amount: number;
-  txHash: string;
-  decimals: number;
-}
-
-const extractTransferDetails = (
-  messages: any[]
-): TransferDetailsFromToolResponse | null => {
-  return messages.reduce((acc, { content }) => {
-    try {
-      const response = JSON.parse(content);
-
-      if (response.status === "error") {
-        throw new Error(response.message);
-      }
-
-      return response as TransferDetailsFromToolResponse;
-    } catch {
-      return acc;
-    }
-  }, null);
-};
-
-
-describe("Test Token transfer", async () => {
+describe("transfer_token_tool (non-custodial)", async () => {
   let acc1: AccountData;
   let acc2: AccountData;
   let acc3: AccountData;
+  let txExecutorAccount: AccountData;
   let token1: string;
   let token2: string;
   let hederaApiClient: HederaMirrorNodeClient;
   let networkClientWrapper: NetworkClientWrapper;
+  let executorCustodialClientWrapper: NetworkClientWrapper;
   let testCases: [string, number, string, string][];
 
   beforeAll(async () => {
@@ -62,21 +36,31 @@ describe("Test Token transfer", async () => {
         networkClientWrapper.createAccount(0, -1),
         networkClientWrapper.createAccount(0, -1),
         networkClientWrapper.createAccount(0, -1),
-      ]).then(([_acc1, _acc2, _acc3]) => {
+        networkClientWrapper.createAccount(30, -1), // txExecutorAccount needs to have 30 HBARs to pay for the tx gas
+      ]).then(([_acc1, _acc2, _acc3, _acc4]) => {
         acc1 = _acc1;
         acc2 = _acc2;
         acc3 = _acc3;
+        txExecutorAccount = _acc4;
       });
+
+      // a custodial client wrapper for the tx executor account is required for creating tokens before the test
+      executorCustodialClientWrapper = new NetworkClientWrapper(
+        txExecutorAccount.accountId,
+        txExecutorAccount.privateKey,
+        'ECDSA', // .createAccount() creates account with ECDSA key
+        "testnet"
+      );
 
       // Create test tokens
       await Promise.all([
-        networkClientWrapper.createFT({
+        executorCustodialClientWrapper.createFT({
           name: "TestToken1",
           symbol: "TT1",
           initialSupply: 1000000,
           decimals: 2,
         }),
-        networkClientWrapper.createFT({
+        executorCustodialClientWrapper.createFT({
           name: "TestToken2",
           symbol: "TT2",
           initialSupply: 2000,
@@ -86,8 +70,6 @@ describe("Test Token transfer", async () => {
         token1 = _token1;
         token2 = _token2;
       });
-
-      await wait(5000);
 
       hederaApiClient = new HederaMirrorNodeClient("testnet");
 
@@ -113,6 +95,8 @@ describe("Test Token transfer", async () => {
           `Transfer exactly 3 of token ${token1} to ${acc3.accountId}.`,
         ],
       ];
+
+      await wait(5000); // wait for the mirror node to be updated with new accounts and tokens
     } catch (error) {
       console.error("Error in setup:", error);
       throw error;
@@ -127,88 +111,94 @@ describe("Test Token transfer", async () => {
         tokenId,
         promptText,
       ] of testCases) {
-        const agentsAccountId = process.env.HEDERA_ACCOUNT_ID;
-
-        if (!agentsAccountId || receiversAccountId === agentsAccountId) {
-          throw new Error(
-            "Note that transfers cant be done to the operator account address."
-          );
-        }
-
-        const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
-
-        const balanceAgentBeforeInDisplayUnits =
-          await hederaApiClient.getTokenBalance(agentsAccountId, tokenId);
-        const balanceAgentBeforeInBaseUnits = (
-          await hederaApiClient.getAccountToken(agentsAccountId, tokenId)
-        )?.balance;
-
-        const balanceReceiverBeforeInDisplayUnits = await hederaApiClient.getTokenBalance(
-          receiversAccountId,
-          tokenId
-        );
-
-        const balanceReceiverBeforeInBaseUnits = (
-          await hederaApiClient.getAccountToken(receiversAccountId, tokenId)
-        )?.balance ?? 0;
-
         const prompt = {
           user: "user",
           text: promptText,
         };
 
         const langchainAgent = await LangchainAgent.create();
-        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
-        const transferDetails = extractTransferDetails(response.messages);
-        const formattedTxHash = formatTxHash(transferDetails?.txHash ?? "");
 
-        if (!formattedTxHash) {
-          throw new Error("No match for transaction hash found in response.");
+        console.log(`Prompt: ${promptText}`);
+        console.log(JSON.stringify(txExecutorAccount, null, 2));
+
+        const executorAccountDetails: ExecutorAccountDetails = {
+          executorAccountId: txExecutorAccount.accountId,
+          executorPublicKey: txExecutorAccount.publicKey,
         }
 
-        await wait(5000);
+        // STEP 0: get state before action call
+        const balanceExecutorBeforeInDisplayUnits =
+          await hederaApiClient.getTokenBalance(executorAccountDetails.executorAccountId!, tokenId);
+        const balanceExecutorBeforeInBaseUnits = (
+          await hederaApiClient.getAccountToken(executorAccountDetails.executorAccountId!, tokenId)
+        )?.balance;
 
-        const balanceAgentAfterInDisplayUnits =
-          await hederaApiClient.getTokenBalance(agentsAccountId, tokenId);
+        const balanceReceiverBeforeInDisplayUnits = await hederaApiClient.getTokenBalance(
+          receiversAccountId,
+          tokenId
+        );
+        const balanceReceiverBeforeInBaseUnits = (
+          await hederaApiClient.getAccountToken(receiversAccountId, tokenId)
+        )?.balance ?? 0;
 
-        const balanceAgentAfterInBaseUnits =
-          (await hederaApiClient.getAccountToken(agentsAccountId, tokenId))
+        const tokenDetails = await hederaApiClient.getTokenDetails(tokenId);
+
+        // STEP 1: send non-custodial prompt
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL, executorAccountDetails);
+
+        // STEP 2: extract tx bytes
+        const txBytesString = extractTxBytes(response.messages)
+
+        // STEP 3: verify correctness by signing and executing the tx
+        const executedTx = await signAndExecuteTx(
+          txBytesString,
+          txExecutorAccount.privateKey,
+          txExecutorAccount.accountId
+        )
+
+        await wait(5000); // wait for the mirror node to update
+
+        // STEP 4: verify that the transfer was executed correctly
+        const balanceExecutorAfterInDisplayUnits =
+          await hederaApiClient.getTokenBalance(executorAccountDetails.executorAccountId!, tokenId);
+        const balanceExecutorAfterInBaseUnits =
+          (await hederaApiClient.getAccountToken(executorAccountDetails.executorAccountId!, tokenId))
             ?.balance ?? 0;
 
         const balanceReceiverAfterInDisplayUnits =
           await hederaApiClient.getTokenBalance(receiversAccountId, tokenId);
-
         const balanceReceiverAfterInBaseUnits =
           (await hederaApiClient.getAccountToken(receiversAccountId, tokenId))
             ?.balance ?? 0;
 
         const txReport = await hederaApiClient.getTransactionReport(
-          formattedTxHash,
-          agentsAccountId,
+          formatTxHash(executedTx.txHash),
+          executorAccountDetails.executorAccountId!,
           [receiversAccountId]
         );
 
         // Compare before and after including the difference due to paid fees
         expect(txReport.status).toEqual("SUCCESS");
-        // check if balance is correct in display units
-        expect(balanceAgentBeforeInDisplayUnits).toEqual(
-          balanceAgentAfterInDisplayUnits + transferAmountInDisplayUnits
+        // check if the balance is correct in display units
+        expect(balanceExecutorBeforeInDisplayUnits).toEqual(
+          balanceExecutorAfterInDisplayUnits + transferAmountInDisplayUnits
         );
-        // check if balance is correct in base units
-        expect(balanceAgentBeforeInBaseUnits).toEqual(
-          balanceAgentAfterInBaseUnits +
+        // check if the balance is correct in base units
+        expect(balanceExecutorBeforeInBaseUnits).toEqual(
+          balanceExecutorAfterInBaseUnits +
             transferAmountInDisplayUnits * 10 ** Number(tokenDetails.decimals)
         );
-        // check if balance is correct in display units for receiver
+        // check if the balance is correct in display units for receiver
         expect(balanceReceiverBeforeInDisplayUnits).toEqual(
           balanceReceiverAfterInDisplayUnits - transferAmountInDisplayUnits
         );
-        // check if balance is correct in base units for receiver
+        // check if the balance is correct in base units for receiver
         expect(balanceReceiverBeforeInBaseUnits).toEqual(
           balanceReceiverAfterInBaseUnits -
             transferAmountInDisplayUnits * 10 ** Number(tokenDetails.decimals)
         );
-        await wait(1000);
+
+        console.log("\n\n");
       }
     });
   });

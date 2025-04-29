@@ -4,49 +4,33 @@ import { HederaMirrorNodeClient } from "../utils/hederaMirrorNodeClient";
 import * as dotenv from "dotenv";
 import { NetworkClientWrapper } from "../utils/testnetClient";
 import { AccountData } from "../utils/testnetUtils";
-import { formatTxHash, wait } from "../utils/utils";
+import { extractTxBytes, formatTxHash, signAndExecuteTx, wait } from "../utils/utils";
+import { ExecutorAccountDetails } from "../../types";
 
-const IS_CUSTODIAL = true;
+const IS_CUSTODIAL = false;
 
-const extractTxHash = (messages: any[]) => {
-  return messages.reduce((acc, { content }) => {
-    try {
-      const response = JSON.parse(content);
-
-      if (response.status === "error") {
-        throw new Error(response.message);
-      }
-
-      return String(response.txHash);
-    } catch {
-      return acc;
-    }
-  }, "");
-};
-
-
-describe("Test HBAR transfer", async () => {
+describe("Test HBAR transfer (non-custodial)", async () => {
   let acc1: AccountData;
   let acc2: AccountData;
   let acc3: AccountData;
-  let langchainAgent: LangchainAgent;
+  let txExecutorAccount: AccountData;
+  let networkClientWrapper: NetworkClientWrapper;
   let hederaApiClient: HederaMirrorNodeClient;
   let testCases: [string, number, string][];
 
   beforeAll(async () => {
     dotenv.config();
     try {
-      langchainAgent = await LangchainAgent.create();
-
-      const wrapper = new NetworkClientWrapper(
+      networkClientWrapper = new NetworkClientWrapper(
         process.env.HEDERA_ACCOUNT_ID!,
         process.env.HEDERA_PRIVATE_KEY!,
         process.env.HEDERA_KEY_TYPE!,
         "testnet"
       );
-      acc1 = await wrapper.createAccount(0);
-      acc2 = await wrapper.createAccount(0);
-      acc3 = await wrapper.createAccount(0);
+      acc1 = await networkClientWrapper.createAccount(0);
+      acc2 = await networkClientWrapper.createAccount(0);
+      acc3 = await networkClientWrapper.createAccount(0);
+      txExecutorAccount = await networkClientWrapper.createAccount(15); // set up with 15 HBARs
 
       hederaApiClient = new HederaMirrorNodeClient("testnet");
 
@@ -55,6 +39,8 @@ describe("Test HBAR transfer", async () => {
         [acc2.accountId, 0.5, `Send 0.5 HBAR to account ${acc2.accountId}.`],
         [acc3.accountId, 3, `Transfer exactly 3 HBAR to ${acc3.accountId}.`],
       ];
+
+      await wait(5000); // wait for the mirror node to be updated with new accounts
     } catch (error) {
       console.error("Error in setup:", error);
       throw error;
@@ -68,38 +54,51 @@ describe("Test HBAR transfer", async () => {
         transferAmount,
         promptText,
       ] of testCases) {
-        const agentsAccountId = process.env.HEDERA_ACCOUNT_ID;
-
-        if (!agentsAccountId || receiversAccountId === agentsAccountId) {
-          throw new Error(
-            "Env file must be defined! Note that transfers can be done to the operator account address."
-          );
-        }
-
-        // Get balances before
-        const balanceAgentBefore =
-          await hederaApiClient.getHbarBalance(agentsAccountId);
-        const balanceReceiverBefore =
-          await hederaApiClient.getHbarBalance(receiversAccountId);
-
-        // Perform transfer action
         const prompt = {
           user: "user",
           text: promptText,
         };
-        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
-        const txHash = extractTxHash(response.messages);
 
-        // Get balances after transaction being successfully processed by mirror node
-        await wait(5000);
+        const langchainAgent = await LangchainAgent.create();
 
+        console.log(`Prompt: ${promptText}`);
+        console.log(JSON.stringify(txExecutorAccount, null, 2));
+
+        const executorAccountDetails: ExecutorAccountDetails = {
+          executorAccountId: txExecutorAccount.accountId,
+          executorPublicKey: txExecutorAccount.publicKey,
+        }
+
+        // STEP 0: get state before action call
+        const balanceExecutorBefore =
+          await hederaApiClient.getHbarBalance(executorAccountDetails.executorAccountId!);
+        const balanceReceiverBefore =
+          await hederaApiClient.getHbarBalance(receiversAccountId);
+
+        // STEP 1: send non-custodial prompt
+        const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL, executorAccountDetails);
+
+        // STEP 2: extract tx bytes
+        const txBytesString = extractTxBytes(response.messages)
+
+        // STEP 3: verify correctness by signing and executing the tx
+        const executedTx = await signAndExecuteTx(
+          txBytesString,
+          txExecutorAccount.privateKey,
+          txExecutorAccount.accountId
+        )
+
+        await wait(5000); // wait for the mirror node to update
+
+        // STEP 4: verify that the transfer was executed correctly
         const balanceAgentAfter =
-          await hederaApiClient.getHbarBalance(agentsAccountId);
+          await hederaApiClient.getHbarBalance(executorAccountDetails.executorAccountId!);
         const balanceReceiverAfter =
           await hederaApiClient.getHbarBalance(receiversAccountId);
+
         const txReport = await hederaApiClient.getTransactionReport(
-          formatTxHash(txHash),
-          agentsAccountId,
+          formatTxHash(executedTx.txHash),
+          executorAccountDetails.executorAccountId!,
           [receiversAccountId]
         );
 
@@ -108,7 +107,7 @@ describe("Test HBAR transfer", async () => {
         expect(txReport.status).toEqual("SUCCESS");
         expect(
           Math.abs(
-            balanceAgentBefore -
+            balanceExecutorBefore -
               (balanceAgentAfter + transferAmount + txReport.totalPaidFees)
           )
         ).toBeLessThanOrEqual(margin);
@@ -118,7 +117,7 @@ describe("Test HBAR transfer", async () => {
           )
         ).toBeLessThanOrEqual(margin);
 
-        await wait(1000);
+        console.log("\n\n");
       }
     });
   });
