@@ -69,13 +69,9 @@ describe("dissociate_token", () => {
         token2 = _token2;
       });
 
-      await wait(3000);
-
       // associate with those tokens
       await networkClientWrapper.associateToken(token1);
       await networkClientWrapper.associateToken(token2);
-
-      await wait(3000);
 
       testCases = [
         {
@@ -106,7 +102,7 @@ describe("dissociate_token", () => {
         // STEP 1: send custodial prompt
         const response = await langchainAgent.sendPrompt(prompt, IS_CUSTODIAL);
 
-        await wait(5000);
+        await wait(5000); // wait for the mirror node to update
 
         // STEP 2: verify correctness by checking that token was dissociated
         const token = await hederaMirrorNodeClient.getAccountToken(
