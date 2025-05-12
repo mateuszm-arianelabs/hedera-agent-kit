@@ -2,6 +2,13 @@
 
 Welcome to the **Hedera Agent Kit**! This project aims to provide a LangChain-compatible toolkit for interacting with the Hedera Network. The focus is on a minimal, easy-to-use set of functions, while staying flexible for future enhancements.
 
+## ChatGPT Model Compatibility
+
+The Hedera Agent Kit has been tested with the following ChatGPT models:
+
+- o3-mini
+- gpt-4o
+
 ## Overview
 
 - **Agent Interaction**: Make on-chain calls to Hedera (e.g., create tokens, post messages to consensus).
@@ -11,41 +18,48 @@ Welcome to the **Hedera Agent Kit**! This project aims to provide a LangChain-co
 ## Hedera Agent Kit Features
 
 1. **Native Hedera Token Service (HTS)**:
-    - Create fungible tokens with minimal parameters (name, symbol, decimals, supply, etc.).
-    - Mint additional tokens to existing token accounts.
+
+   - Create fungible tokens with minimal parameters (name, symbol, decimals, supply, etc.).
+   - Mint additional tokens to existing token accounts.
 
 2. **Token Operations**:
-    - **Create Fungible Tokens (FT)**: Easily create and configure new fungible tokens.
-    - **Create Non-fungible Tokens (NFT)**: Easily create and configure new non-fungible tokens.
-    - **Transfer Tokens**: Transfer tokens between accounts.
-    - **Associate / Dissociate Tokens**: Associate a token to an account or dissociate it as needed.
-    - **Reject Tokens**: Reject a token from an account.
+
+   - **Create Fungible Tokens (FT)**: Easily create and configure new fungible tokens.
+   - **Create Non-fungible Tokens (NFT)**: Easily create and configure new non-fungible tokens.
+   - **Transfer Tokens**: Transfer tokens between accounts.
+   - **Associate / Dissociate Tokens**: Associate a token to an account or dissociate it as needed.
+   - **Reject Tokens**: Reject a token from an account.
 
 3. **HBAR Transactions**:
-    - Transfer HBAR between accounts.
+
+   - Transfer HBAR between accounts.
 
 4. **Airdrop Management**:
-    - Airdrop tokens to multiple recipients.
-    - Claim a pending airdrop.
+
+   - Airdrop tokens to multiple recipients.
+   - Claim a pending airdrop.
 
 5. **Token Balance Queries**:
-    - Get HBAR balances of an account.
-    - Get HTS token balances for a specific token ID.
-    - Retrieve all token balances for an account.
-    - Get token holders for a specific token.
+
+   - Get HBAR balances of an account.
+   - Get HTS token balances for a specific token ID.
+   - Retrieve all token balances for an account.
+   - Get token holders for a specific token.
 
 6. **Topic Management (HCS)**:
-    - **Create Topics**: Create new topics for Hedera Consensus Service (HCS).
-    - **Delete Topics**: Delete an existing topic.
-    - **Submit Topic Messages**: Send messages to a specific topic.
-    - **Get Topic Info**: Retrieve information about a specific topic.
-    - **Get Topic Messages**: Fetch messages from a specific topic.
+   - **Create Topics**: Create new topics for Hedera Consensus Service (HCS).
+   - **Delete Topics**: Delete an existing topic.
+   - **Submit Topic Messages**: Send messages to a specific topic.
+   - **Get Topic Info**: Retrieve information about a specific topic.
+   - **Get Topic Messages**: Fetch messages from a specific topic.
 
 ### Details
+
 For further details check [HederaAgentKit Readme](./src/agent/README.md).
 
 ## Langchain Tools
-This library implements langchain tools for most of HederaAgentKit functionalities. 
+
+This library implements langchain tools for most of HederaAgentKit functionalities.
 Consider checking the [Langchain Readme](./src/langchain/README.md) for additional information.
 
 ## Getting Started
@@ -57,18 +71,18 @@ npm i hedera-agent-kit
 LangChain/ LangGraph quick start:
 
 ```js
-import { HederaAgentKit, createHederaTools } from 'hedera-agent-kit';
-import { ToolNode } from '@langchain/langgraph/prebuilt';
+import { HederaAgentKit, createHederaTools } from "hedera-agent-kit";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
 
 const hederaAgentKit = new HederaAgentKit(
-  '0.0.12345', // Replace with your account ID
-  '0x.......', // Replace with your private key
-  'testnet',   // Replace with your selected network
+  "0.0.12345", // Replace with your account ID
+  "0x.......", // Replace with your private key
+  "testnet" // Replace with your selected network
 );
 const hederaAgentKitTools = createHederaTools(hederaAgentKit);
 const toolsNode = new ToolNode(tools);
-
 ```
+
 - `hederaAgentKitTools` is an array of `Tool` instances
   (from `@langchain/core/tools`).
 - `toolsNode` can be used in any LangGraph workflow,
@@ -92,6 +106,13 @@ npm install
 3. Configure environment variables in a `.env` file. See the `sample.env`.
 
 4. Test the kit:
+
+> **Note**: The `tests/index.js` file is intended for manual developer testing purposes only. To run the it, you'll need to configure these additional environment variables in your `.env` file:
+
+```env
+EXECUTOR_ACCOUNT_ID=    # Account ID for the executor
+EXECUTOR_PUBLIC_KEY=    # Public key of the executor account
+```
 
 ```bash
  npm run test
